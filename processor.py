@@ -1,9 +1,17 @@
-from langchain_community.document_loaders import PyPDFLoader, UnstructuredWordDocumentLoader, TextLoader # Docx2txtLoader
+from langchain_community.document_loaders import PyPDFLoader, UnstructuredWordDocumentLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 from chunks import Chunk
+import nltk
+
+# TODO: create some config file with debug_mode, logger config and further stuff
 
 import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(levelname)s: %(message)s",
+    handlers=[logging.StreamHandler()]
+)
 
 # TODO: add requirements.txt
 
@@ -31,9 +39,9 @@ class document_processor:
     '''
     Loads one file - extracts text from file
 
-    TODO: Consider AzureAIDocumentIntelligenceLoader
     TODO: Replace UnstructuredWordDocumentLoader with Docx2txtLoader
     TODO: Play with .pdf and text from img extraction
+    TODO: Try chunking with llm
 
     add_to_unprocessed -> used to add loaded file to the list of unprocessed(unchunked) files if true
     '''
@@ -42,8 +50,8 @@ class document_processor:
 
         if filepath.endswith(".pdf"):
             loader = PyPDFLoader(file_path=filepath) # splits each presentation into slides and processes it as separate file
-        elif filepath.endswith(".docx"):
-            # loader = Docx2txtLoader(file_path=filepath) ## try it later
+        elif filepath.endswith(".docx") or filepath.endswith(".doc"):
+            # loader = Docx2txtLoader(file_path=filepath) ## try it later, since UnstructuredWordDocumentLoader is extremly slow
             loader = UnstructuredWordDocumentLoader(file_path=filepath)
         elif filepath.endswith(".txt"):
             loader = TextLoader(file_path=filepath)
@@ -55,7 +63,7 @@ class document_processor:
         try:
             documents = loader.load()
         except Exception:
-            raise RuntimeError("File is currpted")
+            raise RuntimeError("File is corrupted")
         
         if add_to_unprocessed:
             for doc in documents:
@@ -98,21 +106,21 @@ class document_processor:
             self.processed.append(document)
 
             text: list[str] = self.text_splitter.split_documents([document])
+            lines: list[str] = document.page_content.split("\n")
 
             for chunk in text:
 
-                # TODO: fix indexing
                 start_l, end_l = self.get_start_end_lines(
-                    text=chunk.page_content,
-                    start_char=chunk.metadata["start_index"],
-                    end_char=chunk.metadata["start_index"] + len(chunk.page_content)
+                    splitted_text=lines,
+                    start_char=chunk.metadata.get("start_index", 0),
+                    end_char=chunk.metadata.get("start_index", 0) + len(chunk.page_content)
                 )
 
                 self.chunks.append(Chunk(
                     id=len(self.chunks),
                     filename=document.metadata.get("source", ""),
                     page_number=document.metadata.get("page", 0),
-                    start_index=chunk.metadata["start_index"],
+                    start_index=chunk.metadata.get("start_index", 0),
                     start_line=start_l,
                     end_line=end_l,
                     text=chunk.page_content
@@ -120,31 +128,62 @@ class document_processor:
 
 
     '''
-    Some magic stuff here. To be honest, i understood it after 7th attempt
-    '''
-    def get_start_end_lines(self, text: str, start_char: int, end_char: int) -> list[int]: # TODO: add better function return value description
-        lines = text.split("\n")
-        start, end, char_ct = 0, 0, 0
+    Determines the line, were the chunk starts and ends (1-based indexing)
 
-        for i, line in enumerate(lines):
+    Some magic stuff here. To be honest, i understood it after 7th attempt
+
+    splitted_text -> original text splitted by \n
+    start_char -> index of symbol, were current chunk starts
+    end_char ->  index of symbol, were current chunk ends
+    debug_mode -> flag, which enables printing useful info about the process
+
+    TODO: invent more efficient way
+    '''
+    def get_start_end_lines(self, splitted_text: list[str], start_char: int, end_char: int, debug_mode: bool = False) -> tuple[int, int]:
+        if debug_mode:
+            logging.info(splitted_text)
+
+        start, end, char_ct = 0, 0, 0
+        iter_count = 1
+
+        for i, line in enumerate(splitted_text):
+            if debug_mode:
+                logging.info(f"start={start_char}, current={char_ct}, end_current={char_ct + len(line) + 1}, end={end_char}, len={len(line)}, iter={iter_count}\n")
+            
             if char_ct <= start_char <= char_ct + len(line) + 1:
                 start = i + 1
             if char_ct <= end_char <= char_ct + len(line) + 1:
                 end = i + 1
                 break
+
+            iter_count += 1
             char_ct += len(line) + 1
+
+        if debug_mode:
+            logging.info(f"result => {start} {end}\n\n\n")
 
         return start, end
 
-  
-if __name__ == "__main__":
+
+    def update_nltk(self) -> None:
+        nltk.download('punkt')
+        nltk.download('averaged_perceptron_tagger')
+
+
+def main():
     processor = document_processor()
+    # processor.update_nltk()
     processor.load_documents([
-        "/your local path/sample.docx",
-        "/your local path/sample.txt",
-        "/your local path/sample.pdf"
+        "/your_path/samples/sample.txt",
+        "/your_path/samples/sample.doc",
+        "/your_path/samples/sample.docx",
+        "/your_path/samples/sample.pdf"
         ], add_to_unprocessed=True)
     processor.generate_chunks()
 
     for c in processor.chunks:
         print(c)
+
+
+if __name__ == "__main__":
+    main()
