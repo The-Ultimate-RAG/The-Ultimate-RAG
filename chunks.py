@@ -3,6 +3,8 @@ import uuid
 class Chunk:
     '''
     TODO: implement access modifiers and set of getters and setters
+
+    id -> unique number in uuid format, can be tried https://www.uuidgenerator.net/
     '''
     def __init__(self, id: uuid.UUID, filename: str, page_number: int, start_index: int, start_line: int, end_line: int, text: str):
         self.id: uuid.UUID = id
@@ -27,11 +29,12 @@ class Chunk:
             "id": self.id,
             "filename": self.filename,
             "page_number": self.page_number,
+            "start_index": self.start_index,
             "start_line": self.start_line,
             "end_line": self.end_line,
         }
     
 
-    #TODO: remove kostyly
+    # TODO: remove kostyly
     def __str__(self):
-        return f"Chunk from {self.filename.split("/")[-1]}, page - {self.page_number}, start - {self.start_line}, end - {self.end_line}, and text - {self.text[:100]}...({len(self.text)})"
+        return f"Chunk from {self.filename.split("/")[-1]}, page - {self.page_number}, start - {self.start_line}, end - {self.end_line}, and text - {self.text[:100]}...({len(self.text)})\n"

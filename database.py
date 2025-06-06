@@ -1,12 +1,14 @@
 from qdrant_client import QdrantClient
 from qdrant_client.models import VectorParams, Distance, PointStruct
-from embedder import Embedder
+from models import Embedder, Reranker
 from chunks import Chunk
-from processor import Document_processor
 import numpy as np
+from uuid import UUID
+
+# TODO: for now all documents are saved to one db, but what if user wants to get references from his own documents, so temp storage is needed
 
 class Vector_database:
-    def __init__(self, host: str, port: int, embedder: Embedder):
+    def __init__(self, embedder: Embedder, host: str = "localhost", port: int = 6333):
         self.host: str = host
         self.client: QdrantClient = QdrantClient(host=host, port=port)
         self.collection_name: str = "document_chunks"
@@ -25,7 +27,7 @@ class Vector_database:
         for chunk in chunks:
             vector: np.ndarray = self.embedder.encode(chunk.get_raw_text())
             points.append(PointStruct(
-                id=str(chunk.id), # TODO: remove kostyly, hotya ih navernoe ne uberesh
+                id=str(chunk.id),
                 vector=vector,
                 payload={"metadata": chunk.get_metadata(), "text": chunk.get_raw_text()}
             ))
@@ -35,17 +37,28 @@ class Vector_database:
             points=points
         )
 
+    '''
+    According to tests, re-ranker needs ~7-10 chunks to generate the most accurate hit
 
-def main():
-    processor = Document_processor()
-    processor.load_document("/home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/samples/sample.txt", add_to_unprocessed=True)
-    processor.generate_chunks()
+    TODO: implement hybrid search
+    '''
+    def search(self, query: str, top_K: int = 5) -> list[Chunk]:
+        query_embedded: np.ndarray = self.embedder.encode(query)
 
-    embedder = Embedder()
+        points: list[PointStruct] = self.client.query_points(
+            collection_name=self.collection_name,
+            query=query_embedded,
+            limit=top_K
+        ).points
 
-    db = Vector_database("localhost", 6333, embedder)
-    db.store(processor.chunks)
-
-
-if __name__ == '__main__':
-    main()
+        return [
+            Chunk(
+                id=UUID(point.payload.get("metadata", {}).get("id", "")),
+                filename=point.payload.get("metadata", {}).get("filename", ""),
+                page_number=point.payload.get("metadata", {}).get("page_number", 0),
+                start_index=point.payload.get("metadata", {}).get("start_index", 0),
+                start_line=point.payload.get("metadata", {}).get("start_line", 0),
+                end_line=point.payload.get("metadata", {}).get("end_line", 0),
+                text=point.payload.get("text", "")
+            )
+        for point in points]

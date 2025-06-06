@@ -20,12 +20,14 @@ class Document_processor:
 
     '''
     chunks -> the list of chunks from loaded files
+    chunks_unsaved -> the list of recently added chunks that havn't been saved to db yet
     processed -> the list of files that were already splitted into chunks
     upprocessed -> !processed
     text_splitter -> text splitting strategy
     '''
     def __init__(self):
         self.chunks: list[Chunk] = []
+        self.chunks_unsaved: list[Chunk] = []
         self.processed: list[Document] = []
         self.unprocessed: list[Document] = []
         self.text_splitter = RecursiveCharacterTextSplitter(
@@ -101,6 +103,8 @@ class Document_processor:
 
     '''
     Generates chunks with recursive splitter from the list of unprocessed files, add files to the list of processed, and clears unprocessed
+
+    TODO: try to split text with other llm (not really needed, but we should at least try it)
     '''
     def generate_chunks(self):
         for document in self.unprocessed:
@@ -117,7 +121,7 @@ class Document_processor:
                     end_char=chunk.metadata.get("start_index", 0) + len(chunk.page_content)
                 )
 
-                self.chunks.append(Chunk(
+                newChunk = Chunk(
                     id=uuid4(),
                     filename=document.metadata.get("source", ""),
                     page_number=document.metadata.get("page", 0),
@@ -125,7 +129,10 @@ class Document_processor:
                     start_line=start_l,
                     end_line=end_l,
                     text=chunk.page_content
-                ))
+                )
+
+                self.chunks.append(newChunk)
+                self.chunks_unsaved.append(newChunk)
 
 
     '''
@@ -133,12 +140,12 @@ class Document_processor:
 
     Some magic stuff here. To be honest, i understood it after 7th attempt
 
+    TODO: invent more efficient way
+
     splitted_text -> original text splitted by \n
     start_char -> index of symbol, were current chunk starts
     end_char ->  index of symbol, were current chunk ends
     debug_mode -> flag, which enables printing useful info about the process
-
-    TODO: invent more efficient way
     '''
     def get_start_end_lines(self, splitted_text: list[str], start_char: int, end_char: int, debug_mode: bool = False) -> tuple[int, int]:
         if debug_mode:
@@ -166,25 +173,23 @@ class Document_processor:
         return start, end
 
 
+    '''
+    Note: it should be used only once to download tokenizers, futher usage is not recommended
+    '''
     def update_nltk(self) -> None:
         nltk.download('punkt')
         nltk.download('averaged_perceptron_tagger')
+    
+
+    def clear_unsaved_chunks(self):
+        self.chunks_unsaved = []
 
 
-# def main():
-#     processor = document_processor()
-#     # processor.update_nltk()
-#     processor.load_documents([
-#         "/your_path/samples/sample.txt",
-#         "/your_path/samples/sample.doc",
-#         "/your_path/samples/sample.docx",
-#         "/your_path/samples/sample.pdf"
-#         ], add_to_unprocessed=True)
-#     processor.generate_chunks()
+    def get_all_chunks(self) -> list[Chunk]:
+        return self.chunks
+    
 
-#     for c in processor.chunks:
-#         print(c)
-
-
-# if __name__ == "__main__":
-#     main()
+    def get_and_save_unsaved_chunks(self) -> list[Chunk]:
+        chunks_copy: list[Chunk] = self.chunks.copy(deep=True)
+        self.clear_unsaved_chunks()
+        return chunks_copy
