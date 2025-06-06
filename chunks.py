@@ -1,18 +1,27 @@
+import uuid
+
 class Chunk:
-    def __init__(self, id: int, filename: str, page_number: int, start_index: int, start_line: int, end_line: int, text: str):
-        self.id = id
-        self.filename = filename
-        self.page_number = page_number
-        self.start_index = start_index
-        self.start_line = start_line
-        self.end_line = end_line
-        self.text = text
+    '''
+    TODO: implement access modifiers and set of getters and setters
+    '''
+    def __init__(self, id: uuid.UUID, filename: str, page_number: int, start_index: int, start_line: int, end_line: int, text: str):
+        self.id: uuid.UUID = id
+        self.filename: str = filename
+        self.page_number: int = page_number
+        self.start_index: int = start_index
+        self.start_line: int = start_line
+        self.end_line: int = end_line
+        self.text: str = text
 
 
     def get_raw_text(self) -> str:
         return self.text
     
 
+    def get_splitted_text(self) -> list[str]:
+        return self.text.split(" ")
+    
+    
     def get_metadata(self) -> dict:
         return {
             "id": self.id,

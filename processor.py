@@ -3,6 +3,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 from chunks import Chunk
 import nltk
+from uuid import uuid4
 
 # TODO: create some config file with debug_mode, logger config and further stuff
 
@@ -15,7 +16,7 @@ logging.basicConfig(
 
 # TODO: add requirements.txt
 
-class document_processor:
+class Document_processor:
 
     '''
     chunks -> the list of chunks from loaded files
@@ -117,7 +118,7 @@ class document_processor:
                 )
 
                 self.chunks.append(Chunk(
-                    id=len(self.chunks),
+                    id=uuid4(),
                     filename=document.metadata.get("source", ""),
                     page_number=document.metadata.get("page", 0),
                     start_index=chunk.metadata.get("start_index", 0),
@@ -170,20 +171,20 @@ class document_processor:
         nltk.download('averaged_perceptron_tagger')
 
 
-def main():
-    processor = document_processor()
-    # processor.update_nltk()
-    processor.load_documents([
-        "/your_path/samples/sample.txt",
-        "/your_path/samples/sample.doc",
-        "/your_path/samples/sample.docx",
-        "/your_path/samples/sample.pdf"
-        ], add_to_unprocessed=True)
-    processor.generate_chunks()
+# def main():
+#     processor = document_processor()
+#     # processor.update_nltk()
+#     processor.load_documents([
+#         "/your_path/samples/sample.txt",
+#         "/your_path/samples/sample.doc",
+#         "/your_path/samples/sample.docx",
+#         "/your_path/samples/sample.pdf"
+#         ], add_to_unprocessed=True)
+#     processor.generate_chunks()
 
-    for c in processor.chunks:
-        print(c)
+#     for c in processor.chunks:
+#         print(c)
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
