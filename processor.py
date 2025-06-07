@@ -2,23 +2,25 @@ from langchain_community.document_loaders import PyPDFLoader, UnstructuredWordDo
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 from chunks import Chunk
-import nltk
-from uuid import uuid4
+import nltk # used for proper tokenizer workflow
+from uuid import uuid4 # for generating uniqe id as hex (uuid4 is used as it generates ids form pseudo random numbers unlike uuid1 and others)
+import logging # kind of advanced logger
 
 # TODO: create some config file with debug_mode, logger config and further stuff
+# TODO: replace PDFloader since it is completely unusable OR try to fix it
+# TODO: add requirements.txt
 
-import logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(levelname)s: %(message)s",
     handlers=[logging.StreamHandler()]
 )
 
-# TODO: add requirements.txt
-
 class Document_processor:
 
     '''
+    TODO: determine the most suitable chunk size
+
     chunks -> the list of chunks from loaded files
     chunks_unsaved -> the list of recently added chunks that havn't been saved to db yet
     processed -> the list of files that were already splitted into chunks
@@ -31,8 +33,8 @@ class Document_processor:
         self.processed: list[Document] = []
         self.unprocessed: list[Document] = []
         self.text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=400,
-            chunk_overlap=70,
+            chunk_size=1000,
+            chunk_overlap=100,
             length_function=len,
             is_separator_regex=False,
             add_start_index=True,
@@ -181,6 +183,13 @@ class Document_processor:
         nltk.download('averaged_perceptron_tagger')
     
 
+    '''
+    For now the system works as follows: we save recently loaded chunks in two arrays:
+        chunks - for all chunks, even for that ones that havn't been saveed to db
+        chunks_unsaved - for chunks that have been added recently
+    I do not know weather we really need to store all chunks that were added in the 
+    current session, but chunks_unsaved are used to avoid dublications while saving to db.
+    '''
     def clear_unsaved_chunks(self):
         self.chunks_unsaved = []
 
@@ -189,7 +198,10 @@ class Document_processor:
         return self.chunks
     
 
+    '''
+    If we want to save chunks to db, we need to clear the temp storage to avoid dublications
+    '''
     def get_and_save_unsaved_chunks(self) -> list[Chunk]:
-        chunks_copy: list[Chunk] = self.chunks.copy(deep=True)
+        chunks_copy: list[Chunk] = self.chunks.copy()
         self.clear_unsaved_chunks()
         return chunks_copy

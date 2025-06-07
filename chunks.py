@@ -2,9 +2,10 @@ import uuid
 
 class Chunk:
     '''
-    TODO: implement access modifiers and set of getters and setters
-
     id -> unique number in uuid format, can be tried https://www.uuidgenerator.net/
+    start_index -> the index of the first char from the beginning of the original document
+
+    TODO: implement access modifiers and set of getters and setters
     '''
     def __init__(self, id: uuid.UUID, filename: str, page_number: int, start_index: int, start_line: int, end_line: int, text: str):
         self.id: uuid.UUID = id

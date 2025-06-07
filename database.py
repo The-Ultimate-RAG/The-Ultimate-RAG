@@ -1,7 +1,7 @@
-from qdrant_client import QdrantClient
-from qdrant_client.models import VectorParams, Distance, PointStruct
-from models import Embedder, Reranker
-from chunks import Chunk
+from qdrant_client import QdrantClient # main component to provide the access to db
+from qdrant_client.models import VectorParams, Distance, PointStruct # VectorParams -> config of vectors that will be used as primary keys
+from models import Embedder                                          # Distance -> defines the metric
+from chunks import Chunk                                             # PointStruct -> instance that will be stored in db
 import numpy as np
 from uuid import UUID
 
@@ -12,7 +12,7 @@ class Vector_database:
         self.host: str = host
         self.client: QdrantClient = QdrantClient(host=host, port=port)
         self.collection_name: str = "document_chunks"
-        self.embedder: Embedder = embedder
+        self.embedder: Embedder = embedder # embedder is used to convert a user's query 
 
         if not self.client.collection_exists(self.collection_name):
             self.client.create_collection(
