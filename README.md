@@ -3,10 +3,11 @@
 
 
 ## How to use
-First, you need to install: pytorch, sentence_transformers, ctransformers, numpy, qdrant_client, nltk, langchain[docx text pdf]
-Then, for only the first run, in main add:
-                                system.processor.update_nltk()
-In main: for path -> define a full path to the test files
-After that, python will automatically install required models(it will take a lot of time and space ~10 gb)
+Instal required packages(requirements.txt) <br />
+<br />
+Install docker, create folder "database" in the project directory, and run docker "run --publish 6333:6333 --volume path_to_project/database:/qdrant/storage qdrant/qdrant" <br />
+<br />
+Wait until models will be installed (it may take around 10 minutes) <br />
+<br />
+Bless RNG, you can use it now.
 
-Bless RNG, you can run it.
