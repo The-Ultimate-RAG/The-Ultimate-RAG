@@ -52,7 +52,7 @@ class Reranker:
 
 class LLM:
     def __init__(self):
-        self.max_tokens = 2048
+        self.max_tokens = 4096
         self.model = AutoModelForCausalLM.from_pretrained(
             "TheBloke/Mistral-7B-v0.1-GGUF",
             model_file="mistral-7b-v0.1.Q5_K_S.gguf",
@@ -71,9 +71,16 @@ class LLM:
     TODO: invent a way to really stream the answer (as return value)
     '''
     def get_response(self, prompt: str, stream: bool = True, logging: bool = True) -> str:
+
+        generation_config = {
+            "last_n_tokens": 128, # regulates repetitions
+            "temperature": 0.3,
+            "repetition_penalty": 1.2,
+        }
+            
         generated_text = ""
         tokenized_text: list[int] = self.model.tokenize(text=prompt)
-        response: list[int] = self.model.generate(tokens=tokenized_text)
+        response: list[int] = self.model.generate(tokens=tokenized_text, **generation_config)
 
         if logging:
             print(response)
