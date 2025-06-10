@@ -77,7 +77,10 @@ class LLM:
             "temperature": 0.3,
             "repetition_penalty": 1.2,
         }
-            
+        
+        with open("prompt.txt", "w") as f:
+            f.write(prompt)
+        
         generated_text = ""
         tokenized_text: list[int] = self.model.tokenize(text=prompt)
         response: list[int] = self.model.generate(tokens=tokenized_text, **generation_config)

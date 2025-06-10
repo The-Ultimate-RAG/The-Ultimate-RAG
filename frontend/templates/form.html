@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Ultimate RAG</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .hero-section {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: white;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .search-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .search-box {
+            border-radius: 10px;
+            border: none;
+            padding: 15px 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .btn-search {
+            border-radius: 10px;
+            padding: 15px 30px;
+            background-color: #4e44ce;
+            border: none;
+        }
+        .file-upload {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .file-list {
+            margin-top: 10px;
+        }
+        .file-item {
+            background: #f1f3ff;
+            border-radius: 5px;
+            padding: 8px 12px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="hero-section py-5 mb-5">
+        <div class="container text-center">
+            <h1 class="display-4 fw-bold mb-3">The Ultimate RAG</h1>
+            <p class="tagline h5 mb-4">ask anything...</p>
+        </div>
+    </div>
+
+    <div class="container search-container">
+        <!-- File Upload Section -->
+        <div class="file-upload mb-4">
+            <h5 class="mb-3">Upload Documents</h5>
+            <form id="uploadForm"  enctype="multipart/form-data">
+                <div class="mb-3">
+                    <input class="form-control" type="file" id="fileInput" multiple>
+                </div>
+                <div id="fileList" class="file-list"></div>
+            </form>
+        </div>
+
+        <!-- Search Section -->
+        <div class="row justify-content-center">
+            <div class="col-md-12">
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control search-box" id="queryInput" 
+                           placeholder="Ask your question..." aria-label="Ask your question">
+                    <button class="btn btn-primary btn-search" id="searchButton" type="button">Search</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results section -->
+    <div class="container mt-5 d-none" id="results-section">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Results</h5>
+                        <div id="results-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // File upload handling
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        let uploadedFiles = [];
+
+        fileInput.addEventListener('change', function(e) {
+            fileList.innerHTML = '';
+            uploadedFiles = Array.from(e.target.files);
+            
+            uploadedFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item d-flex justify-content-between align-items-center';
+                fileItem.innerHTML = `
+                    <span>${file.name}</span>
+                    <button class="btn btn-sm btn-outline-danger remove-file" data-index="${index}">×</button>
+                `;
+                fileList.appendChild(fileItem);
+            });
+
+            // Add event listeners to remove buttons
+            document.querySelectorAll('.remove-file').forEach(button => {
+                button.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    uploadedFiles.splice(index, 1);
+                    
+                    // Update file input and UI
+                    const dataTransfer = new DataTransfer();
+                    uploadedFiles.forEach(file => dataTransfer.items.add(file));
+                    fileInput.files = dataTransfer.files;
+                    
+                    // Re-render file list
+                    const event = new Event('change');
+                    fileInput.dispatchEvent(event);
+                });
+            });
+        });
+
+        // Search functionality
+        document.getElementById('searchButton').addEventListener('click', async function() {
+            const query = document.getElementById('queryInput').value.trim();
+            
+            if (!query) {
+                alert('Please enter a question');
+                return;
+            }
+
+            if (uploadedFiles.length === 0) {
+                alert('Please upload at least one document');
+                return;
+            }
+
+            // Show loading state
+            document.getElementById('results-section').classList.remove('d-none');
+            document.getElementById('results-content').innerHTML = `
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Processing your documents and question...</p>
+                </div>
+            `;
+
+            try {
+                // Prepare form data
+                const formData = new FormData();
+
+                // Append each file
+                uploadedFiles.forEach(file => {
+                    formData.append('files', file);  // Must use 'files' as the key
+                });
+
+                // Append the prompt
+                formData.append('prompt', query);  // Must use 'prompt' as the key
+
+                // Headers will be set automatically by the browser
+                const response = await fetch('/message_with_docs/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // Display results
+                document.getElementById('results-content').innerHTML = `
+                    <h6>Question:</h6>
+                    <p class="mb-4">${query}</p>
+                    <h6>Answer:</h6>
+                    <div class="alert alert-success">
+                        ${data.response || 'No answer found in the provided documents'}
+                    </div>
+                    ${data.sources ? `<h6>Sources:</h6><p>${data.sources}</p>` : ''}
+                `;
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('results-content').innerHTML = `
+                    <div class="alert alert-danger">
+                        Error processing your request: ${error.message}
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

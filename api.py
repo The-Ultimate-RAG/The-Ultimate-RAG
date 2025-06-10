@@ -2,6 +2,8 @@ from fastapi import FastAPI, UploadFile, Form, File
 import uvicorn
 import os
 from rag_generator import RAG_system
+from fastapi.responses import HTMLResponse
+
 
 api = FastAPI()
 rag = None
@@ -14,9 +16,14 @@ def initialize_rag() -> RAG_system:
 
 @api.get("/")
 def root():
-    return {"status": "ok"}
+    content = None
+    with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "frontend", "templates", "form.html")) as f:
+        content = f.read()
 
-@api.post("/message_with_docs")
+    return HTMLResponse(content=content)
+
+
+@api.post("/message_with_docs/")
 async def create_prompt(files: list[UploadFile] = File(...), prompt: str = Form(...)):
     docs = []
     rag = initialize_rag()
@@ -34,12 +41,17 @@ async def create_prompt(files: list[UploadFile] = File(...), prompt: str = Form(
             docs.append(saved_file)
     
         rag.upload_documents(docs)
+
         return {"response": rag.generate_response(user_prompt=prompt), "status": 200}
 
     except Exception as e:
         print(e)
+    finally:
+        for file in files:
+            temp_storage = os.path.join(os.path.dirname(os.path.realpath(__file__)), "temp_storage")
+            saved_file = os.path.join(temp_storage, file.filename)
+            os.remove(saved_file)
         
-
 
 def main():
     uvicorn.run("api:api", host="127.0.0.1", port=5050, reload=True)
