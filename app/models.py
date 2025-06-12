@@ -1,6 +1,8 @@
 from sentence_transformers import SentenceTransformer, CrossEncoder # SentenceTransformer -> model for embeddings, CrossEncoder -> re-ranker
 from ctransformers import AutoModelForCausalLM
 import torch # used to run on cuda if avaliable
+from torch import Tensor
+
 from chunks import Chunk
 import numpy as np # used only for type hints
 from settings import device, llm_config, generation_config
@@ -17,7 +19,7 @@ class Embedder:
     '''
     Encodes string to dense vector
     '''
-    def encode(self, text: str) -> np.ndarray:
+    def encode(self, text: str) -> Tensor:
         return self.model.encode(sentences=text)
     
 

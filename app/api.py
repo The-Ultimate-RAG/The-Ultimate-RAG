@@ -1,17 +1,17 @@
 from fastapi import FastAPI, UploadFile, Form, File
 import uvicorn
 import os
-from rag_generator import RAG_system
+from rag_generator import RagSystem
 from fastapi.responses import HTMLResponse
 from settings import base_path, api_config
 
 api = FastAPI()
 rag = None
 
-def initialize_rag() -> RAG_system:
+def initialize_rag() -> RagSystem:
     global rag
     if rag is None:
-        rag = RAG_system()
+        rag = RagSystem()
     return rag
 
 @api.get("/")

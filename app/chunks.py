@@ -38,4 +38,10 @@ class Chunk:
 
     # TODO: remove kostyly
     def __str__(self):
-        return f"Chunk from {self.filename.split("/")[-1]}, page - {self.page_number}, start - {self.start_line}, end - {self.end_line}, and text - {self.text[:100]}...({len(self.text)})\n"
+        return (f"Chunk from {self.filename.split('/')[-1]}, "
+                f"page - {self.page_number}, "
+                f"start - {self.start_line}, "
+                f"end - {self.end_line}, "
+                f"and text - {self.text[:100]}... ({len(self.text)})\n"
+                )
+

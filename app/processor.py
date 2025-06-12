@@ -11,7 +11,7 @@ from settings import logging, text_splitter_config
 # TODO: replace PDFloader since it is completely unusable OR try to fix it
 
 
-class Document_processor:
+class DocumentProcessor:
 
     '''
     TODO: determine the most suitable chunk size

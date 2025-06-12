@@ -11,7 +11,7 @@ logging.basicConfig(
 )
 
 qdrant_client_config = {
-    "host": "localhost",
+    "host": "qdrant",
     "port": 6333
 }
 
