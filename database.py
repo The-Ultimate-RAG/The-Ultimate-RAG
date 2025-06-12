@@ -4,13 +4,14 @@ from models import Embedder                                          # Distance 
 from chunks import Chunk                                             # PointStruct -> instance that will be stored in db
 import numpy as np
 from uuid import UUID
+from settings import qdrant_client_config
 
 # TODO: for now all documents are saved to one db, but what if user wants to get references from his own documents, so temp storage is needed
 
 class Vector_database:
     def __init__(self, embedder: Embedder, host: str = "localhost", port: int = 6333):
         self.host: str = host
-        self.client: QdrantClient = QdrantClient(host=host, port=port)
+        self.client: QdrantClient = QdrantClient(**qdrant_client_config)
         self.collection_name: str = "document_chunks"
         self.embedder: Embedder = embedder # embedder is used to convert a user's query 
 

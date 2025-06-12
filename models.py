@@ -3,16 +3,15 @@ from ctransformers import AutoModelForCausalLM
 import torch # used to run on cuda if avaliable
 from chunks import Chunk
 import numpy as np # used only for type hints
+from settings import device, llm_config, generation_config
 
-# TODO: add device to global config file
 # TODO: replace all models with geminai after receiving api-keys
 
 class Embedder:
     def __init__(self, model: str = "BAAI/bge-m3"):
-        device = "cuda" if torch.cuda.is_available() else 'cpu'
         self.device: str = device
         self.model_name: str = model
-        self.model: SentenceTransformer = SentenceTransformer(model, device=device)
+        self.model: SentenceTransformer = SentenceTransformer(model, device=self.device)
 
 
     '''
@@ -31,10 +30,9 @@ class Embedder:
 
 class Reranker:
     def __init__(self, model: str = "cross-encoder/ms-marco-MiniLM-L6-v2"):
-        device = "cuda" if torch.cuda.is_available() else 'cpu'
         self.device: str = device
         self.model_name: str = model
-        self.model: CrossEncoder = CrossEncoder(model, device=device)
+        self.model: CrossEncoder = CrossEncoder(model, device=self.device)
     
     
     '''
@@ -52,15 +50,7 @@ class Reranker:
 
 class LLM:
     def __init__(self):
-        self.max_tokens = 4096
-        self.model = AutoModelForCausalLM.from_pretrained(
-            "TheBloke/Mistral-7B-v0.1-GGUF",
-            model_file="mistral-7b-v0.1.Q5_K_S.gguf",
-            model_type="mistral",
-            gpu_layers=20 if torch.cuda.is_available() else 0,
-            threads=8,
-            context_length=self.max_tokens 
-        )
+        self.model = AutoModelForCausalLM.from_pretrained(**llm_config)
 
 
     '''
@@ -71,12 +61,6 @@ class LLM:
     TODO: invent a way to really stream the answer (as return value)
     '''
     def get_response(self, prompt: str, stream: bool = True, logging: bool = True) -> str:
-
-        generation_config = {
-            "last_n_tokens": 128, # regulates repetitions
-            "temperature": 0.3,
-            "repetition_penalty": 1.2,
-        }
         
         with open("prompt.txt", "w") as f:
             f.write(prompt)

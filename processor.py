@@ -1,20 +1,15 @@
 from langchain_community.document_loaders import PyPDFLoader, UnstructuredWordDocumentLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
+from models import Embedder
 from chunks import Chunk
 import nltk # used for proper tokenizer workflow
 from uuid import uuid4 # for generating uniqe id as hex (uuid4 is used as it generates ids form pseudo random numbers unlike uuid1 and others)
-import logging # kind of advanced logger
+import numpy as np
+from settings import logging, text_splitter_config
 
-# TODO: create some config file with debug_mode, logger config and further stuff
 # TODO: replace PDFloader since it is completely unusable OR try to fix it
-# TODO: add requirements.txt
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(levelname)s: %(message)s",
-    handlers=[logging.StreamHandler()]
-)
 
 class Document_processor:
 
@@ -22,7 +17,7 @@ class Document_processor:
     TODO: determine the most suitable chunk size
 
     chunks -> the list of chunks from loaded files
-    chunks_unsaved -> the list of recently added chunks that havn't been saved to db yet
+    chunks_unsaved -> the list of recently added chunks that have not been saved to db yet
     processed -> the list of files that were already splitted into chunks
     upprocessed -> !processed
     text_splitter -> text splitting strategy
@@ -32,13 +27,30 @@ class Document_processor:
         self.chunks_unsaved: list[Chunk] = []
         self.processed: list[Document] = []
         self.unprocessed: list[Document] = []
-        self.text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1000,
-            chunk_overlap=100,
-            length_function=len,
-            is_separator_regex=False,
-            add_start_index=True,
-        )
+        self.embedder = Embedder()
+        self.text_splitter = RecursiveCharacterTextSplitter(**text_splitter_config)
+
+
+    '''
+    Measures cosine between two vectors
+    '''
+    def cosine_similarity(self, vec1, vec2):
+        return vec1 @ vec2 / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
+    
+
+    '''
+    Updates a list of the most relevant chunks without interacting with db
+    '''
+    def update_most_relevant_chunk(self, chunk: list[np.float64, Chunk], relevant_chunks: list[list[np.float64, Chunk]], mx_len = 15):
+        relevant_chunks.append(chunk)
+        for i in range(len(relevant_chunks) - 1, 0, -1):
+            if relevant_chunks[i][0] > relevant_chunks[i - 1][0]:
+                relevant_chunks[i], relevant_chunks[i - 1] = relevant_chunks[i - 1], relevant_chunks[i]
+            else:
+                break
+        
+        if len(relevant_chunks) > mx_len:
+            del relevant_chunks[-1]
 
 
     '''
@@ -108,7 +120,12 @@ class Document_processor:
 
     TODO: try to split text with other llm (not really needed, but we should at least try it)
     '''
-    def generate_chunks(self):
+    def generate_chunks(self, query: str ="", embedding: bool = True):
+        most_relevant = []
+
+        if embedding:
+            query_embedded = self.embedder.encode(query)
+
         for document in self.unprocessed:
             self.processed.append(document)
 
@@ -132,9 +149,15 @@ class Document_processor:
                     end_line=end_l,
                     text=chunk.page_content
                 )
+                
+                if embedding:
+                    chunk_embedded = self.embedder.encode(newChunk.text)
+                    similarity = self.cosine_similarity(query_embedded, chunk_embedded)
+                    self.update_most_relevant_chunk([similarity, newChunk], most_relevant)
 
                 self.chunks.append(newChunk)
                 self.chunks_unsaved.append(newChunk)
+        return most_relevant
 
 
     '''
