@@ -50,18 +50,36 @@ class RagSystem:
     Splits the list of documents into groups with 'split_by' docs (done to avoid qdrant_client connection error handling), loads them,
     splits into chunks, and saves to db
     '''
-    def upload_documents(self, documents: list[str], split_by: int = 3, debug_mode: bool = False) -> None:
+    def upload_documents(self, documents: list[str], split_by: int = 3, debug_mode: bool = True) -> None:
         
         for i in range(0, len(documents), split_by):
 
             if debug_mode:
-                print(f"New document group is taken into processing, time - {time.time()}")
+                print("<" + "-" * 10 + "New document group is taken into processing" + "-" * 10 + ">")
 
             docs = documents[i: i + split_by]
 
+            loading_time = 0
+            chunk_generating_time = 0
+            db_saving_time = 0
+
+            print("Start loading the documents")
+            start = time.time()
             self.processor.load_documents(documents=docs, add_to_unprocessed=True)
+            loading_time = time.time() - start
+            
+            print("Start loading chunk generation")
+            start = time.time()
             self.processor.generate_chunks()
+            chunk_generating_time = time.time() - start
+
+            print("Start saving to db")
+            start = time.time()
             self.db.store(self.processor.get_and_save_unsaved_chunks())
+            db_saving_time = time.time() - start
+
+            if debug_mode:
+                print(f"loading time = {loading_time}, chunk generation time = {chunk_generating_time}, saving time = {db_saving_time}\n")
     
 
     '''

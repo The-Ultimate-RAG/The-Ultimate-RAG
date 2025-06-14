@@ -26,8 +26,9 @@ class VectorDatabase:
     def store(self, chunks: list[Chunk]) -> None:
         points: list[PointStruct] = []
 
-        for chunk in chunks:
-            vector: np.ndarray = self.embedder.encode(chunk.get_raw_text())
+        vectors = self.embedder.encode([chunk.get_raw_text() for chunk in chunks])
+
+        for vector, chunk in zip(vectors, chunks):
             points.append(PointStruct(
                 id=str(chunk.id),
                 vector=vector,
@@ -36,7 +37,8 @@ class VectorDatabase:
 
         self.client.upsert(
             collection_name=self.collection_name,
-            points=points
+            points=points,
+            wait=False,
         )
 
     '''

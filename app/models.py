@@ -19,8 +19,8 @@ class Embedder:
     '''
     Encodes string to dense vector
     '''
-    def encode(self, text: str) -> Tensor:
-        return self.model.encode(sentences=text)
+    def encode(self, text: str | list[str]) -> Tensor | list[Tensor]:
+        return self.model.encode(sentences=text, show_progress_bar=False, batch_size=32)
     
 
     '''

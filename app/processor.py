@@ -4,7 +4,7 @@ from langchain_core.documents import Document
 from models import Embedder
 from chunks import Chunk
 import nltk # used for proper tokenizer workflow
-from uuid import uuid4 # for generating uniqe id as hex (uuid4 is used as it generates ids form pseudo random numbers unlike uuid1 and others)
+from uuid import uuid4 # for generating unique id as hex (uuid4 is used as it generates ids form pseudo random numbers unlike uuid1 and others)
 import numpy as np
 from settings import logging, text_splitter_config
 
@@ -95,7 +95,7 @@ class DocumentProcessor:
     add_to_unprocessed -> used to add loaded files to the list of unprocessed(unchunked) files if true
     '''
     def load_documents(self, documents: list[str], add_to_unprocessed: bool = False) -> list[Document]:
-        exctracted_documents: list[Document] = []
+        extracted_documents: list[Document] = []
 
         for doc in documents:
             temp_storage: list[Document] = []
@@ -107,12 +107,12 @@ class DocumentProcessor:
                 continue
             
             for extrc_doc in temp_storage:
-                exctracted_documents.append(extrc_doc)
+                extracted_documents.append(extrc_doc)
 
                 if add_to_unprocessed:
                     self.unprocessed.append(extrc_doc)
 
-        return exctracted_documents
+        return extracted_documents
     
 
     '''
@@ -120,7 +120,7 @@ class DocumentProcessor:
 
     TODO: try to split text with other llm (not really needed, but we should at least try it)
     '''
-    def generate_chunks(self, query: str ="", embedding: bool = True):
+    def generate_chunks(self, query: str ="", embedding: bool = False):
         most_relevant = []
 
         if embedding:
