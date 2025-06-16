@@ -9,7 +9,7 @@ import numpy as np
 from uuid import UUID
 from settings import qdrant_client_config
 import time
-
+  
 
 # TODO: for now all documents are saved to one db, but what if user wants to get references from his own documents, so temp storage is needed
 

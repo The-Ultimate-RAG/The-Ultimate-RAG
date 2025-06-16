@@ -1,9 +1,8 @@
 from fastapi import FastAPI, UploadFile, Form, File
-import uvicorn
 import os
 from rag_generator import RagSystem
 from fastapi.responses import HTMLResponse
-from settings import base_path, api_config
+from settings import base_path
 
 api = FastAPI()
 rag = None
@@ -54,9 +53,3 @@ async def create_prompt(files: list[UploadFile] = File(...), prompt: str = Form(
             saved_file = os.path.join(temp_storage, file.filename)
             os.remove(saved_file)
         
-
-def main():
-    uvicorn.run(**api_config)
-
-if __name__ == '__main__':
-    main()

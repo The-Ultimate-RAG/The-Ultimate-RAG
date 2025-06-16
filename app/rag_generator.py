@@ -7,7 +7,7 @@ from settings import reranker_model, embedder_model, base_path
 
 # TODO: write a better prompt
 # TODO: wrap original(user's) prompt with LLM's one
-
+#
 class RagSystem:
     def __init__(self):
         self.embedder = Embedder(model=embedder_model)
@@ -53,7 +53,7 @@ class RagSystem:
     def upload_documents(self, documents: list[str], split_by: int = 3, debug_mode: bool = True) -> None:
         
         for i in range(0, len(documents), split_by):
-
+   
             if debug_mode:
                 print("<" + "-" * 10 + "New document group is taken into processing" + "-" * 10 + ">")
 

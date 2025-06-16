@@ -27,8 +27,8 @@ def initialize_system() -> bool:
 
 
 def main():
-    if not initialize_system():
-        return
+    # if not initialize_system():
+    #     return
     
     uvicorn.run(**api_config)
 

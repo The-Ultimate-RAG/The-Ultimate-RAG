@@ -9,7 +9,7 @@ logging.basicConfig(
     format="%(levelname)s: %(message)s",
     handlers=[logging.StreamHandler()]
 )
-
+  
 qdrant_client_config = {
     "host": "qdrant" if os.name == "nt" else "localhost",
     "port": 6333,
