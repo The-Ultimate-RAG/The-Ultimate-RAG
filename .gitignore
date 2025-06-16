@@ -1,0 +1,6 @@
+__pycache__
+/app/temp_storage
+/database
+/new_env
+/prompt.txt
+/app/key.py

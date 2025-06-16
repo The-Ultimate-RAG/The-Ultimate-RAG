@@ -9,15 +9,20 @@ logging.basicConfig(
     format="%(levelname)s: %(message)s",
     handlers=[logging.StreamHandler()]
 )
-
+  
 qdrant_client_config = {
     "host": "qdrant" if os.name == "nt" else "localhost",
-    "port": 6333
+    "port": 6333,
+
+    # Note: for now it may not work
+
+    # "grpc_port": 6334,
+    # "prefer_grpc": True
 }
 
 device = "cuda" if torch.cuda.is_available() else 'cpu'
 
-embedder_model = "BAAI/bge-m3"
+embedder_model = "all-MiniLM-L6-v2"
 
 reranker_model = "cross-encoder/ms-marco-MiniLM-L6-v2"
 
@@ -45,6 +50,7 @@ text_splitter_config = {
     "add_start_index": True,
 }
 
+# "127.0.0.1"
 api_config = {
     "app": "api:api",
     "host": "127.0.0.1",
