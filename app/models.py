@@ -1,13 +1,12 @@
 from sentence_transformers import SentenceTransformer, CrossEncoder # SentenceTransformer -> model for embeddings, CrossEncoder -> re-ranker
 from ctransformers import AutoModelForCausalLM
-import torch # used to run on cuda if avaliable
 from torch import Tensor
-
+from google import genai
+from google.genai import types
+from key import KEY
 from chunks import Chunk
 import numpy as np # used only for type hints
-from settings import device, llm_config, generation_config
-
-# TODO: replace all models with geminai after receiving api-keys
+from settings import device, local_llm_config, local_generation_config, gemini_generation_config
 
 class Embedder:
     def __init__(self, model: str = "BAAI/bge-m3"):
@@ -50,9 +49,9 @@ class Reranker:
 # TODO: add exception handling when response have more tokens than was set
 # TODO: find a way to restrict the model for providing too long answers
 
-class LLM:
+class LocalLLM:
     def __init__(self):
-        self.model = AutoModelForCausalLM.from_pretrained(**llm_config)
+        self.model = AutoModelForCausalLM.from_pretrained(**local_llm_config)
 
 
     '''
@@ -62,14 +61,14 @@ class LLM:
 
     TODO: invent a way to really stream the answer (as return value)
     '''
-    def get_response(self, prompt: str, stream: bool = True, logging: bool = True) -> str:
+    def get_response(self, prompt: str, stream: bool = True, logging: bool = True, use_default_config: bool = True) -> str:
         
         with open("prompt.txt", "w") as f:
             f.write(prompt)
         
         generated_text = ""
         tokenized_text: list[int] = self.model.tokenize(text=prompt)
-        response: list[int] = self.model.generate(tokens=tokenized_text, **generation_config)
+        response: list[int] = self.model.generate(tokens=tokenized_text, **local_generation_config)
 
         if logging:
             print(response)
@@ -84,3 +83,23 @@ class LLM:
                 print(chunk, end="", flush=True) # flush -> clear the buffer
 
         return generated_text
+    
+
+class Gemini:
+    def __init__(self, model="gemini-2.0-flash"):
+        self.client = genai.Client(api_key=KEY)
+        self.model = model
+
+
+    def get_response(self, prompt: str, stream: bool = True, logging: bool = True, use_default_config: bool = False) -> str:
+        
+        with open("prompt.txt", "w") as f:
+            f.write(prompt)
+        
+        response = self.client.models.generate_content(
+            model=self.model,
+            contents=prompt,
+            config= types.GenerateContentConfig(**gemini_generation_config) if use_default_config else None
+        )
+
+        return response.text

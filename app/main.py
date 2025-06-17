@@ -7,11 +7,13 @@ def initialize_system() -> bool:
     success = True
     path = os.path.dirname(base_path)
     temp_storage_path = os.path.join(path, os.path.join("app", "temp_storage"))
+    temp_storage_path_pdf = os.path.join(path, os.path.join("app", "temp_storage", "pdfs"))
     database_path = os.path.join(path, "database")
 
     try:
         os.makedirs(temp_storage_path, exist_ok=True)
         os.makedirs(database_path, exist_ok=True)
+        os.makedirs(temp_storage_path_pdf, exist_ok=True)
     except Exception:
         success = False
         print("Not all required directories were initialized")

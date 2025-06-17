@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <title>PDF Viewer</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+        <style>
+            #pdf-container { 
+                width: 100%;
+                height: 90vh;
+            }
+            .highlight {
+                background-color: yellow;
+            }
+        </style>
+    </head>
+    <body>
+        <div>
+            Page: <input type="number" id="pageNum" value="PAGE">
+            <button id="prev">Previous</button>
+            <button id="next">Next</button>
+        </div>
+        <div id="pdf-container">
+            <canvas id="pdf-canvas"></canvas>
+        </div>
+        
+        <script>
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 
+                'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';
+            
+            let pdfDoc = null;
+            let currentPage = PAGE;
+            
+            // Load document
+
+            pdfjsLib.getDocument({
+                url: 'PATH',
+                withCredentials: true,
+                httpHeaders: { 'Access-Control-Allow-Origin': '*' }
+            }).promise.then(function(pdf) {{
+                pdfDoc = pdf;
+                renderPage(currentPage);
+            }});
+            
+            function renderPage(num) {{
+                pdfDoc.getPage(num).then(function(page) {{
+                    const viewport = page.getViewport({ scale: 1.5 });
+                    const canvas = document.getElementById('pdf-canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+                    
+                    page.render({
+                        canvasContext: ctx,
+                        viewport: viewport
+                    });
+                    
+                    // TODO: Implement text highlighting based on lines parameter
+                }});
+            }}
+            
+            // Navigation controls
+            document.getElementById('prev').addEventListener('click', function() {{
+                if (currentPage <= 1) return;
+                currentPage--;
+                document.getElementById('pageNum').value = currentPage;
+                renderPage(currentPage);
+            }});
+            
+            document.getElementById('next').addEventListener('click', function() {{
+                if (currentPage >= pdfDoc.numPages) return;
+                currentPage++;
+                document.getElementById('pageNum').value = currentPage;
+                renderPage(currentPage);
+            }});
+            
+            document.getElementById('pageNum').addEventListener('change', function() {{
+                const newPage = parseInt(this.value);
+                if (newPage >= 1 && newPage <= pdfDoc.numPages) {{
+                    currentPage = newPage;
+                    renderPage(currentPage);
+                }}
+            }});
+        </script>
+    </body>
+    </html>
