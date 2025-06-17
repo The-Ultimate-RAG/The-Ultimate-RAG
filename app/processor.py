@@ -6,7 +6,7 @@ from chunks import Chunk
 import nltk # used for proper tokenizer workflow
 from uuid import uuid4 # for generating unique id as hex (uuid4 is used as it generates ids form pseudo random numbers unlike uuid1 and others)
 import numpy as np
-from settings import logging, text_splitter_config
+from settings import logging, text_splitter_config, embedder_model
 
 # TODO: replace PDFloader since it is completely unusable OR try to fix it
 
@@ -27,7 +27,7 @@ class DocumentProcessor:
         self.chunks_unsaved: list[Chunk] = []
         self.processed: list[Document] = []
         self.unprocessed: list[Document] = []
-        self.embedder = Embedder()
+        self.embedder = Embedder(embedder_model)
         self.text_splitter = RecursiveCharacterTextSplitter(**text_splitter_config)
 
 

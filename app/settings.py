@@ -13,11 +13,6 @@ logging.basicConfig(
 qdrant_client_config = {
     "host": "qdrant" if os.name == "nt" else "localhost",
     "port": 6333,
-
-    # Note: for now it may not work
-
-    # "grpc_port": 6334,
-    # "prefer_grpc": True
 }
 
 device = "cuda" if torch.cuda.is_available() else 'cpu'
@@ -26,7 +21,7 @@ embedder_model = "all-MiniLM-L6-v2"
 
 reranker_model = "cross-encoder/ms-marco-MiniLM-L6-v2"
 
-llm_config = {
+local_llm_config = {
     "model_path_or_repo_id": "TheBloke/Mistral-7B-v0.1-GGUF",
     "model_file": "mistral-7b-v0.1.Q5_K_S.gguf",
     "model_type": "mistral",
@@ -36,7 +31,7 @@ llm_config = {
     "mlock": True,
 }
 
-generation_config = {
+local_generation_config = {
     "last_n_tokens": 128,
     "temperature": 0.3,
     "repetition_penalty": 1.2,
@@ -57,3 +52,17 @@ api_config = {
     "port": 5050,
     "reload": True,
 }
+
+gemini_generation_config = {
+    "temperature": 0,
+    "top_p": 0.95,
+    "top_k": 20,
+    "candidate_count": 1,
+    "seed": 5,
+    "max_output_tokens": 100,
+    "stop_sequences": ['STOP!'],
+    "presence_penalty": 0.0,
+    "frequency_penalty": 0.0,
+}
+
+use_gemini: bool = True

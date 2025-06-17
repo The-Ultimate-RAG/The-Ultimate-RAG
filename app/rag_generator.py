@@ -1,9 +1,9 @@
-from models import LLM, Embedder, Reranker
+from models import LocalLLM, Embedder, Reranker, Gemini
 from processor import DocumentProcessor
 from database import VectorDatabase
 import time
 import os
-from settings import reranker_model, embedder_model, base_path
+from settings import reranker_model, embedder_model, base_path, use_gemini
 
 # TODO: write a better prompt
 # TODO: wrap original(user's) prompt with LLM's one
@@ -14,7 +14,7 @@ class RagSystem:
         self.reranker = Reranker(model=reranker_model)
         self.processor = DocumentProcessor()
         self.db = VectorDatabase(embedder=self.embedder)
-        self.llm = LLM()
+        self.llm = Gemini() if use_gemini else LocalLLM()
 
 
     '''
