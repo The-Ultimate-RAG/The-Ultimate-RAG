@@ -7,9 +7,8 @@ from models import Embedder  # Distance -> defines the metric
 from chunks import Chunk  # PointStruct -> instance that will be stored in db
 import numpy as np
 from uuid import UUID
-from settings import qdrant_client_config
+from settings import qdrant_client_config, max_delta
 import time
-  
 
 # TODO: for now all documents are saved to one db, but what if user wants to get references from his own documents, so temp storage is needed
 
@@ -19,27 +18,62 @@ class VectorDatabase:
         self.client: QdrantClient = self._initialize_qdrant_client()
         self.collection_name: str = "document_chunks"
         self.embedder: Embedder = embedder  # embedder is used to convert a user's query
+        self.already_stored: np.array[np.array] = np.array([]).reshape(0, embedder.get_vector_dimensionality()) # should be already normalized
 
         if not self._check_collection_exists():
             self._create_collection()
 
-    def store(self, chunks: list[Chunk]) -> None:
+
+    def store(self, chunks: list[Chunk], batch_size: int = 1000) -> None:
         points: list[PointStruct] = []
 
         vectors = self.embedder.encode([chunk.get_raw_text() for chunk in chunks])
 
         for vector, chunk in zip(vectors, chunks):
-            points.append(PointStruct(
-                id=str(chunk.id),
-                vector=vector,
-                payload={"metadata": chunk.get_metadata(), "text": chunk.get_raw_text()}
-            ))
+            if self.accept_vector(vector):
+                points.append(PointStruct(
+                    id=str(chunk.id),
+                    vector=vector,
+                    payload={"metadata": chunk.get_metadata(), "text": chunk.get_raw_text()}
+                ))
 
-        self.client.upsert(
+        if len(points):
+            for group in range(0, len(points), batch_size):
+                self.client.upsert(
+                    collection_name=self.collection_name,
+                    points=points[group : group + batch_size],
+                    wait=False,
+                )
+
+
+    '''
+    Measures a cosine of angle between tow vectors
+    '''
+    def cosine_similarity(self, vec1, vec2):
+        return vec1 @ vec2 / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
+
+
+    '''
+    Defines weather the vector should be stored in the db by searching for the most
+    similar one
+    '''
+    def accept_vector(self, vector: np.array) -> bool:
+        most_similar = self.client.query_points(
             collection_name=self.collection_name,
-            points=points,
-            wait=False,
-        )
+            query=vector,
+            limit=1,
+            with_vectors=True
+        ).points
+
+        if not len(most_similar):
+            return True
+        else:
+            most_similar = most_similar[0]
+
+        if 1 - self.cosine_similarity(vector, most_similar.vector) < max_delta:
+            return False
+        return True
+
 
     '''
     According to tests, re-ranker needs ~7-10 chunks to generate the most accurate hit
@@ -67,6 +101,7 @@ class VectorDatabase:
                 text=point.payload.get("text", "")
             ) for point in points
         ]
+
 
     def _initialize_qdrant_client(self, max_retries=5, delay=2) -> QdrantClient:
         for attempt in range(max_retries):

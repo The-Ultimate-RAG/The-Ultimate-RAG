@@ -159,7 +159,7 @@ class DocumentProcessor:
                 self.chunks_unsaved.append(newChunk)
 
             self.unprocessed = []
-            
+            print(len(self.chunks_unsaved))
         return most_relevant
 
 
