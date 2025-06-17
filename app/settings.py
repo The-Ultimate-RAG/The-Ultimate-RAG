@@ -13,11 +13,6 @@ logging.basicConfig(
 qdrant_client_config = {
     "host": "qdrant" if os.name == "nt" else "localhost",
     "port": 6333,
-
-    # Note: for now it may not work
-
-    # "grpc_port": 6334,
-    # "prefer_grpc": True
 }
 
 device = "cuda" if torch.cuda.is_available() else 'cpu'
