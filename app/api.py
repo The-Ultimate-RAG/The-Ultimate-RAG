@@ -7,6 +7,7 @@ from settings import base_path
 from typing import Optional
 from response_parser import add_links
 from document_validator import path_is_valid
+from pathlib import Path
 
 # TODO: implement a better TextHandler
 # TODO: optionally implement DocHandler
@@ -82,15 +83,29 @@ async def create_prompt(files: list[UploadFile] = File(...), prompt: str = Form(
     rag = initialize_rag()
 
     try:
+        temp_storage = os.path.join(base_path, "temp_storage")
+
+        path_pdfs = Path(os.path.join(temp_storage, "pdfs"))
+        files_amount_pdfs = sum(1 for item in path_pdfs.iterdir() if item.is_file())
+        folders_amount_pdfs = sum(1 for item in path_pdfs.iterdir() if item.is_dir())
+        objects_pdfs = files_amount_pdfs + folders_amount_pdfs
+
+        path_other = Path(os.path.join(temp_storage, "pdfs"))
+        files_amount_other = sum(1 for item in path_other.iterdir() if item.is_file())
+        folders_amount_other = sum(1 for item in path_other.iterdir() if item.is_dir())
+        objects_other = files_amount_other + folders_amount_other
+
         for file in files:
             content = await file.read()
             temp_storage = os.path.join(base_path, "temp_storage")
             os.makedirs(temp_storage, exist_ok=True)
 
             if file.filename.endswith('.pdf'):
-                saved_file = os.path.join(temp_storage, "pdfs", file.filename)
+                saved_file = os.path.join(temp_storage, "pdfs", str(objects_pdfs) + ".pdf")
+                objects_pdfs += 1
             else:
-                saved_file = os.path.join(temp_storage, file.filename)
+                saved_file = os.path.join(temp_storage, str(objects_other) + ".pdf")
+                objects_other += 1
 
             with open(saved_file, "wb") as f:
                 f.write(content)
