@@ -11,7 +11,7 @@ logging.basicConfig(
 )
   
 qdrant_client_config = {
-    "host": "qdrant" if os.name == "nt" else "localhost",
+    "host": "localhost",
     "port": 6333,
 }
 
