@@ -1,7 +1,6 @@
 from app.backend.models.base_model import Base
 from sqlalchemy import Integer, String, Column, ForeignKey
 from sqlalchemy.orm import relationship
-from app.backend.controllers.base_controller import engine
 
 class Chat(Base):
     __tablename__ = "chats"

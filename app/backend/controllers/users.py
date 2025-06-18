@@ -1,80 +1,134 @@
-from app.backend.models.users import User, add_new_user, find_user_by_email
+from app.backend.models.users import User, add_new_user, find_user_by_email, find_user_by_access_string, update_user
 from bcrypt import gensalt, hashpw, checkpw
-from app.settings import very_secret_pepper, jwt_algorithm
+from app.settings import very_secret_pepper, jwt_algorithm, max_cookie_lifetime
 from fastapi import HTTPException
 import jwt
 from datetime import datetime, timedelta
 from fastapi import Response, Request
-from fastapi.responses import JSONResponse
+from secrets import token_urlsafe
+import hmac
+import hashlib
 
-def create_access_token(email: str, expires_delta: timedelta | None = None):
+# A vot nado bilo izuchat kak web dev rabotaet
+
+'''
+Creates a jwt token by access string
+
+Param:
+access_string - randomly (safe methods) generated string (by default - 16 len) 
+expires_delta - time in seconds, defines a token lifetime
+
+Returns:
+string with 4 sections (valid jwt token)
+'''
+def create_access_token(access_string: str, expires_delta: timedelta = timedelta(seconds=max_cookie_lifetime)) -> str:
     token_payload = {
-        "email":  email,
+        "access_string": access_string,
     }
 
-    if expires_delta:
-        expires = expires_delta
-    else:
-        expires = datetime.now() + timedelta(minutes=5)
-
-    token_payload.update({"exp": expires})
-    encoded_jwt = jwt.encode(token_payload, very_secret_pepper, algorithm=jwt_algorithm)
+    token_payload.update({"exp": datetime.now() + expires_delta})
+    encoded_jwt: str = jwt.encode(token_payload, very_secret_pepper, algorithm=jwt_algorithm)
 
     return encoded_jwt
         
 
-def create_user(response: Response, email: str, password: str):
+'''
+Safely creates random string of 16 chars
+'''
+def create_access_string() -> str:
+    return token_urlsafe(16)
 
+
+'''
+Hashes access string using hmac and sha256
+
+We can not use the same methods as we do to save password
+since we need to know a salt to get similar hash, but since
+we put a raw string (non-hashed) we won't be able to guess
+salt
+'''
+def hash_access_string(string: str) -> str:
+    return hmac.new(
+        key=very_secret_pepper.encode("utf-8"),
+        msg=string.encode("utf-8"),
+        digestmod=hashlib.sha256
+    ).hexdigest()
+
+
+'''
+Creates a new user and sets a cookie with jwt token
+
+Params:
+response - needed to set a cookie
+...
+
+Returns:
+Dict to send a response in JSON 
+'''
+def create_user(response: Response, email: str, password: str) -> dict:
     user: User = find_user_by_email(email=email)
     if user is not None:
-        print("-"*100)
         return HTTPException(418, "The user with similar email already exists")
     
-    salt = gensalt(rounds=16)
-    password_hashed = hashpw(password.encode("utf-8"), salt).decode("utf-8")
-
-    add_new_user(email=email, password_hash=password_hashed)
-
-    access_token = create_access_token(email)
-    response.set_cookie(key="access_token", value=access_token, path='/', max_age=300, httponly=True)
-
-    return JSONResponse({"status": "ok"})
-
-
-def authenticate_user(response: Response, email: str, password: str):
-    user: User = find_user_by_email(email=email)
-    print(user)
-    if not user:
-        return HTTPException(418, "User does not exists")
+    salt: bytes = gensalt(rounds=16)
+    password_hashed: str = hashpw(password.encode("utf-8"), salt).decode("utf-8")
     
-    print(123)
-    if not checkpw(password.encode('utf-8'), user.password_hash.encode('utf-8')):
-        return HTTPException(418, "Wrong credentials")
-    print(123)
+    access_string: str = create_access_string()
+    access_string_hashed: str = hash_access_string(string=access_string)
 
-    access_token = create_access_token(email)
-    print(access_token)
-    response.set_cookie(key="access_token", value=access_token, path='/', max_age=300, httponly=True)
+    add_new_user(email=email, password_hash=password_hashed, access_string_hash=access_string_hashed)
+
+    access_token: str = create_access_token(access_string=access_string)
+    response.set_cookie(key="access_token", value=access_token, path='/', max_age=max_cookie_lifetime, httponly=True)
 
     return {"status": "ok"}
 
 
-def check_cookie(request: Request):
-    token = request.cookies.get("access_token")
-    print(request.cookies)
-    print(token)
-    user_email = jwt.decode(
+
+'''
+Finds user by email. If user is found, sets a cookie with token
+'''
+def authenticate_user(response: Response, email: str, password: str) -> dict:
+    user: User = find_user_by_email(email=email)
+
+    if not user:
+        raise HTTPException(418, "User does not exists")
+
+    if not checkpw(password.encode('utf-8'), user.password_hash.encode('utf-8')):
+        raise HTTPException(418, "Wrong credentials")
+
+    access_string: str = create_access_string()
+    access_string_hashed: str = hash_access_string(string=access_string)
+
+    update_user(user, access_string_hash=access_string_hashed)
+    
+    access_token = create_access_token(access_string)
+    response.set_cookie(key="access_token", value=access_token, path='/', max_age=max_cookie_lifetime, httponly=True)
+
+    return {"status": "ok"}
+
+
+'''
+Validates cookies
+'''
+def check_cookie(request: Request) -> dict:
+    token: str | None = request.cookies.get("access_token")
+    if not token:
+        raise HTTPException(418, "No cookie is present")
+    
+    access_string = jwt.decode(
             jwt=bytes(token, encoding='utf-8'),
             key=very_secret_pepper,
-            algorithms=['HS256']
-        ).get('email')
+            algorithms=[jwt_algorithm]
+        ).get('access_string')
 
-    user = find_user_by_email(user_email)
-
+    user = find_user_by_access_string(hash_access_string(access_string))
+    if not user:
+        raise HTTPException(418, "No user was found")
+    
     return {"user" : {"email": user.email, "id": user.id, "password": user.password_hash}}
 
 
-
-    
-
-
+def clear_cookie(response: Response) -> dict:
+    response.set_cookie(key="access_token", value="", httponly=True)
+    return {"status": "ok"}

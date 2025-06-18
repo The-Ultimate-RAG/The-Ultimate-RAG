@@ -7,10 +7,9 @@ from app.settings import base_path
 from typing import Optional
 from app.response_parser import add_links
 from app.document_validator import path_is_valid
-from app.backend.controllers.users import create_user, authenticate_user, check_cookie
+from app.backend.controllers.users import create_user, authenticate_user, check_cookie, clear_cookie
 from app.backend.controllers.shemas import SUser
 from pathlib import Path
-
 
 # TODO: implement a better TextHandler
 # TODO: optionally implement DocHandler
@@ -151,6 +150,8 @@ def show_document(path: str, page: Optional[int] = 1, lines: Optional[str] = "1-
     else:
         return FileResponse(path=path)
 
+
+# <--------------------------------- Get --------------------------------->
 @api.get("/new_user")
 def new_user():
     template = ''
@@ -158,11 +159,6 @@ def new_user():
         template = f.read()
 
     return HTMLResponse(content=template)
-
-
-@api.post("/new_user")
-def new_user(response: Response, user: SUser):
-    return create_user(response, user.email, user.password)
 
 
 @api.get("/login")
@@ -174,10 +170,23 @@ def login():
     return HTMLResponse(content=template)
 
 
+@api.get("/cookie_test")
+def test_cookie(request: Request):
+    return check_cookie(request)
+
+
+# <--------------------------------- Post --------------------------------->
+@api.post("/new_user")
+def new_user(response: Response, user: SUser):
+    return create_user(response, user.email, user.password)
+
+
+
 @api.post("/login")
 def login(response: Response, user: SUser):
     return authenticate_user(response, user.email, user.password)
 
-@api.get("/cookie_test")
-def test_cookie(request: Request):
-    return check_cookie(request)
+
+@api.get("/logout")
+def logout(response: Response):
+    return clear_cookie(response)

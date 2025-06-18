@@ -85,3 +85,5 @@ postgers_client_config = {
 
 very_secret_pepper = "goida"
 jwt_algorithm = "HS256"
+
+max_cookie_lifetime = 300

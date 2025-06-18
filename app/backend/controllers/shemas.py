@@ -6,5 +6,12 @@ class SUser(BaseModel):
 
     @field_validator('password', mode='before')
     def validate_password(cls, p):
-        # TODO: implement validation logic
+        digits_count = sum([p.count(digit) for digit in "0123456789"])
+        special_symbols_count = sum([p.count(symbol) for symbol in "!@#$%^&*()_+=<,.>/?:;"])
+
+        if digits_count < 3:
+            raise ValueError(f"Your password is too simple, add at least {3 - digits_count} digits")        
+        if special_symbols_count < 3:
+            raise ValueError(f"Your password is too simple, add at least {3 - special_symbols_count} special symbols")
+        
         return p
