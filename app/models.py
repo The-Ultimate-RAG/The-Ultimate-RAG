@@ -3,10 +3,10 @@ from ctransformers import AutoModelForCausalLM
 from torch import Tensor
 from google import genai
 from google.genai import types
-from key import KEY
-from chunks import Chunk
+from app.key import KEY
+from app.chunks import Chunk
 import numpy as np # used only for type hints
-from settings import device, local_llm_config, local_generation_config, gemini_generation_config
+from app.settings import device, local_llm_config, local_generation_config, gemini_generation_config
 
 class Embedder:
     def __init__(self, model: str = "BAAI/bge-m3"):

@@ -1,12 +1,14 @@
-from fastapi import FastAPI, UploadFile, Form, File, HTTPException
+from fastapi import FastAPI, UploadFile, Form, File, HTTPException, Response, Request
 from fastapi.staticfiles import StaticFiles
 import os
-from rag_generator import RagSystem
+from app.rag_generator import RagSystem
 from fastapi.responses import HTMLResponse, FileResponse
-from settings import base_path
+from app.settings import base_path
 from typing import Optional
-from response_parser import add_links
-from document_validator import path_is_valid
+from app.response_parser import add_links
+from app.document_validator import path_is_valid
+from app.backend.controllers.users import create_user, authenticate_user, check_cookie
+from app.backend.controllers.shemas import SUser
 
 # TODO: implement a better TextHandler
 # TODO: optionally implement DocHandler
@@ -132,3 +134,34 @@ def show_document(path: str, page: Optional[int] = 1, lines: Optional[str] = "1-
         return TextHandler(path=path, lines=lines) # should be a bit different handler
     else:
         return FileResponse(path=path)
+
+@api.get("/new_user")
+def new_user():
+    template = ''
+    with open(os.path.join(base_path, "frontend", "templates", "registration.html")) as f:
+        template = f.read()
+
+    return HTMLResponse(content=template)
+
+
+@api.post("/new_user")
+def new_user(response: Response, user: SUser):
+    return create_user(response, user.email, user.password)
+
+
+@api.get("/login")
+def login():
+    template = ''
+    with open(os.path.join(base_path, "frontend", "templates", "login.html")) as f:
+        template = f.read()
+
+    return HTMLResponse(content=template)
+
+
+@api.post("/login")
+def login(response: Response, user: SUser):
+    return authenticate_user(response, user.email, user.password)
+
+@api.get("/cookie_test")
+def test_cookie(request: Request):
+    return check_cookie(request)

@@ -1,13 +1,12 @@
 from qdrant_client import QdrantClient  # main component to provide the access to db
-from qdrant_client.embed import embedder
 from qdrant_client.http.models import ScoredPoint
 from qdrant_client.models import VectorParams, Distance, \
     PointStruct  # VectorParams -> config of vectors that will be used as primary keys
-from models import Embedder  # Distance -> defines the metric
-from chunks import Chunk  # PointStruct -> instance that will be stored in db
+from app.models import Embedder  # Distance -> defines the metric
+from app.chunks import Chunk  # PointStruct -> instance that will be stored in db
 import numpy as np
 from uuid import UUID
-from settings import qdrant_client_config, max_delta
+from app.settings import qdrant_client_config, max_delta
 import time
 
 # TODO: for now all documents are saved to one db, but what if user wants to get references from his own documents, so temp storage is needed

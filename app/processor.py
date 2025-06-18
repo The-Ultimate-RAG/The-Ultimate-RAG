@@ -1,12 +1,12 @@
 from langchain_community.document_loaders import PyPDFLoader, UnstructuredWordDocumentLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
-from models import Embedder
-from chunks import Chunk
+from app.models import Embedder
+from app.chunks import Chunk
 import nltk # used for proper tokenizer workflow
 from uuid import uuid4 # for generating unique id as hex (uuid4 is used as it generates ids form pseudo random numbers unlike uuid1 and others)
 import numpy as np
-from settings import logging, text_splitter_config, embedder_model
+from app.settings import logging, text_splitter_config, embedder_model
 
 # TODO: replace PDFloader since it is completely unusable OR try to fix it
 

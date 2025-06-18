@@ -1,7 +1,7 @@
-import api
-from settings import api_config, base_path
+from app.settings import api_config, base_path
 import uvicorn
 import os
+from app.backend.models.db_service import automigrate
 
 def initialize_system() -> bool:
     success = True
@@ -31,7 +31,7 @@ def initialize_system() -> bool:
 def main():
     # if not initialize_system():
     #     return
-    
+    automigrate() # Note: it will drop all existing dbs and create a new ones
     uvicorn.run(**api_config)
 
 
