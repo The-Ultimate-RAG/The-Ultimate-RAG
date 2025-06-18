@@ -1,9 +1,9 @@
-from models import LocalLLM, Embedder, Reranker, Gemini
-from processor import DocumentProcessor
-from database import VectorDatabase
+from app.models import LocalLLM, Embedder, Reranker, Gemini
+from app.processor import DocumentProcessor
+from app.database import VectorDatabase
 import time
 import os
-from settings import reranker_model, embedder_model, base_path, use_gemini
+from app.settings import reranker_model, embedder_model, base_path, use_gemini
 
 
 # TODO: write a better prompt

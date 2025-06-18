@@ -1,13 +1,12 @@
 from langchain_community.document_loaders import PyPDFLoader, UnstructuredWordDocumentLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
-from models import Embedder
-from chunks import Chunk
-import nltk  # used for proper tokenizer workflow
-from uuid import \
-    uuid4  # for generating unique id as hex (uuid4 is used as it generates ids form pseudo random numbers unlike uuid1 and others)
+from app.models import Embedder
+from app.chunks import Chunk
+import nltk # used for proper tokenizer workflow
+from uuid import uuid4 # for generating unique id as hex (uuid4 is used as it generates ids form pseudo random numbers unlike uuid1 and others)
 import numpy as np
-from settings import logging, text_splitter_config, embedder_model
+from app.settings import logging, text_splitter_config, embedder_model
 
 
 # TODO: replace PDFloader since it is completely unusable OR try to fix it
@@ -35,14 +34,12 @@ class DocumentProcessor:
     '''
     Measures cosine between two vectors
     '''
-
     def cosine_similarity(self, vec1, vec2):
         return vec1 @ vec2 / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
 
     '''
     Updates a list of the most relevant chunks without interacting with db
     '''
-
     def update_most_relevant_chunk(self, chunk: list[np.float64, Chunk], relevant_chunks: list[list[np.float64, Chunk]],
                                    mx_len=15):
         relevant_chunks.append(chunk)
@@ -64,7 +61,6 @@ class DocumentProcessor:
 
     add_to_unprocessed -> used to add loaded file to the list of unprocessed(unchunked) files if true
     '''
-
     def load_document(self, filepath: str, add_to_unprocessed: bool = False) -> list[Document]:
         loader = None
 
@@ -98,7 +94,6 @@ class DocumentProcessor:
 
     add_to_unprocessed -> used to add loaded files to the list of unprocessed(unchunked) files if true
     '''
-
     def load_documents(self, documents: list[str], add_to_unprocessed: bool = False) -> list[Document]:
         extracted_documents: list[Document] = []
 
@@ -125,7 +120,6 @@ class DocumentProcessor:
 
     TODO: try to split text with other llm (not really needed, but we should at least try it)
     '''
-
     def generate_chunks(self, query: str = "", embedding: bool = False):
         most_relevant = []
 
@@ -180,7 +174,6 @@ class DocumentProcessor:
     end_char ->  index of symbol, were current chunk ends
     debug_mode -> flag, which enables printing useful info about the process
     '''
-
     def get_start_end_lines(self, splitted_text: list[str], start_char: int, end_char: int, debug_mode: bool = False) -> \
     tuple[int, int]:
         if debug_mode:
@@ -211,7 +204,6 @@ class DocumentProcessor:
     '''
     Note: it should be used only once to download tokenizers, futher usage is not recommended
     '''
-
     def update_nltk(self) -> None:
         nltk.download('punkt')
         nltk.download('averaged_perceptron_tagger')
@@ -223,7 +215,6 @@ class DocumentProcessor:
     I do not know weather we really need to store all chunks that were added in the 
     current session, but chunks_unsaved are used to avoid dublications while saving to db.
     '''
-
     def clear_unsaved_chunks(self):
         self.chunks_unsaved = []
 
@@ -233,7 +224,6 @@ class DocumentProcessor:
     '''
     If we want to save chunks to db, we need to clear the temp storage to avoid dublications
     '''
-
     def get_and_save_unsaved_chunks(self) -> list[Chunk]:
         chunks_copy: list[Chunk] = self.chunks.copy()
         self.clear_unsaved_chunks()
