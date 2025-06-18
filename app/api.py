@@ -1,3 +1,5 @@
+import uuid
+
 from fastapi import FastAPI, UploadFile, Form, File, HTTPException
 from fastapi.staticfiles import StaticFiles
 import os
@@ -55,18 +57,20 @@ def TextHandler(path: str, lines: str) -> HTMLResponse:
             if not anchor_added:
                 anchor_added = True
                 content.append("<a name='anchor'></a>")
-            content.append(f'<span style="background-color: green;">{ line }</span>')
+            content.append(f'<span style="background-color: green;">{line}</span>')
         else:
             content.append(line)
 
     text = text.replace("CONTENT", "<pre>" + '\n'.join(content) + "</pre>")
-    
+
     return HTMLResponse(content=text)
 
 
 '''
 Optional handler
 '''
+
+
 def DocHandler():
     pass
 
@@ -86,17 +90,6 @@ async def create_prompt(files: list[UploadFile] = File(...), prompt: str = Form(
     rag = initialize_rag()
 
     try:
-        temp_storage = os.path.join(base_path, "temp_storage")
-
-        path_pdfs = Path(os.path.join(temp_storage, "pdfs"))
-        files_amount_pdfs = sum(1 for item in path_pdfs.iterdir() if item.is_file())
-        folders_amount_pdfs = sum(1 for item in path_pdfs.iterdir() if item.is_dir())
-        objects_pdfs = files_amount_pdfs + folders_amount_pdfs
-
-        path_other = Path(os.path.join(temp_storage, "pdfs"))
-        files_amount_other = sum(1 for item in path_other.iterdir() if item.is_file())
-        folders_amount_other = sum(1 for item in path_other.iterdir() if item.is_dir())
-        objects_other = files_amount_other + folders_amount_other
 
         for file in files:
             content = await file.read()
@@ -104,17 +97,15 @@ async def create_prompt(files: list[UploadFile] = File(...), prompt: str = Form(
             os.makedirs(temp_storage, exist_ok=True)
 
             if file.filename.endswith('.pdf'):
-                saved_file = os.path.join(temp_storage, "pdfs", str(objects_pdfs) + ".pdf")
-                objects_pdfs += 1
+                saved_file = os.path.join(temp_storage, "pdfs", str(uuid.uuid4()) + ".pdf")
             else:
-                saved_file = os.path.join(temp_storage, str(objects_other) + ".pdf")
-                objects_other += 1
+                saved_file = os.path.join(temp_storage, str(uuid.uuid4()) + "." + file.filename.split('.')[-1])
 
             with open(saved_file, "wb") as f:
                 f.write(content)
 
             docs.append(saved_file)
-    
+
         if len(files) > 0:
             rag.upload_documents(docs)
 
@@ -124,8 +115,9 @@ async def create_prompt(files: list[UploadFile] = File(...), prompt: str = Form(
         return {"response": response, "status": 200}
 
     except Exception as e:
+        print("!!!ERROR!!!")
         print(e)
-        
+
     # finally:
     #     for file in files:
     #         temp_storage = os.path.join(base_path, "temp_storage")
@@ -136,7 +128,7 @@ async def create_prompt(files: list[UploadFile] = File(...), prompt: str = Form(
 @api.get("/viewer/")
 def show_document(path: str, page: Optional[int] = 1, lines: Optional[str] = "1-1", start: Optional[int] = 0):
     if not path_is_valid(path):
-        return  HTTPException(status_code=404, detail="Document not found")
+        return HTTPException(status_code=404, detail="Document not found")
 
     ext = path.split(".")[-1]
     if ext == 'pdf':
@@ -144,6 +136,6 @@ def show_document(path: str, page: Optional[int] = 1, lines: Optional[str] = "1-
     elif ext in ('txt', 'csv', 'md'):
         return TextHandler(path=path, lines=lines)
     elif ext in ('docx', 'doc'):
-        return TextHandler(path=path, lines=lines) # should be a bit different handler
+        return TextHandler(path=path, lines=lines)  # should be a bit different handler
     else:
         return FileResponse(path=path)

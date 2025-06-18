@@ -59,12 +59,12 @@ gemini_generation_config = {
     "top_k": 20,
     "candidate_count": 1,
     "seed": 5,
-    "max_output_tokens": 100,
+    "max_output_tokens": 1000,
     "stop_sequences": ['STOP!'],
     "presence_penalty": 0.0,
     "frequency_penalty": 0.0,
 }
 
-use_gemini: bool = False
+use_gemini: bool = True
 
 max_delta = 0.15 # defines what is the minimum boundary for vectors to be considered similar
