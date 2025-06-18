@@ -65,4 +65,6 @@ gemini_generation_config = {
     "frequency_penalty": 0.0,
 }
 
-use_gemini: bool = True
+use_gemini: bool = False
+
+max_delta = 0.15 # defines what is the minimum boundary for vectors to be considered similar

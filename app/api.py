@@ -49,15 +49,18 @@ def TextHandler(path: str, lines: str) -> HTMLResponse:
     start_line, end_line = map(int, lines.split('-'))
 
     content = []
+    anchor_added = False
     for index, line in enumerate(file_content.split('\n')):
-        if start_line <= index <= end_line:
-            content.append(f'<span style="background-color: yellow;">{ line }</span>')
+        if start_line <= index + 1 <= end_line:
+            if not anchor_added:
+                anchor_added = True
+                content.append("<a name='anchor'></a>")
+            content.append(f'<span style="background-color: green;">{ line }</span>')
         else:
             content.append(line)
 
-    text += "<pre>" + '\n'.join(content) + "</pre>"
-    text += '</body>\n</html>'
-
+    text = text.replace("CONTENT", "<pre>" + '\n'.join(content) + "</pre>")
+    
     return HTMLResponse(content=text)
 
 
