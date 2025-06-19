@@ -1,17 +1,32 @@
 from pydantic import BaseModel, Field, EmailStr, field_validator
+import re
 
 class SUser(BaseModel):
     email: EmailStr
     password: str = Field(default=..., min_length=8, max_length=32)
 
     @field_validator('password', mode='before')
-    def validate_password(cls, p):
-        digits_count = sum([p.count(digit) for digit in "0123456789"])
-        special_symbols_count = sum([p.count(symbol) for symbol in "!@#$%^&*()_+=<,.>/?:;"])
+    def validate_password(self, password_to_validate):
+        """
+        Validates the strength of the password.
 
-        if digits_count < 3:
-            raise ValueError(f"Your password is too simple, add at least {3 - digits_count} digits")        
-        if special_symbols_count < 3:
-            raise ValueError(f"Your password is too simple, add at least {3 - special_symbols_count} special symbols")
-        
-        return p
+        The password **must** contain:
+            - At least one digit
+            - At least one special character
+            - At least one uppercase character
+            - At least one lowercase character
+        """
+
+        if not re.search(r"\d", password_to_validate):
+            raise ValueError("Password must contain at least one number.")
+
+        if not re.search(r"[!@#$%^&*()_+\-=\[\]{};:\'\",.<>?`~]", password_to_validate):
+            raise ValueError("Password must contain at least one special symbol.")
+
+        if not re.search(r"[A-Z]", password_to_validate):
+            raise ValueError("Password must contain at least one uppercase letter.")
+
+        if not re.search(r"[a-z]", password_to_validate):
+            raise ValueError("Password must contain at least one lowercase letter.")
+
+        return password_to_validate
