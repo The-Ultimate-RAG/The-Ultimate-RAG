@@ -11,7 +11,7 @@ logging.basicConfig(
 )
   
 qdrant_client_config = {
-    "host": "qdrant" if os.name == "nt" else "localhost",
+    "host": "localhost",
     "port": 6333,
 }
 
@@ -47,7 +47,7 @@ text_splitter_config = {
 
 # "127.0.0.1"
 api_config = {
-    "app": "api:api",
+    "app": "app.api:api",
     "host": "127.0.0.1",
     "port": 5050,
     "reload": True,
@@ -59,10 +59,31 @@ gemini_generation_config = {
     "top_k": 20,
     "candidate_count": 1,
     "seed": 5,
-    "max_output_tokens": 100,
+    "max_output_tokens": 1000,
     "stop_sequences": ['STOP!'],
     "presence_penalty": 0.0,
     "frequency_penalty": 0.0,
 }
 
 use_gemini: bool = True
+
+max_delta = 0.15 # defines what is the minimum boundary for vectors to be considered similar
+
+
+# for postgres client
+# Note: you should run postgres server with similar host, post, and do not forget to create a user with similar settings
+host = "localhost"
+port = 5432
+user = "postgres"
+password = "1121"
+dbname = "exp"
+
+postgers_client_config = {
+    "url": f"postgresql://{user}:{password}@{host}:{port}/{dbname}",
+    "echo": False,
+}
+
+very_secret_pepper = "goida"
+jwt_algorithm = "HS256"
+
+max_cookie_lifetime = 300

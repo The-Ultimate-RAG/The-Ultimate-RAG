@@ -1,9 +1,10 @@
-from models import LocalLLM, Embedder, Reranker, Gemini
-from processor import DocumentProcessor
-from database import VectorDatabase
+from app.models import LocalLLM, Embedder, Reranker, Gemini
+from app.processor import DocumentProcessor
+from app.database import VectorDatabase
 import time
 import os
-from settings import reranker_model, embedder_model, base_path, use_gemini
+from app.settings import reranker_model, embedder_model, base_path, use_gemini
+
 
 # TODO: write a better prompt
 # TODO: wrap original(user's) prompt with LLM's one
@@ -16,12 +17,12 @@ class RagSystem:
         self.db = VectorDatabase(embedder=self.embedder)
         self.llm = Gemini() if use_gemini else LocalLLM()
 
-
     '''
     Provides a prompt with substituted context from chunks
 
     TODO: add template to prompt without docs
     '''
+
     def get_prompt_template(self, user_prompt: str, chunks: list) -> str:
         sources = ""
         prompt = ""
@@ -37,23 +38,23 @@ class RagSystem:
             prompt = f.read()
 
         prompt += (
-            "**QUESTION**: " 
+            "**QUESTION**: "
             f"{user_prompt.strip()}\n"
             "**CONTEXT DOCUMENTS**:\n"
             f"{sources}\n"
         )
 
         return prompt
-    
 
     '''
     Splits the list of documents into groups with 'split_by' docs (done to avoid qdrant_client connection error handling), loads them,
     splits into chunks, and saves to db
     '''
+
     def upload_documents(self, documents: list[str], split_by: int = 3, debug_mode: bool = True) -> None:
-        
+
         for i in range(0, len(documents), split_by):
-   
+
             if debug_mode:
                 print("<" + "-" * 10 + "New document group is taken into processing" + "-" * 10 + ">")
 
@@ -67,7 +68,7 @@ class RagSystem:
             start = time.time()
             self.processor.load_documents(documents=docs, add_to_unprocessed=True)
             loading_time = time.time() - start
-            
+
             print("Start loading chunk generation")
             start = time.time()
             self.processor.generate_chunks()
@@ -79,25 +80,25 @@ class RagSystem:
             db_saving_time = time.time() - start
 
             if debug_mode:
-                print(f"loading time = {loading_time}, chunk generation time = {chunk_generating_time}, saving time = {db_saving_time}\n")
-    
+                print(
+                    f"loading time = {loading_time}, chunk generation time = {chunk_generating_time}, saving time = {db_saving_time}\n")
 
     '''
     Produces answer to user's request. First, finds the most relevant chunks, generates prompt with them, and asks llm
     '''
+
     def generate_response(self, user_prompt: str) -> str:
         relevant_chunks = self.db.search(query=user_prompt, top_k=15)
         relevant_chunks = [relevant_chunks[ranked["corpus_id"]]
                            for ranked in self.reranker.rank(query=user_prompt, chunks=relevant_chunks)[:3]]
 
         general_prompt = self.get_prompt_template(user_prompt=user_prompt, chunks=relevant_chunks)
-        
         return self.llm.get_response(prompt=general_prompt)
 
+    '''
+    Produces the list of the most relevant chunkВs
+    '''
 
-    '''
-    Produces the list of the most relevant chunks
-    '''
     def get_relevant_chunks(self, query):
         relevant_chunks = self.db.search(query=query, top_k=15)
         relevant_chunks = [relevant_chunks[ranked["corpus_id"]]

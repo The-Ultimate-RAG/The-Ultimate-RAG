@@ -1,12 +1,18 @@
+from fastapi import FastAPI, UploadFile, Form, File, HTTPException, Response, Request
+import uuid
+
 from fastapi import FastAPI, UploadFile, Form, File, HTTPException
 from fastapi.staticfiles import StaticFiles
 import os
-from rag_generator import RagSystem
+from app.rag_generator import RagSystem
 from fastapi.responses import HTMLResponse, FileResponse
-from settings import base_path
+from app.settings import base_path
 from typing import Optional
-from response_parser import add_links
-from document_validator import path_is_valid
+from app.response_parser import add_links
+from app.document_validator import path_is_valid
+from app.backend.controllers.users import create_user, authenticate_user, check_cookie, clear_cookie
+from app.backend.controllers.shemas import SUser
+from pathlib import Path
 
 # TODO: implement a better TextHandler
 # TODO: optionally implement DocHandler
@@ -48,15 +54,18 @@ def TextHandler(path: str, lines: str) -> HTMLResponse:
     start_line, end_line = map(int, lines.split('-'))
 
     content = []
+    anchor_added = False
     for index, line in enumerate(file_content.split('\n')):
-        if start_line <= index <= end_line:
-            content.append(f'<span style="background-color: yellow;">{ line }</span>')
+        if start_line <= index + 1 <= end_line:
+            if not anchor_added:
+                anchor_added = True
+                content.append("<a name='anchor'></a>")
+            content.append(f'<span style="background-color: green;">{ line }</span>')
         else:
             content.append(line)
 
-    text += "<pre>" + '\n'.join(content) + "</pre>"
-    text += '</body>\n</html>'
-
+    text = text.replace("CONTENT", "<pre>" + '\n'.join(content) + "</pre>")
+    
     return HTMLResponse(content=text)
 
 
@@ -82,21 +91,22 @@ async def create_prompt(files: list[UploadFile] = File(...), prompt: str = Form(
     rag = initialize_rag()
 
     try:
+
         for file in files:
             content = await file.read()
             temp_storage = os.path.join(base_path, "temp_storage")
             os.makedirs(temp_storage, exist_ok=True)
 
             if file.filename.endswith('.pdf'):
-                saved_file = os.path.join(temp_storage, "pdfs", file.filename)
+                saved_file = os.path.join(temp_storage, "pdfs", str(uuid.uuid4()) + ".pdf")
             else:
-                saved_file = os.path.join(temp_storage, file.filename)
+                saved_file = os.path.join(temp_storage, str(uuid.uuid4()) + "." + file.filename.split('.')[-1])
 
             with open(saved_file, "wb") as f:
                 f.write(content)
 
             docs.append(saved_file)
-    
+
         if len(files) > 0:
             rag.upload_documents(docs)
 
@@ -106,8 +116,9 @@ async def create_prompt(files: list[UploadFile] = File(...), prompt: str = Form(
         return {"response": response, "status": 200}
 
     except Exception as e:
+        print("!!!ERROR!!!")
         print(e)
-        
+
     # finally:
     #     for file in files:
     #         temp_storage = os.path.join(base_path, "temp_storage")
@@ -118,7 +129,7 @@ async def create_prompt(files: list[UploadFile] = File(...), prompt: str = Form(
 @api.get("/viewer/")
 def show_document(path: str, page: Optional[int] = 1, lines: Optional[str] = "1-1", start: Optional[int] = 0):
     if not path_is_valid(path):
-        return  HTTPException(status_code=404, detail="Document not found")
+        return HTTPException(status_code=404, detail="Document not found")
 
     ext = path.split(".")[-1]
     if ext == 'pdf':
@@ -126,6 +137,47 @@ def show_document(path: str, page: Optional[int] = 1, lines: Optional[str] = "1-
     elif ext in ('txt', 'csv', 'md'):
         return TextHandler(path=path, lines=lines)
     elif ext in ('docx', 'doc'):
-        return TextHandler(path=path, lines=lines) # should be a bit different handler
+        return TextHandler(path=path, lines=lines)  # should be a bit different handler
     else:
         return FileResponse(path=path)
+
+
+# <--------------------------------- Get --------------------------------->
+@api.get("/new_user")
+def new_user():
+    template = ''
+    with open(os.path.join(base_path, "frontend", "templates", "registration.html")) as f:
+        template = f.read()
+
+    return HTMLResponse(content=template)
+
+
+@api.get("/login")
+def login():
+    template = ''
+    with open(os.path.join(base_path, "frontend", "templates", "login.html")) as f:
+        template = f.read()
+
+    return HTMLResponse(content=template)
+
+
+@api.get("/cookie_test")
+def test_cookie(request: Request):
+    return check_cookie(request)
+
+
+# <--------------------------------- Post --------------------------------->
+@api.post("/new_user")
+def new_user(response: Response, user: SUser):
+    return create_user(response, user.email, user.password)
+
+
+
+@api.post("/login")
+def login(response: Response, user: SUser):
+    return authenticate_user(response, user.email, user.password)
+
+
+@api.get("/logout")
+def logout(response: Response):
+    return clear_cookie(response)
