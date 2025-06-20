@@ -1,6 +1,7 @@
 from app.backend.models.base_model import Base
 from sqlalchemy import Integer, String, Column, ForeignKey, Text
 from sqlalchemy.orm import relationship
+from app.backend.controllers.base_controller import engine
 
 class Message(Base):
     __tablename__ = "messages"
@@ -9,3 +10,7 @@ class Message(Base):
     sender = Column("role", String)
     chat_id = Column(Integer, ForeignKey("chats.id"))
     chat = relationship("Chat", back_populates="messages")
+
+
+def new_message(chat_id: int, sender: str, content: str):
+    pass

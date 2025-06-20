@@ -11,7 +11,7 @@ from app.response_parser import add_links
 from app.document_validator import path_is_valid
 from app.backend.controllers.users import create_user, authenticate_user, check_cookie, clear_cookie, get_current_user
 from app.backend.controllers.schemas import SUser
-
+from app.backend.controllers.chats import create_new_chat
 
 # TODO: implement a better TextHandler
 # TODO: optionally implement DocHandler
@@ -100,10 +100,13 @@ url_user_not_required list in settings.py (/ should be removed)
 '''
 @api.middleware("http")
 async def require_user(request: Request, call_next):
-    print(request.url.path)
-    if request.url.path.strip('/') in url_user_not_required or request.url.path.strip('/').startswith("pdfs"):
+    print(request.url.path, request.method)
+
+    awaitable_response = AwaitableResponse(RedirectResponse("/login", status_code=303))
+    stripped_path = request.url.path.strip('/')
+
+    if stripped_path in url_user_not_required or stripped_path.startswith("pdfs"):
         return await call_next(request)
-    awaitable_response = AwaitableResponse(RedirectResponse("/login"))
 
     user = get_current_user(request)
     if user is None:
@@ -222,6 +225,11 @@ def test(request: Request, user: User = Depends(get_current_user)):
         }
 
 
+@api.get("/chats/id={chat_id}")
+def show_chat(chat_id: int):
+    return {"chat_id": chat_id}
+
+
 # <--------------------------------- Post --------------------------------->
 @api.post("/new_user")
 def new_user(response: Response, user: SUser):
@@ -237,3 +245,9 @@ def login(response: Response, user: SUser):
 @api.get("/logout")
 def logout(response: Response):
     return clear_cookie(response)
+
+
+@api.post("/new_chat")
+def create_chat(request: Request, title: Optional[str] = "new chat", user: User = Depends(get_current_user)):
+    url = create_new_chat(title, user)
+    return RedirectResponse(url, status_code=303)
