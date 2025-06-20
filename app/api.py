@@ -76,7 +76,7 @@ def DocHandler():
 
 
 # <--------------------------------- Middleware --------------------------------->
-# NOTE: to avoid infinite redirects add main routs to this list
+# NOTE: carefully read documentation to require_user
 
 '''
 Special class to have an opportunity to redirect user to login page in middleware
