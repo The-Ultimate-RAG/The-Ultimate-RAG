@@ -93,3 +93,5 @@ very_secret_pepper = "goida"  # +1 point, имба
 jwt_algorithm = "HS256"
 
 max_cookie_lifetime = 300  # in seconds
+
+url_user_not_required = ["login", "", "viewer", "message_with_docs", "new_user"]

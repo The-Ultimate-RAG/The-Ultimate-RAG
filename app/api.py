@@ -1,18 +1,17 @@
-from fastapi import FastAPI, UploadFile, Form, File, HTTPException, Response, Request
+from fastapi import FastAPI, UploadFile, Form, File, HTTPException, Response, Request, Depends
 import uuid
-
-from fastapi import FastAPI, UploadFile, Form, File, HTTPException
+from app.backend.models.users import User
 from fastapi.staticfiles import StaticFiles
 import os
 from app.rag_generator import RagSystem
-from fastapi.responses import HTMLResponse, FileResponse
-from app.settings import base_path
+from fastapi.responses import HTMLResponse, FileResponse, RedirectResponse
+from app.settings import base_path, url_user_not_required
 from typing import Optional
 from app.response_parser import add_links
 from app.document_validator import path_is_valid
-from app.backend.controllers.users import create_user, authenticate_user, check_cookie, clear_cookie
-from app.backend.controllers.shemas import SUser
-from pathlib import Path
+from app.backend.controllers.users import create_user, authenticate_user, check_cookie, clear_cookie, get_current_user
+from app.backend.controllers.schemas import SUser
+
 
 # TODO: implement a better TextHandler
 # TODO: optionally implement DocHandler
@@ -76,6 +75,45 @@ def DocHandler():
     pass
 
 
+# <--------------------------------- Middleware --------------------------------->
+# NOTE: to avoid infinite redirects add main routs to this list
+
+'''
+Special class to have an opportunity to redirect user to login page in middleware
+'''
+class AwaitableResponse:
+    def __init__(self, response: Response):
+        self.response = response
+
+    def __await__(self):
+        yield
+        return self.response
+
+
+'''
+TODO: remove KOSTYLY -> find better way to skip requesting to login while showing pdf
+
+Middleware that requires user to log in into the system before accessing any utl
+
+NOTE: For now it is applied to all routes, but if you want to skip any, add it to the
+url_user_not_required list in settings.py (/ should be removed)
+'''
+@api.middleware("http")
+async def require_user(request: Request, call_next):
+    print(request.url.path)
+    if request.url.path.strip('/') in url_user_not_required or request.url.path.strip('/').startswith("pdfs"):
+        return await call_next(request)
+    awaitable_response = AwaitableResponse(RedirectResponse("/login"))
+
+    user = get_current_user(request)
+    if user is None:
+        return await awaitable_response
+    
+    response = await call_next(request)
+    return response
+
+
+# <--------------------------------- Common routes --------------------------------->
 @api.get("/")
 def root():
     content = None
@@ -85,7 +123,7 @@ def root():
     return HTMLResponse(content=content)
 
 
-@api.post("/message_with_docs/")
+@api.post("/message_with_docs")
 async def create_prompt(files: list[UploadFile] = File(...), prompt: str = Form(...)):
     docs = []
     rag = initialize_rag()
@@ -126,7 +164,7 @@ async def create_prompt(files: list[UploadFile] = File(...), prompt: str = Form(
     #         os.remove(saved_file)
 
 
-@api.get("/viewer/")
+@api.get("/viewer")
 def show_document(path: str, page: Optional[int] = 1, lines: Optional[str] = "1-1", start: Optional[int] = 0):
     if not path_is_valid(path):
         return HTTPException(status_code=404, detail="Document not found")
@@ -164,6 +202,24 @@ def login():
 @api.get("/cookie_test")
 def test_cookie(request: Request):
     return check_cookie(request)
+
+
+'''
+Use only for testing. For now, provides user info for logged ones, and redirects to
+login in other case
+'''
+@api.get("/test")
+def test(request: Request, user: User = Depends(get_current_user)):
+    # if user is None:
+    #     return RedirectResponse("/login")
+    return {
+        "user": {
+            "email": user.email,
+            "password_hash": user.password_hash,
+            # "chats": user.chats, # Note: it will rise error since due to the optimization associated fields are not loaded
+            # it is just a reference, but the session is closed, however you are trying to get access to the data through this session
+            }
+        }
 
 
 # <--------------------------------- Post --------------------------------->

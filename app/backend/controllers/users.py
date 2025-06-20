@@ -109,12 +109,12 @@ def authenticate_user(response: Response, email: str, password: str) -> dict:
 
 
 '''
-Validates cookies
+Get user from token stored in cookies
 '''
-def check_cookie(request: Request) -> dict:
+def get_current_user(request: Request) -> User | None:
     token: str | None = request.cookies.get("access_token")
     if not token:
-        raise HTTPException(418, "No cookie is present")
+        return None
     
     access_string = jwt.decode(
             jwt=bytes(token, encoding='utf-8'),
@@ -124,9 +124,20 @@ def check_cookie(request: Request) -> dict:
 
     user = find_user_by_access_string(hash_access_string(access_string))
     if not user:
-        raise HTTPException(418, "No user was found")
+        return None
     
-    return {"user" : {"email": user.email, "id": user.id, "password": user.password_hash}}
+    return user
+
+
+'''
+Checks if cookie with access token is present
+'''
+def check_cookie(request: Request) -> dict:
+    result = {"token": "No token is present"}
+    token = request.cookies.get("access_token")
+    if token:
+        result["token"] = token
+    return result
 
 
 def clear_cookie(response: Response) -> dict:

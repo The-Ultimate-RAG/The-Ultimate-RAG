@@ -6,7 +6,7 @@ class SUser(BaseModel):
     password: str = Field(default=..., min_length=8, max_length=32)
 
     @field_validator('password', mode='before')
-    def validate_password(self, password_to_validate):
+    def validate_password(cls, password_to_validate):
         """
         Validates the strength of the password.
 
