@@ -1,3 +1,8 @@
+<!-- All the data is accessible via context  -->
 <div>
-    {{ context.status }}
+    {% if context.user.role == "guest" %}
+        <p>Hello, guest!</p>
+    {% else %}
+        <p>Hello, {{ context.user.instance.email }}</p>
+    {% endif %}
 </div>

@@ -30,11 +30,45 @@ def initialize_rag() -> RagSystem:
     return rag
 
 
+'''
+Updates response context and adds context of navbar (role, instance(or none)) and footer (none)
+'''
+def extend_context(context: dict):
+    user = get_current_user(context.get("request"))
+    navbar = {
+        "navbar": True,
+        "navbar_path": os.path.join("components", "navbar.html"),
+        "navbar_context": {
+            "user": {
+                "role": "user" if user else "guest",
+                "instance": user
+            }
+        }
+    }
+    footer = {
+        "footer": False,
+        "footer_context": None
+    }
+
+    context.update(**navbar)
+    context.update(**footer)
+
+    return context
+
+
 def PDFHandler(request: Request, path: str, page: int) -> HTMLResponse:
     filename = os.path.basename(path)
     url_path = f"/pdfs/{filename}"
     current_template = os.path.join("pages", "show_pdf.html")
-    return templates.TemplateResponse(current_template, {"request": request, "page": str(page or 1), "url_path": url_path})
+    return templates.TemplateResponse(
+        current_template, 
+        extend_context({
+        "request": request, 
+        "page": str(page or 1), 
+        "url_path": url_path,
+        "user": get_current_user(request)
+        })
+    )
 
 
 def TextHandler(request: Request, path: str, lines: str) -> HTMLResponse:
@@ -61,13 +95,17 @@ def TextHandler(request: Request, path: str, lines: str) -> HTMLResponse:
             citation.append(line)
 
     current_template = os.path.join("pages", "show_text.html")
-    return templates.TemplateResponse(current_template, {
+
+    return templates.TemplateResponse(
+        current_template, 
+        extend_context({
         "request": request, 
         "text_before_citation": text_before_citation,
         "text_after_citation": text_after_citation,
         "citation": citation,
-        "anchor_added": anchor_added
-        }
+        "anchor_added": anchor_added,
+        "user": get_current_user(request)
+        })
     )
 
 
@@ -123,10 +161,21 @@ async def require_user(request: Request, call_next):
 
 
 # <--------------------------------- Common routes --------------------------------->
+# @api.get("/")
+# def root(request: Request):
+#     current_template = os.path.join("pages", "main.html")
+#     return templates.TemplateResponse(current_template, extend_context({"request": request}))
+
+
 @api.get("/")
 def root(request: Request):
     current_template = os.path.join("pages", "chat.html")
-    return templates.TemplateResponse(current_template, {"request": request})
+    return templates.TemplateResponse(current_template, 
+        extend_context({
+        "request": request, 
+        "user": get_current_user(request)
+        })
+    )
 
 
 @api.post("/message_with_docs")
@@ -190,13 +239,13 @@ def show_document(request: Request, path: str, page: Optional[int] = 1, lines: O
 @api.get("/new_user")
 def new_user(request: Request):
     current_template = os.path.join("pages", "registration.html")
-    return templates.TemplateResponse(current_template, {"request": request})
+    return templates.TemplateResponse(current_template, extend_context({"request": request}))
 
 
 @api.get("/login")
 def login(request: Request):
     current_template = os.path.join("pages", "login.html")
-    return templates.TemplateResponse(current_template, {"request": request})
+    return templates.TemplateResponse(current_template, extend_context({"request": request}))
 
 
 @api.get("/cookie_test")
@@ -210,8 +259,6 @@ login in other case
 '''
 @api.get("/test")
 def test(request: Request, user: User = Depends(get_current_user)):
-    # if user is None:
-    #     return RedirectResponse("/login")
     return {
         "user": {
             "email": user.email,
@@ -227,6 +274,9 @@ def show_chat(chat_id: int):
     return {"chat_id": chat_id}
 
 
+@api.get("/logout")
+def logout(response: Response):
+    return clear_cookie(response)
 # <--------------------------------- Post --------------------------------->
 @api.post("/new_user")
 def new_user(response: Response, user: SUser):
@@ -237,11 +287,6 @@ def new_user(response: Response, user: SUser):
 @api.post("/login")
 def login(response: Response, user: SUser):
     return authenticate_user(response, user.email, user.password)
-
-
-@api.get("/logout")
-def logout(response: Response):
-    return clear_cookie(response)
 
 
 @api.post("/new_chat")

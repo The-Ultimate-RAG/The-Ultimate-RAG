@@ -12,8 +12,8 @@
 </head>
 <body>
     {% if navbar %}
-        {% with context=navbar.navbar_context %}
-            {% include navbar.navbar_path %}
+        {% with context=navbar_context %}
+            {% include navbar_path %}
         {% endwith %}
     {% endif %}
 
@@ -21,8 +21,8 @@
     {% endblock %}
 
     {% if footer %}
-        {% with context=footer.footer_context %}
-            {% include footer.footer_path %}
+        {% with context=footer_context %}
+            {% include footer_path %}
         {% endwith %}
     {% endif %}
 
