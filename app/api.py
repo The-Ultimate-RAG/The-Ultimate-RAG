@@ -37,7 +37,7 @@ def extend_context(context: dict):
     user = get_current_user(context.get("request"))
     navbar = {
         "navbar": True,
-        "navbar_path": os.path.join("components", "navbar.html"),
+        "navbar_path": "components/navbar.html",
         "navbar_context": {
             "user": {
                 "role": "user" if user else "guest",
