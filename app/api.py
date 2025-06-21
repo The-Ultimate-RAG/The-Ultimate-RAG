@@ -59,7 +59,7 @@ def extend_context(context: dict):
 def PDFHandler(request: Request, path: str, page: int) -> HTMLResponse:
     filename = os.path.basename(path)
     url_path = f"/pdfs/{filename}"
-    current_template = os.path.join("pages", "show_pdf.html")
+    current_template = "pages/show_pdf.html"
     return templates.TemplateResponse(
         current_template, 
         extend_context({
@@ -94,7 +94,7 @@ def TextHandler(request: Request, path: str, lines: str) -> HTMLResponse:
             anchor_added = True
             citation.append(line)
 
-    current_template = os.path.join("pages", "show_text.html")
+    current_template = "pages/show_text.html"
 
     return templates.TemplateResponse(
         current_template, 
@@ -163,13 +163,13 @@ async def require_user(request: Request, call_next):
 # <--------------------------------- Common routes --------------------------------->
 # @api.get("/")
 # def root(request: Request):
-#     current_template = os.path.join("pages", "main.html")
+#     current_template = "pages/main.html"
 #     return templates.TemplateResponse(current_template, extend_context({"request": request}))
 
 
 @api.get("/")
 def root(request: Request):
-    current_template = os.path.join("pages", "chat.html")
+    current_template = "pages/chat.html"
     return templates.TemplateResponse(current_template, 
         extend_context({
         "request": request, 
@@ -238,13 +238,13 @@ def show_document(request: Request, path: str, page: Optional[int] = 1, lines: O
 # <--------------------------------- Get --------------------------------->
 @api.get("/new_user")
 def new_user(request: Request):
-    current_template = os.path.join("pages", "registration.html")
+    current_template = "pages/registration.html"
     return templates.TemplateResponse(current_template, extend_context({"request": request}))
 
 
 @api.get("/login")
 def login(request: Request):
-    current_template = os.path.join("pages", "login.html")
+    current_template = "pages/login.html"
     return templates.TemplateResponse(current_template, extend_context({"request": request}))
 
 
