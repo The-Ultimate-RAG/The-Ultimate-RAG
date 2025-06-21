@@ -1,0 +1,206 @@
+.chat-container {
+    display: flex;
+    width: 100%;
+}
+
+.chat-body {
+    flex: 1;
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.hero-section {
+    background: linear-gradient(135deg, #6e8efb, #a777e3);
+    color: white;
+    border-radius: 0 0 20px 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.search-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.search-box {
+    border-radius: 10px;
+    border: none;
+    padding: 15px 25px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.btn-search {
+    border-radius: 10px;
+    padding: 15px 30px;
+    background-color: #4e44ce;
+    border: none;
+}
+
+.file-upload {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.file-list {
+    margin-top: 10px;
+}
+
+.file-item {
+    background: #f1f3ff;
+    border-radius: 5px;
+    padding: 8px 12px;
+    margin-bottom: 5px;
+}
+
+.login-body {
+    font-family: Arial, sans-serif;
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.login-label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.input-field {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.login-button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.login-button :hover {
+    background-color: #45a049;
+}
+
+.error {
+    color: red;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+#pdf-container {
+    margin: 0 auto;
+    max-width: 100%;
+    overflow-x: auto;
+    text-align: center;
+    padding: 20px 0;
+}
+
+#pdf-canvas {
+    margin: 0 auto;
+    display: block;
+    max-width: 100%;
+    box-shadow: 0 0 5px rgba(0,0,0,0.2);
+}
+
+/* Fix the page input container layout */
+.page-input-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.page-input {
+    width: 50px;
+    padding: 8px 25px 8px 8px;  /* Right padding gives space for label */
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    -moz-appearance: textfield;  /* Hide number arrows in Firefox */
+}
+
+/* Hide number arrows in Chrome/Safari */
+.page-input::-webkit-outer-spin-button,
+.page-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.page-input-label {
+    position: absolute;
+    right: 8px;
+    color: #666;
+    pointer-events: none;  /* Allows clicking through to input */
+}
+
+/* Pagination styling */
+.pagination-container {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.pagination {
+    display: inline-flex;
+    align-items: center;
+}
+
+.pagination-button {
+    padding: 8px 16px;
+    background: #4a6fa5;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.pagination-button-text:hover {
+    background-color: #e0e0e0;
+    transform: translateY(-1px);
+}
+
+.pagination-button-text:active {
+    transform: translateY(0);
+}
+
+.text-viewer {
+    font-family: monospace;
+    white-space: pre-wrap; /* Preserve line breaks but wrap text */
+    background: #f8f8f8;
+    padding: 20px;
+    border-radius: 5px;
+    line-height: 1.5;
+}
+.citation {
+    background-color: rgba(0, 255, 0, 0.2);
+    padding: 2px 0;
+}
+.no-content {
+    color: #999;
+    font-style: italic;
+}
+.pagination-container-text {
+    margin: 20px 0;
+    text-align: center;
+}
+.pagination-button-text {
+    padding: 8px 16px;
+    background: #4a6fa5;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}

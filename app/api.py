@@ -12,6 +12,7 @@ from app.document_validator import path_is_valid
 from app.backend.controllers.users import create_user, authenticate_user, check_cookie, clear_cookie, get_current_user
 from app.backend.controllers.schemas import SUser
 from app.backend.controllers.chats import create_new_chat
+from fastapi.templating import Jinja2Templates
 
 # TODO: implement a better TextHandler
 # TODO: optionally implement DocHandler
@@ -19,7 +20,8 @@ from app.backend.controllers.chats import create_new_chat
 api = FastAPI()
 rag = None
 api.mount("/pdfs", StaticFiles(directory=os.path.join(base_path, "temp_storage", "pdfs")), name="pdfs")
-
+api.mount("/static", StaticFiles(directory=os.path.join(base_path, "frontend", "static")), name="static")
+templates = Jinja2Templates(directory=os.path.join(base_path, "frontend", "templates"))
 
 def initialize_rag() -> RagSystem:
     global rag
@@ -28,44 +30,45 @@ def initialize_rag() -> RagSystem:
     return rag
 
 
-def PDFHandler(path: str, page: int) -> HTMLResponse:
-    template = ""
-    with open(os.path.join(base_path, "frontend", "templates", "show_pdf.html"), "r") as f:
-        template = f.read()
-
+def PDFHandler(request: Request, path: str, page: int) -> HTMLResponse:
     filename = os.path.basename(path)
     url_path = f"/pdfs/{filename}"
-
-    template = template.replace("PAGE", str(page or 1)).replace("PATH", url_path)
-
-    return HTMLResponse(content=template)
+    current_template = os.path.join("pages", "show_pdf.html")
+    return templates.TemplateResponse(current_template, {"request": request, "page": str(page or 1), "url_path": url_path})
 
 
-def TextHandler(path: str, lines: str) -> HTMLResponse:
-    text = ""
-    with open(os.path.join(base_path, "frontend", "templates", "show_text.html"), "r") as f:
-        text = f.read()
-
+def TextHandler(request: Request, path: str, lines: str) -> HTMLResponse:
     file_content = ""
     with open(path, "r") as f:
         file_content = f.read()
 
     start_line, end_line = map(int, lines.split('-'))
 
-    content = []
+    text_before_citation = []
+    text_after_citation = []
+    citation = []
     anchor_added = False
-    for index, line in enumerate(file_content.split('\n')):
-        if start_line <= index + 1 <= end_line:
-            if not anchor_added:
-                anchor_added = True
-                content.append("<a name='anchor'></a>")
-            content.append(f'<span style="background-color: green;">{ line }</span>')
-        else:
-            content.append(line)
 
-    text = text.replace("CONTENT", "<pre>" + '\n'.join(content) + "</pre>")
-    
-    return HTMLResponse(content=text)
+    for index, line in enumerate(file_content.split('\n')):
+        if line == "" or line == "\n":
+            continue
+        if index + 1 < start_line:
+            text_before_citation.append(line)
+        elif end_line < index + 1:
+            text_after_citation.append(line)
+        else:
+            anchor_added = True
+            citation.append(line)
+
+    current_template = os.path.join("pages", "show_text.html")
+    return templates.TemplateResponse(current_template, {
+        "request": request, 
+        "text_before_citation": text_before_citation,
+        "text_after_citation": text_after_citation,
+        "citation": citation,
+        "anchor_added": anchor_added
+        }
+    )
 
 
 '''
@@ -105,7 +108,10 @@ async def require_user(request: Request, call_next):
     awaitable_response = AwaitableResponse(RedirectResponse("/login", status_code=303))
     stripped_path = request.url.path.strip('/')
 
-    if stripped_path in url_user_not_required or stripped_path.startswith("pdfs"):
+    if stripped_path in url_user_not_required \
+        or stripped_path.startswith("pdfs") \
+        or "static/styles.css" in stripped_path \
+        or "favicon.ico" in stripped_path:
         return await call_next(request)
 
     user = get_current_user(request)
@@ -118,12 +124,9 @@ async def require_user(request: Request, call_next):
 
 # <--------------------------------- Common routes --------------------------------->
 @api.get("/")
-def root():
-    content = None
-    with open(os.path.join(base_path, "frontend", "templates", "form.html")) as f:
-        content = f.read()
-
-    return HTMLResponse(content=content)
+def root(request: Request):
+    current_template = os.path.join("pages", "chat.html")
+    return templates.TemplateResponse(current_template, {"request": request})
 
 
 @api.post("/message_with_docs")
@@ -168,38 +171,32 @@ async def create_prompt(files: list[UploadFile] = File(...), prompt: str = Form(
 
 
 @api.get("/viewer")
-def show_document(path: str, page: Optional[int] = 1, lines: Optional[str] = "1-1", start: Optional[int] = 0):
+def show_document(request: Request, path: str, page: Optional[int] = 1, lines: Optional[str] = "1-1", start: Optional[int] = 0):
     if not path_is_valid(path):
         return HTTPException(status_code=404, detail="Document not found")
 
     ext = path.split(".")[-1]
     if ext == 'pdf':
-        return PDFHandler(path=path, page=page)
+        return PDFHandler(request, path=path, page=page)
     elif ext in ('txt', 'csv', 'md'):
-        return TextHandler(path=path, lines=lines)
+        return TextHandler(request, path=path, lines=lines)
     elif ext in ('docx', 'doc'):
-        return TextHandler(path=path, lines=lines)  # should be a bit different handler
+        return TextHandler(request, path=path, lines=lines)  # should be a bit different handler
     else:
         return FileResponse(path=path)
 
 
 # <--------------------------------- Get --------------------------------->
 @api.get("/new_user")
-def new_user():
-    template = ''
-    with open(os.path.join(base_path, "frontend", "templates", "registration.html")) as f:
-        template = f.read()
-
-    return HTMLResponse(content=template)
+def new_user(request: Request):
+    current_template = os.path.join("pages", "registration.html")
+    return templates.TemplateResponse(current_template, {"request": request})
 
 
 @api.get("/login")
-def login():
-    template = ''
-    with open(os.path.join(base_path, "frontend", "templates", "login.html")) as f:
-        template = f.read()
-
-    return HTMLResponse(content=template)
+def login(request: Request):
+    current_template = os.path.join("pages", "login.html")
+    return templates.TemplateResponse(current_template, {"request": request})
 
 
 @api.get("/cookie_test")
