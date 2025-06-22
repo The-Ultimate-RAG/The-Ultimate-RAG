@@ -1,5 +1,4 @@
 from app.backend.models.base_model import Base
-from app.backend.models.users import User
 from sqlalchemy import Integer, String, Column, ForeignKey
 from sqlalchemy.orm import relationship, Session
 from app.backend.controllers.base_controller import engine
@@ -13,7 +12,7 @@ class Chat(Base):
     messages = relationship("Message", back_populates="chat")
 
 
-def new_chat(title: str | None, user: User) -> int:
+def new_chat(title: str | None, user) -> int:
     id = None
     with Session(autoflush=False, bind=engine) as db:
         new_chat = Chat(user_id=user.id, user=user)
@@ -23,3 +22,13 @@ def new_chat(title: str | None, user: User) -> int:
         db.commit()
         id = new_chat.id
     return id
+
+
+def get_chat_by_id(id: int) -> Chat | None:
+    with Session(autoflush=False, bind=engine) as db:
+        return db.query(Chat).where(Chat.id==id).first()
+
+
+def get_chats_by_user_id(id: int) -> list[Chat]:
+    with Session(autoflush=False, bind=engine) as db:
+        return db.query(Chat).filter(Chat.user_id==id).order_by(Chat.created_at.desc())

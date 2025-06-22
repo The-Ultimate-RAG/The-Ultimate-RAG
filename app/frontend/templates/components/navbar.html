@@ -5,4 +5,29 @@
     {% else %}
         <p>Hello, {{ context.user.instance.email }}</p>
     {% endif %}
+
+    <p>Today</p>
+    <ul>
+        {% for chat in context.chats.today %}
+            <li>{{ chat.title }}</li>
+        {% endfor %}
+    </ul>
+    <p>Last week</p>
+    <ul>
+        {% for chat in context.chats.last_week %}
+            <li>{{ chat.title }}</li>
+        {% endfor %}
+    </ul>
+    <p>Last month</p>
+    <ul>
+        {% for chat in context.chats.last_month %}
+            <li>{{ chat.title }}</li>
+        {% endfor %}
+    </ul>
+    <p>Later</p>
+     <ul>
+        {% for chat in context.chats.other %}
+            <li>{{ chat.title }}</li>
+        {% endfor %}
+    </ul>
 </div>

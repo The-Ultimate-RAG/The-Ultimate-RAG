@@ -2,6 +2,7 @@ from sqlalchemy import Column, String, Integer
 from sqlalchemy.orm import relationship, Session
 from app.backend.models.base_model import Base
 from app.backend.controllers.base_controller import engine
+from app.backend.models.chats import Chat
 
 class User(Base):
     __tablename__ = "users"
@@ -45,3 +46,21 @@ def update_user(user: User, language: str = None, theme: str = None, access_stri
         if access_string_hash:
             user.access_string_hash = access_string_hash
         db.commit()
+
+
+def get_user_chats(user: User) -> list[Chat]:
+    with Session(autoflush=False, bind=engine) as db:
+        user = db.get(User, user.id)
+        return user.chats
+    
+
+def get_user_last_chat(user: User) -> Chat | None:
+    with Session(autoflush=False, bind=engine) as db:
+        user = db.get(User, user.id)
+        
+        chats = user.chats
+
+        if chats is not None and len(chats):
+            return chats[-1]
+        
+        return None

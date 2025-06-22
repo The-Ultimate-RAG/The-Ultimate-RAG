@@ -1,4 +1,5 @@
-from app.backend.models.users import User, add_new_user, find_user_by_email, find_user_by_access_string, update_user
+from app.backend.models.users import User, add_new_user, find_user_by_email, find_user_by_access_string, update_user, get_user_last_chat
+from app.backend.models.chats import Chat
 from bcrypt import gensalt, hashpw, checkpw
 from app.settings import very_secret_pepper, jwt_algorithm, max_cookie_lifetime
 from fastapi import HTTPException
@@ -143,3 +144,7 @@ def check_cookie(request: Request) -> dict:
 def clear_cookie(response: Response) -> dict:
     response.set_cookie(key="access_token", value="", httponly=True)
     return {"status": "ok"}
+
+
+def get_latest_chat(user: User) -> Chat | None:
+    return get_user_last_chat(user)

@@ -4,7 +4,6 @@ import os
 from app.backend.models.db_service import automigrate
 
 def initialize_system() -> bool:
-    success = True
     path = os.path.dirname(base_path)
     temp_storage_path = os.path.join(path, os.path.join("app", "temp_storage"))
     temp_storage_path_pdf = os.path.join(path, os.path.join("app", "temp_storage", "pdfs"))
@@ -15,27 +14,21 @@ def initialize_system() -> bool:
         os.makedirs(database_path, exist_ok=True)
         os.makedirs(temp_storage_path_pdf, exist_ok=True)
     except Exception:
-        success = False
-        print("Not all required directories were initialized")
+        raise RuntimeError("Not all required directories were initialized")
     
     try:
         # os.system(f"pip install -r {os.path.join(base_path, 'requirements.txt')}")
         pass
     except Exception:
-        success = False
-        print("Not all package were downloaded")
-
-    return success
-
+        raise RuntimeError("Not all package were downloaded")
+    
 
 def main():
-    # if not initialize_system():
-    #     return
     # automigrate() # Note: it will drop all existing dbs and create a new ones
+    initialize_system()
     uvicorn.run(**api_config)
 
 
 if __name__ == '__main__':
-
     # ATTENTION: run from base dir ---> python -m app.main
     main()
