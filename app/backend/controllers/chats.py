@@ -17,6 +17,7 @@ def dump_messages_dict(messages: list[Message], dst: dict) -> None:
                 "content": message.content
             }
         )
+        print(message.sender, message.content[:100])
 
     dst.update({"history": history})
 

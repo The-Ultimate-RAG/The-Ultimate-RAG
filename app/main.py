@@ -24,7 +24,7 @@ def initialize_system() -> bool:
     
 
 def main():
-    # automigrate() # Note: it will drop all existing dbs and create a new ones
+    automigrate() # Note: it will drop all existing dbs and create a new ones
     initialize_system()
     uvicorn.run(**api_config)
 

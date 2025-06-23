@@ -92,7 +92,7 @@ async def send_message(request: Request, files: list[UploadFile] = File(None), p
         response = add_links(response_raw)
 
         register_message(content=response, sender="assistant", chat_id=int(chat_id))
-        
+        print(response)
     except Exception as e:
         print(e)
 
