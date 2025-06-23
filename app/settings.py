@@ -66,7 +66,7 @@ gemini_generation_config = {
     "top_k": 20,
     "candidate_count": 1,
     "seed": 5,
-    "max_output_tokens": 1000,
+    "max_output_tokens": 1001,
     "stop_sequences": ['STOP!'],
     "presence_penalty": 0.0,
     "frequency_penalty": 0.0,
