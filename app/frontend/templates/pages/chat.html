@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}
+    <title>
+        The Ultimate RAG
+    </title>
+{% endblock %}
+
+{% block content %}
+ <div class="chat-page">
+        <div class="container py-4">
+            <div id="chat-messages" class="chat-messages">
+                {% for message in history %}
+                    <div class="message {{ message.role }}-message">
+                        <div class="message-header">
+                            {{ "You" if message.role == "user" else "Assistant" }}
+                        </div>
+                        <div class="message-content">{{ message.content | safe }}</div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <form id="chat-form" class="input-group mt-4" enctype="multipart/form-data">
+                <input type="text" class="form-control" name="prompt" placeholder="Ask your question here" id="queryInput">
+                <label class="btn btn-outline-secondary btn-primary">
+                    📎<input type="file" id="fileInput" name="files" multiple hidden>
+                </label>
+                <button type="button" class="btn text-white" id="searchButton">Send</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block body_scripts %}
+    <script>
+        const initialChatId = "{{ chat_id }}";
+        const initialHistory = {{ history | tojson | safe }};
+        // Conversation state
+        let conversationId = initialChatId || null;
+
+        // if (initialHistory && Array.isArray(initialHistory)) {
+        //     initialHistory.forEach(msg => {
+        //         addMessageToChat(msg.role, msg.content);
+        //     });
+        // }
+
+        // Main chat function
+        document.getElementById('searchButton').addEventListener('click', async function() {
+            const query = document.getElementById('queryInput').value.trim();
+            if (!query) return alert('Please enter a question');
+
+            // Add user message
+            addMessageToChat('user', escapeHTML(query));
+            document.getElementById('queryInput').value = '';
+
+            // Show loading indicator
+            const loadingId = addMessageToChat('assistant', 'Thinking...', true);
+
+            try {
+                const formData = new FormData();
+                const fileInput = document.getElementById('fileInput');
+                const files = fileInput.files;
+
+                for (let i = 0; i < files.length; i++) {
+                    formData.append('files', files[i]);
+                }
+                formData.append('prompt', query);
+                if (conversationId) formData.append('chat_id', conversationId);
+
+                const response = await fetch('/message_with_docs', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+                
+                const data = await response.json();
+                
+                // Update conversation ID if new
+                if (!conversationId && data.chat_id) {
+                    conversationId = data.chat_id;
+                }
+                
+                // Update UI
+                removeMessage(loadingId);
+                addMessageToChat('assistant', data.response);
+                
+                // Store history (optional)
+                conversationHistory = data.history || [];
+                
+            } catch (error) {
+                removeMessage(loadingId);
+                addMessageToChat('assistant', `Error: ${error.message}`, false, 'error');
+                console.error('Error:', error);
+            }
+        });
+
+        // Message display helper
+        function addMessageToChat(role, content, isTemporary = false, className = '') {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageId = 'msg-' + Date.now();
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}-message ${className}`;
+            messageDiv.id = messageId;
+            
+            messageDiv.innerHTML = `
+                <div class="message-header">${role === 'user' ? 'You' : 'Assistant'}</div>
+                <div class="message-content">${content}</div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            return isTemporary ? messageId : null;
+        }
+
+        function removeMessage(messageId) {
+            const element = document.getElementById(messageId);
+            if (element) element.remove();
+        }
+
+        function escapeHTML(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+        // New chat handler
+        document.querySelector('form[action="/new_chat"]').addEventListener('submit', function(e) {
+            e.preventDefault();
+            conversationId = null;
+            conversationHistory = [];
+            document.getElementById('chat-messages').innerHTML = '';
+            this.submit();
+        });
+    </script>
+{% endblock %}

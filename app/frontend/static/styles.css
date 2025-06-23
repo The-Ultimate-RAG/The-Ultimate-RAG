@@ -1,0 +1,377 @@
+#pdf-container {
+    margin: 0 auto;
+    max-width: 100%;
+    overflow-x: auto;
+    text-align: center;
+    padding: 20px 0;
+}
+
+#pdf-canvas {
+    margin: 0 auto;
+    display: block;
+    max-width: 100%;
+    box-shadow: 0 0 5px rgba(0,0,0,0.2);
+}
+
+#pageNum {
+    height: 40px; /* optional */
+    font-size: 16px; /* makes text inside input larger */
+    padding: 10px;
+    width: 9vh;    /* optional for more padding inside the box */
+}
+
+.page-input {
+    width: 60px;
+    padding: 8px;
+    padding-right: 40px; /* reserve space for label inside input box */
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    -moz-appearance: textfield;
+}
+
+.page-input-label {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    color: #666;
+    pointer-events: none;
+    background-color: #fff; /* Match background to prevent text overlapping */
+    padding-left: 4px;
+}
+
+.page-input-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Hide number arrows in Chrome/Safari */
+.page-input::-webkit-outer-spin-button,
+.page-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Pagination styling */
+.pagination-container {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.pagination {
+    display: inline-flex;
+    align-items: center;
+}
+
+.pagination-button {
+    padding: 8px 16px;
+    background: #4a6fa5;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.pagination-button-text:hover {
+    background-color: #e0e0e0;
+    transform: translateY(-1px);
+}
+
+.pagination-button-text:active {
+    transform: translateY(0);
+}
+
+.text-viewer {
+    overflow-y: auto;  /* Enables vertical scrolling when needed */
+    height: 100%; 
+    width: 100%; /* Or whatever height you prefer */
+    font-family: monospace;
+    white-space: pre-wrap; /* Preserve line breaks but wrap text */
+    background: #f8f8f8;
+    padding: 20px;
+    border-radius: 5px;
+    line-height: 1.5;
+}
+
+.citation {
+    background-color: rgba(0, 255, 0, 0.2);
+    padding: 2px 0;
+}
+
+.no-content {
+    color: #999;
+    font-style: italic;
+}
+
+.pagination-container-text {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.pagination-button-text {
+    padding: 8px 16px;
+    background: #4a6fa5;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+
+
+/*           --------------------------------------------               */
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: #f7f7f8;
+    color: #111827;
+    margin: 0;
+    overflow: hidden; 
+    height: 100vh;
+    padding: 0;
+    display: flex;
+}
+
+.sidebar {
+    width: 260px;
+    height: 100vh;
+    background-color: #1F2937;
+    /* border-right: 1px solid #e1e4e8; */
+    overflow-y: auto; 
+    padding: 8px;
+    position: sticky;
+    top: 0;
+}
+
+.chat-page {
+    background-color: #111827;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden; /* Prevent double scrollbars */
+}
+
+.container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    max-width: 100%;
+    height: 100%;
+}
+
+/* Chat messages section */
+.chat-messages {
+    flex: 1;
+    overflow-y: auto; /* Make only this section scrollable */
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Input area - stays fixed at bottom */
+.input-group {
+    /* padding: 16px;
+    background-color: #44444C; */
+    /* border-top: 1px solid #e1e4e8; */
+    position: sticky;
+    bottom: 0;
+}
+
+/* General styles */
+
+/* Sidebar styles */
+
+.chat-group {
+    font-weight: 500;
+    color: #9bb8d3;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 12px;
+    padding: 8px 12px;
+}
+
+.btn {
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.btn-success {
+    background-color: #19c37d;
+    border-color: #19c37d;
+}
+
+.btn-success:hover {
+    background-color: #16a369;
+    border-color: #16a369;
+}
+
+.btn-outline-secondary {
+    /* border-color: #e1e4e8; */
+    color: #374151;
+    background-color: transparent;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #273c50;
+    border-color: #e1e4e8;
+}
+
+.btn-outline-light {
+    border-color: #e1e4e8;
+    color: #666;
+    background-color: transparent;
+}
+
+.btn-outline-light:hover {
+    background-color: #e9ecef;
+    border-color: #e1e4e8;
+}
+
+/* Chat page styles */
+
+.message {
+    max-width: 80%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    line-height: 1.5;
+}
+
+.user-message {
+    align-self: flex-end;
+    background-color: #19c37d;
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+
+.assistant-message {
+    align-self: flex-start;
+    background-color: #f0f4f8;
+    border-bottom-left-radius: 4px;
+}
+
+.message-header {
+    font-weight: 600;
+    font-size: 12px;
+    margin-bottom: 4px;
+    color: #666;
+}
+
+.user-message .message-header {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.message-content {
+    font-size: 14px;
+}
+
+
+.form-control {
+    border-radius: 6px;
+    padding: 10px 12px;
+    background-color: #374151;
+    /* border: 1px solid #e1e4e8; */
+}
+
+.form-control:focus {
+    box-shadow: none;
+    border-color: #19c37d;
+}
+
+/* File input button */
+.btn-outline-secondary {
+    position: relative;
+}
+
+.btn-outline-secondary input[type="file"] {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    cursor: pointer;
+}
+
+/* Scrollbar styles */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #aaa;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 220px;
+    }
+    
+    .message {
+        max-width: 90%;
+    }
+}
+
+#queryInput {
+    background-color: #374151;
+    color: white;
+}
+
+#queryInput:focus {
+    background-color: #374151;
+    color: white;
+    outline: none;
+    box-shadow: none;
+    border-color: #19c37d; /* optional green border for focus, remove if unwanted */
+}
+
+#searchButton {
+    background-color: #374151;
+}
+
+#fileInput {
+    background-color: #374151;
+}
+
+
+/* For the placeholder text color */
+#queryInput::placeholder {
+    color: rgba(255, 255, 255, 0.7); /* Slightly transparent white */
+}
+
+.auth-card {
+    background-color: #1F2937;
+    border: none;
+    border-radius: 12px;
+}
+
+.auth-input {
+    background-color: #374151 !important;
+    border: none !important;
+    color: white !important;
+}
+
+.auth-input-group-text {
+    background-color: #374151 !important;
+    border: none !important;
+}

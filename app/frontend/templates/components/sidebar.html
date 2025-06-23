@@ -1,0 +1,26 @@
+<div class="sidebar">
+    <div class="d-flex justify-content-between align-items-center p-3">
+        <form action="/new_chat" method="post">
+            <button type="submit" class="btn btn-success w-100">+ Add new chat</button>
+        </form>
+    </div>
+
+    {% if context.chat_groups %}
+        {% for group in context.chat_groups %}
+            <div class="chat-group px-3 text mt-3">{{ group.title }}</div>
+            {% for chat in group.chats %}
+                <form action="/chats/id={{ chat.id }}" method="get" class="px-3 my-1">
+                    {% if context.selected == chat.id %}
+                        <button type="submit" class="btn btn-outline-secondary w-100 text-start text-truncate text-success">
+                            {{ chat.title }}
+                        </button>
+                    {% else %}
+                        <button type="submit" class="btn btn-outline-secondary w-100 text-start text-truncate text-white">
+                            {{ chat.title }}
+                        </button>
+                    {% endif %}
+                </form>
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
+</div>

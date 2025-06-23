@@ -1,0 +1,21 @@
+services:
+  qdrant:
+    image: qdrant/qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    restart: unless-stopped
+  api:
+    build: .
+    ports:
+      - "5050:5050"
+    depends_on:
+      - qdrant
+    environment:
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+    restart:  unless-stopped
+
+volumes:
+  qdrant_data:

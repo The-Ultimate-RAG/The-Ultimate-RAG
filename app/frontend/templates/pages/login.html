@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}
+  <title>Login</title>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-center align-items-center vh-100" style="background-color: #111827; width: 100%;">
+    <div class="card p-4" style="min-width: 360px; background-color: #1F2937; border: none; border-radius: 12px;">
+        <div class="text-center mb-4">
+            <div class="rounded-circle d-inline-flex align-items-center justify-content-center" 
+                 style="width: 60px; height: 60px; background-color: #19c37d;">
+                <i class="bi bi-person-fill text-white" style="font-size: 1.5rem;"></i>
+            </div>
+            <h3 class="mt-3 text-white">Log In</h3>
+        </div>
+
+        <form id="loginForm" method="POST">
+            <div class="mb-3">
+                <label class="form-label text-white">Email</label>
+                <div class="input-group">
+                    <input type="email" id="email" name="email" 
+                           class="form-control" 
+                            placeholder="your@email.com"
+                           style="background-color: #374151; border: none; color: white;"
+                           required>
+                    <span class="input-group-text" style="background-color: #374151; border: none;">
+                        <i class="bi bi-envelope text-muted"></i>
+                    </span>
+                </div>
+                <div id="emailError" class="text-danger small mt-1"></div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label text-white">Password</label>
+                <div class="input-group">
+                    <input type="password" id="password" name="password" 
+                           class="form-control" 
+                           placeholder="••••••••"
+                           style="background-color: #374151; border: none; color: white;"
+                           required>
+                    <span class="input-group-text" style="background-color: #374151; border: none;">
+                        <i class="bi bi-lock text-muted"></i>
+                    </span>
+                </div>
+                <div id="passwordError" class="text-danger small mt-1"></div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="rememberMe" name="remember"
+                           style="background-color: #374151; border-color: #4B5563;">
+                    <label class="form-check-label text-white" for="rememberMe">Remember me</label>
+                </div>
+                <a href="#" class="text-success small" style="text-decoration: none;">Forgot password?</a>
+            </div>
+
+            <div class="d-grid mb-3">
+                <button type="submit" class="btn btn-success rounded-pill py-2" 
+                        style="background-color: #19c37d; border: none;">
+                    Login
+                </button>
+            </div>
+
+            <div class="text-center small text-white">
+                Don't have an account? 
+                <a href="/new_user" class="text-success" style="text-decoration: none;">Register</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block body_scripts %}
+<script>
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // Clear previous errors
+        document.getElementById('emailError').textContent = '';
+        document.getElementById('passwordError').textContent = '';
+
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+
+        try {
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                if (data.detail) {
+                    if (Array.isArray(data.detail)) {
+                        data.detail.forEach(error => {
+                            if (error.loc && error.loc.includes('email')) {
+                                document.getElementById('emailError').textContent = error.msg;
+                            }
+                            if (error.loc && error.loc.includes('password')) {
+                                document.getElementById('passwordError').textContent = error.msg;
+                            }
+                        });
+                    } else {
+                        alert(data.detail);
+                    }
+                }
+                return;
+            }
+
+            alert('You have logged in successfully!');
+            window.location.href = '/last_user_chat';
+
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred during logging in');
+        }
+    });
+
+    // Password visibility toggle
+    document.querySelectorAll('.input-group').forEach(group => {
+        const input = group.querySelector('input');
+        const iconWrapper = group.querySelector('.input-group-text');
+        const icon = iconWrapper.querySelector('i');
+
+        iconWrapper.style.cursor = 'pointer';
+
+        iconWrapper.addEventListener('click', function () {
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+
+            // Swap icon based on visibility
+            if (icon.classList.contains('bi-lock-fill') || icon.classList.contains('bi-lock')) {
+                icon.className = isPassword ? 'bi bi-eye text-muted' : (input.id === 'confirmPassword' ? 'bi bi-lock-fill text-muted' : 'bi bi-lock text-muted');
+            } else if (icon.classList.contains('bi-eye')) {
+                icon.className = input.id === 'confirmPassword' ? 'bi bi-lock-fill text-muted' : 'bi bi-lock text-muted';
+            }
+        });
+    });
+</script>
+{% endblock %}

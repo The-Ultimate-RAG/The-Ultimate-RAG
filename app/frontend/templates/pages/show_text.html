@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}
+    <title>Text Viewer</title>
+{% endblock %}
+
+{% block content %}
+    <div class="pagination-container-text">
+        <div class="pagination-text">
+            <button id="prev" class="pagination-button-text" onclick="location.href='#anchor'">
+                Look at the citation
+            </button>
+        </div>
+    </div>
+
+    <div class="text-viewer">
+        {% if text_before_citation %}
+            {% for line in text_before_citation -%}
+                <div>{{ line }}</div>
+            {%- endfor %}
+        {% endif %}
+
+        {% if anchor_added %}
+            <a id="anchor"></a>
+        {% endif %}
+        
+        {% if citation %}
+            <div class="citation">
+                {% for line in citation -%}
+                    <div>{{ line }}</div>
+                {%- endfor %}
+            </div>
+        {% endif %}
+
+        {% if text_after_citation %}
+            {% for line in text_after_citation -%}
+                <div>{{ line }}</div>
+            {%- endfor %}
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block body_scripts %}
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const anchor = document.getElementById("anchor");
+            if (anchor) {
+                anchor.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    </script>
+{% endblock %}
