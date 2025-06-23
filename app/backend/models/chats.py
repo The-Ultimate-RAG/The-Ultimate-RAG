@@ -32,3 +32,19 @@ def get_chat_by_id(id: int) -> Chat | None:
 def get_chats_by_user_id(id: int) -> list[Chat]:
     with Session(autoflush=False, bind=engine) as db:
         return db.query(Chat).filter(Chat.user_id==id).order_by(Chat.created_at.desc())
+    
+
+def refresh_title(chat_id: int) -> bool:
+    with Session(autoflush=False, bind=engine) as db:
+        chat = db.get(Chat, chat_id)
+        messages = chat.messages
+
+        if messages is None or len(messages) == 0:
+            return False
+        
+        chat.title = messages[0].content[:47]
+        if len(messages[0].content) > 46:
+            chat.title += "..."
+        
+        db.commit()
+        return True

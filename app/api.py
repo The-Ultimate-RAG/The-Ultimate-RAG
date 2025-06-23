@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 
 from app.backend.controllers.users import create_user, authenticate_user, check_cookie, clear_cookie, get_current_user, get_latest_chat
-from app.backend.controllers.chats import create_new_chat, get_chat_with_messages
+from app.backend.controllers.chats import create_new_chat, get_chat_with_messages, update_title
 from app.backend.controllers.messages import register_message
 from app.backend.controllers.schemas import SUser
 from app.backend.models.users import User
@@ -92,7 +92,7 @@ async def send_message(request: Request, files: list[UploadFile] = File(None), p
         response = add_links(response_raw)
 
         register_message(content=response, sender="assistant", chat_id=int(chat_id))
-
+        
     except Exception as e:
         print(e)
 
@@ -156,13 +156,15 @@ def show_chat(request: Request, chat_id: int):
     chat = get_chat_with_messages(chat_id)
     user = get_current_user(request)
 
+    update_title(chat["chat_id"])
+
     if not protect_chat(user, chat_id):
         raise HTTPException(401, "Yod do not have rights to use this chat!")
 
     context = extend_context({
         "request": request, 
         "user": user
-        })
+        }, selected=chat_id)
     context.update(chat)
 
     return templates.TemplateResponse(current_template, context)

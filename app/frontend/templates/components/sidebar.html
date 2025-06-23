@@ -10,15 +10,17 @@
             <div class="chat-group px-3 text mt-3">{{ group.title }}</div>
             {% for chat in group.chats %}
                 <form action="/chats/id={{ chat.id }}" method="get" class="px-3 my-1">
-                    <button type="submit" class="btn btn-outline-secondary w-100 text-start text-truncate text-white">
-                        {{ chat.title }}
-                    </button>
+                    {% if context.selected == chat.id %}
+                        <button type="submit" class="btn btn-outline-secondary w-100 text-start text-truncate text-success">
+                            {{ chat.title }}
+                        </button>
+                    {% else %}
+                        <button type="submit" class="btn btn-outline-secondary w-100 text-start text-truncate text-white">
+                            {{ chat.title }}
+                        </button>
+                    {% endif %}
                 </form>
             {% endfor %}
         {% endfor %}
     {% endif %}
-
-    <div class="px-3 mt-auto mb-3">
-        <a href="#" class="btn btn-outline-light w-100 small">Manage your database</a>
-    </div>
 </div>

@@ -1,5 +1,5 @@
 from app.backend.models.users import User, get_user_chats
-from app.backend.models.chats import new_chat, get_chat_by_id, get_chats_by_user_id
+from app.backend.models.chats import new_chat, get_chat_by_id, get_chats_by_user_id, refresh_title, Chat
 from app.backend.models.messages import get_messages_by_chat_id, Message
 from fastapi import HTTPException
 from datetime import datetime, timedelta
@@ -78,3 +78,6 @@ def list_user_chats(user_id: int) -> list[dict]:
 def verify_ownership_rights(user: User, chat_id: int) -> bool:
     return chat_id in [chat.id for chat in get_user_chats(user)]
         
+
+def update_title(chat_id: int) -> bool:
+    return refresh_title(chat_id)

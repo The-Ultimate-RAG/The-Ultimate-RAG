@@ -24,7 +24,7 @@ def initialize_rag() -> RagSystem:
 '''
 Updates response context and adds context of navbar (role, instance(or none)) and footer (none)
 '''
-def extend_context(context: dict):
+def extend_context(context: dict, selected: int = None):
     user = get_current_user(context.get("request"))
     navbar = {
         "navbar": False,
@@ -41,6 +41,7 @@ def extend_context(context: dict):
         "sidebar": True,
         "sidebar_path": "components/sidebar.html",
         "sidebar_context": {
+            "selected": selected if selected is not None else None,
             "chat_groups": list_user_chats(user.id) if user else []
         }
     }
