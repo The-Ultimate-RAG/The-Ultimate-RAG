@@ -23,12 +23,12 @@ class DocumentProcessor:
     text_splitter -> text splitting strategy
     '''
 
-    def __init__(self):
+    def __init__(self, embedder: Embedder):
         self.chunks: list[Chunk] = []
         self.chunks_unsaved: list[Chunk] = []
         self.processed: list[Document] = []
         self.unprocessed: list[Document] = []
-        self.embedder = Embedder(embedder_model)
+        self.embedder = embedder
         self.text_splitter = RecursiveCharacterTextSplitter(**text_splitter_config)
 
     '''

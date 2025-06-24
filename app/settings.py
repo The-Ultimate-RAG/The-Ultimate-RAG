@@ -76,16 +76,8 @@ use_gemini: bool = True
 
 max_delta = 0.15  # defines what is the minimum boundary for vectors to be considered similar
 
-# for postgres client
-# Note: you should run postgres server with similar host, post, and do not forget to create a user with similar settings
-host = "localhost"
-port = 5432
-user = "postgres"
-password = "1121"
-dbname = "exp"
-
 postgres_client_config = {
-    "url": f"postgresql://{user}:{password}@{host}:{port}/{dbname}",
+    "url": os.environ['DATABASE_URL'],
     "echo": False,
 }
 

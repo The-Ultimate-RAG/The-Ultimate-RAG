@@ -2,7 +2,7 @@
 title: The Ultimate RAG
 emoji: 🌍
 colorFrom: pink
-colorTo: yellow
+colorTo: indigo
 sdk: docker
 pinned: false
 short_description: the ultimate rag
@@ -17,7 +17,8 @@ short_description: the ultimate rag
 ## Prerequisites
 
 Before you begin, ensure the following is installed on your machine:
-- [Python](https://www.python.org/) 
+
+- [Python](https://www.python.org/)
 - [Docker](https://www.docker.com/get-started/)
 
 ## Installation
@@ -55,15 +56,16 @@ Before you begin, ensure the following is installed on your machine:
     docker-compose up --build
     ```
    *Note:* The initial build may take 10–20 minutes, as it needs to download large language models and other
-   dependencies. 
+   dependencies.
    Later launches will be much faster.
-   
+
 5. **Server access**
 
    Once the containers are running, visit `http://localhost:5050`. You should see the application’s welcome page
 
-To stop the application and shut down all containers, press `Ctrl+C` in the terminal where `docker-compose` is running, 
-and then run: 
+To stop the application and shut down all containers, press `Ctrl+C` in the terminal where `docker-compose` is running,
+and then run:
+
 ```bash
    docker-compose down
 ```
@@ -72,7 +74,7 @@ and then run:
 
 1. **Upload your file:** click the upload button and select a supported file (`.txt`, `.doc`, `.docx`, or `.pdf`)
 2. **Ask a question**: Once the file is processed, type your question into the prompt box and submit.
-3. **Receive your answer** 
+3. **Receive your answer**
 
 **A note on performance**
 

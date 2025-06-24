@@ -4,3 +4,5 @@ __pycache__
 /new_env
 /prompt.txt
 /app/key.py
+/app/env_vars.py
+/chats_storage
