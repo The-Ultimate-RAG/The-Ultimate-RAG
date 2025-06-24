@@ -1,26 +1,24 @@
-FROM python:3.11-slim-bookworm
+# syntax=docker/dockerfile:1
+FROM python:3.12.10
 
-LABEL authors="user"
+RUN useradd -m -u 1000 user
+USER user
+ENV PATH="/home/user/.local/bin:$PATH"
 
-# Set environment variables for non-buffered Python output and no bytecode generation
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-
-# Set the working directory inside the container
 WORKDIR /app
 
-# Install system dependencies and clean up
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends build-essential && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-COPY ./app/requirements.txt /app/
+# copy and install Python reqs
+COPY app/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
-COPY ./app /app
+# download Qdrant binary
+RUN wget https://github.com/qdrant/qdrant/releases/download/v1.11.5/qdrant-x86_64-unknown-linux-gnu.tar.gz \
+    && tar -xzf qdrant-x86_64-unknown-linux-gnu.tar.gz \
+    && mv qdrant /home/user/.local/bin/qdrant \
+    && rm qdrant-x86_64-unknown-linux-gnu.tar.gz
 
-# Expose the port your FastAPI application listens on
-EXPOSE 5050
+COPY --chown=user . /app
 
-CMD ["python", "-m", "uvicorn", "api:api", "--host", "0.0.0.0", "--port", "5050"]
+RUN chmod +x start.sh
+
+CMD ["./start.sh"]
