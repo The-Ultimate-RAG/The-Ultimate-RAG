@@ -8,28 +8,24 @@ import numpy as np
 from uuid import UUID
 from app.settings import qdrant_client_config, max_delta
 import time
+from fastapi import HTTPException
 
-# TODO: for now all documents are saved to one db, but what if user wants to get references from his own documents, so temp storage is needed
 
 class VectorDatabase:
     def __init__(self, embedder: Embedder, host: str = "qdrant", port: int = 6333):
         self.host: str = host
         self.client: QdrantClient = self._initialize_qdrant_client()
-        self.collection_name: str = "document_chunks"
         self.embedder: Embedder = embedder  # embedder is used to convert a user's query
         self.already_stored: np.array[np.array] = np.array([]).reshape(0, embedder.get_vector_dimensionality()) # should be already normalized
 
-        if not self._check_collection_exists():
-            self._create_collection()
 
-
-    def store(self, chunks: list[Chunk], batch_size: int = 1000) -> None:
+    def store(self, collection_name: str, chunks: list[Chunk], batch_size: int = 1000) -> None:
         points: list[PointStruct] = []
 
         vectors = self.embedder.encode([chunk.get_raw_text() for chunk in chunks])
 
         for vector, chunk in zip(vectors, chunks):
-            if self.accept_vector(vector):
+            if self.accept_vector(collection_name, vector):
                 points.append(PointStruct(
                     id=str(chunk.id),
                     vector=vector,
@@ -39,7 +35,7 @@ class VectorDatabase:
         if len(points):
             for group in range(0, len(points), batch_size):
                 self.client.upsert(
-                    collection_name=self.collection_name,
+                    collection_name=collection_name,
                     points=points[group : group + batch_size],
                     wait=False,
                 )
@@ -56,9 +52,9 @@ class VectorDatabase:
     Defines weather the vector should be stored in the db by searching for the most
     similar one
     '''
-    def accept_vector(self, vector: np.array) -> bool:
+    def accept_vector(self, collection_name: str, vector: np.array) -> bool:
         most_similar = self.client.query_points(
-            collection_name=self.collection_name,
+            collection_name=collection_name,
             query=vector,
             limit=1,
             with_vectors=True
@@ -80,11 +76,11 @@ class VectorDatabase:
     TODO: implement hybrid search
     '''
 
-    def search(self, query: str, top_k: int = 5) -> list[Chunk]:
+    def search(self, collection_name: str, query: str, top_k: int = 5) -> list[Chunk]:
         query_embedded: np.ndarray = self.embedder.encode(query)
 
         points: list[ScoredPoint] = self.client.query_points(
-            collection_name=self.collection_name,
+            collection_name=collection_name,
             query=query_embedded,
             limit=top_k
         ).points
@@ -110,7 +106,8 @@ class VectorDatabase:
                 return client
             except Exception as e:
                 if attempt == max_retries - 1:
-                    raise ConnectionError(
+                    raise HTTPException(
+                        500,
                         f"Failed to connect to Qdrant server after {max_retries} attempts. "
                         f"Last error: {str(e)}"
                     )
@@ -121,26 +118,47 @@ class VectorDatabase:
                 time.sleep(delay)
                 delay *= 2
 
-    def _check_collection_exists(self) -> bool:
+
+    def _check_collection_exists(self, collection_name: str) -> bool:
         try:
-            return self.client.collection_exists(self.collection_name)
+            return self.client.collection_exists(collection_name)
         except Exception as e:
-            raise ConnectionError(
-                f"Failed to check collection {self.collection_name} exists. Last error: {str(e)}"
+            raise HTTPException(
+                500, f"Failed to check collection {collection_name} exists. Last error: {str(e)}"
             )
 
-    def _create_collection(self) -> None:
+
+    def _create_collection(self, collection_name: str) -> None:
         try:
             self.client.create_collection(
-                collection_name=self.collection_name,
+                collection_name=collection_name,
                 vectors_config=VectorParams(
                     size=self.embedder.get_vector_dimensionality(),
                     distance=Distance.COSINE
                 )
             )
         except Exception as e:
-            raise RuntimeError(f"Failed to create collection {self.collection_name}: {str(e)}")
+            raise HTTPException(500, f"Failed to create collection {self.collection_name}: {str(e)}")
+
+
+    def create_collection(self, collection_name: str) -> None:
+        try:
+            if self._check_collection_exists(collection_name):
+                return
+            self._create_collection(collection_name)
+        except Exception as e:
+            print(e)
+            raise HTTPException(500, e)
+
 
     def __del__(self):
         if hasattr(self, "client"):
             self.client.close()
+
+
+    def get_collections(self) -> list[str]:
+        try:
+            return self.client.get_collections()
+        except Exception as e:
+            print(e)
+            raise HTTPException(500, "Failed to get collection names")
