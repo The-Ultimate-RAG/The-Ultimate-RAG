@@ -64,20 +64,22 @@ def protect_chat(user: User, chat_id: int) -> bool:
     return verify_ownership_rights(user, chat_id)
 
 
-async def save_documents(files: list[UploadFile], RAG: RagSystem) -> None:
-    temp_storage = os.path.join(base_path, "temp_storage")
+async def save_documents(collection_name: str, files: list[UploadFile], RAG: RagSystem, user: User, chat_id: int) -> None:
+    storage = os.path.join(os.path.dirname(base_path), "chats_storage", f"user_id={user.id}", f"chat_id={chat_id}", "documents")
     docs = []
     
     if files is None or len(files) == 0:
         return
     
+    os.makedirs(os.path.join(storage, "pdfs"), exist_ok=True)
+
     for file in files:
         content = await file.read()
 
         if file.filename.endswith('.pdf'):
-            saved_file = os.path.join(temp_storage, "pdfs", str(uuid4()) + ".pdf")
+            saved_file = os.path.join(storage, "pdfs", str(uuid4()) + ".pdf")
         else:
-            saved_file = os.path.join(temp_storage, str(uuid4()) + "." + file.filename.split('.')[-1])
+            saved_file = os.path.join(storage, str(uuid4()) + "." + file.filename.split('.')[-1])
 
         with open(saved_file, "wb") as f:
             f.write(content)
@@ -85,13 +87,34 @@ async def save_documents(files: list[UploadFile], RAG: RagSystem) -> None:
         docs.append(saved_file)
 
     if len(files) > 0:
-        RAG.upload_documents(docs)
+        RAG.upload_documents(collection_name, docs)
+
+
+def get_pdf_path(path: str) -> str:
+    parts = path.split("chats_storage")
+    if len(parts) < 2:
+        return ''
+    return "chats_storage" + ''.join(parts[1:])
+
+
+def construct_collection_name(user: User, chat_id: int) -> str:
+    return f"user_id_{user.id}_chat_id_{chat_id}"
+
+
+def create_collection(user: User, chat_id: int, RAG: RagSystem) -> None:
+    if RAG is None:
+        raise RuntimeError("RAG was not initialized")
+    
+    RAG.create_new_collection(construct_collection_name(user, chat_id))
+    print(rag.get_collections_names())
 
 
 # <----------------------- Handlers ----------------------->
 def PDFHandler(request: Request, path: str, page: int, templates) -> Jinja2Templates.TemplateResponse:
-    filename = os.path.basename(path)
-    url_path = f"/pdfs/{filename}"
+    print(path)
+    url_path = get_pdf_path(path=path)
+    print(url_path)
+    
     current_template = "pages/show_pdf.html"
     return templates.TemplateResponse(
         current_template, 

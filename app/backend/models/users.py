@@ -32,8 +32,9 @@ def find_user_by_email(email: str) -> User | None:
     
 
 def find_user_by_access_string(access_string_hash: str) -> User | None:
-    with Session(autoflush=False, bind=engine) as db:
-        return db.query(User).where(User.access_string_hash == access_string_hash).first()
+    with Session(autoflush=False, bind=engine, expire_on_commit=False) as db:
+        user = db.query(User).where(User.access_string_hash == access_string_hash).first()
+        return user
     
 
 def update_user(user: User, language: str = None, theme: str = None, access_string_hash: str = None) -> None:

@@ -15,6 +15,7 @@ class Chat(Base):
 def new_chat(title: str | None, user) -> int:
     id = None
     with Session(autoflush=False, bind=engine) as db:
+        user = db.merge(user)
         new_chat = Chat(user_id=user.id, user=user)
         if title:
             new_chat.title = title

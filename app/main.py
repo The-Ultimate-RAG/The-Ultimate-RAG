@@ -5,14 +5,12 @@ from app.backend.models.db_service import automigrate
 
 def initialize_system() -> bool:
     path = os.path.dirname(base_path)
-    temp_storage_path = os.path.join(path, os.path.join("app", "temp_storage"))
-    temp_storage_path_pdf = os.path.join(path, os.path.join("app", "temp_storage", "pdfs"))
+    chats_storage_path = os.path.join(path, "chats_storage")
     database_path = os.path.join(path, "database")
 
     try:
-        os.makedirs(temp_storage_path, exist_ok=True)
         os.makedirs(database_path, exist_ok=True)
-        os.makedirs(temp_storage_path_pdf, exist_ok=True)
+        os.makedirs(chats_storage_path, exist_ok=True)
     except Exception:
         raise RuntimeError("Not all required directories were initialized")
     

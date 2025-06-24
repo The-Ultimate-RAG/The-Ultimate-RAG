@@ -9,7 +9,7 @@ from app.backend.controllers.messages import register_message
 from app.backend.controllers.schemas import SUser
 from app.backend.models.users import User
 
-from app.utils import TextHandler, PDFHandler, protect_chat, extend_context, initialize_rag, save_documents
+from app.utils import TextHandler, PDFHandler, protect_chat, extend_context, initialize_rag, save_documents, construct_collection_name, create_collection
 from app.settings import base_path, url_user_not_required
 from app.document_validator import path_is_valid
 from app.response_parser import add_links
@@ -22,11 +22,11 @@ import os
 
 api = FastAPI()
 
-api.mount("/pdfs", StaticFiles(directory=os.path.join(base_path, "temp_storage", "pdfs")), name="pdfs")
+api.mount("/chats_storage", StaticFiles(directory=os.path.join(os.path.dirname(base_path), "chats_storage")), name="chats_storage")
 api.mount("/static", StaticFiles(directory=os.path.join(base_path, "frontend", "static")), name="static")
 
 templates = Jinja2Templates(directory=os.path.join(base_path, "frontend", "templates"))
-
+rag = initialize_rag()
 
 # NOTE: carefully read documentation to require_user
 # <--------------------------------- Middleware --------------------------------->
@@ -79,16 +79,17 @@ def root(request: Request):
 
 
 @api.post("/message_with_docs")
-async def send_message(request: Request, files: list[UploadFile] = File(None), prompt: str = Form(...), chat_id = Form(None)):
-    rag = initialize_rag()
+async def send_message(request: Request, files: list[UploadFile] = File(None), prompt: str = Form(...), chat_id = Form(None), user: User = Depends(get_current_user)):
     response = ""
 
     try:
+        collection_name = construct_collection_name(user, chat_id)
+
         register_message(content=prompt, sender="user", chat_id=int(chat_id))
         
-        await save_documents(files=files, RAG=rag)
+        await save_documents(collection_name, files=files, RAG=rag, user=user, chat_id=chat_id)
 
-        response_raw = rag.generate_response(user_prompt=prompt)
+        response_raw = rag.generate_response(collection_name=collection_name, user_prompt=prompt)
         response = add_links(response_raw)
 
         register_message(content=response, sender="assistant", chat_id=int(chat_id))
@@ -181,7 +182,15 @@ def last_user_chat(request: Request, user: User = Depends(get_current_user)):
     url = None
 
     if chat is None:
-        url = create_new_chat("new chat", user)
+        print("new_chat")
+        new_chat = create_new_chat("new chat", user)
+        url = new_chat.get("url")
+
+        try:
+            create_collection(user, new_chat.get("chat_id"), rag)
+        except Exception as e:
+            raise HTTPException(500, e)
+        
     else:
         url = f"/chats/id={chat.id}"
 
@@ -201,5 +210,16 @@ def login(response: Response, user: SUser):
 
 @api.post("/new_chat")
 def create_chat(request: Request, title: Optional[str] = "new chat", user: User = Depends(get_current_user)):
-    url = create_new_chat(title, user)
+    new_chat = create_new_chat(title, user)
+    url = new_chat.get("url")
+    chat_id = new_chat.get("chat_id")
+
+    if url is None or chat_id is None:
+        raise HTTPException(500, "New chat was not created")
+    
+    try:
+        create_collection(user, chat_id, rag)
+    except Exception as e:
+        raise HTTPException(500, e)
+    
     return RedirectResponse(url, status_code=303)
