@@ -97,6 +97,8 @@ async def send_message(request: Request, files: list[UploadFile] = File(None), p
     except Exception as e:
         print(e)
 
+    print(response)
+    
     return {"response": response, "status": 200}
 
 
