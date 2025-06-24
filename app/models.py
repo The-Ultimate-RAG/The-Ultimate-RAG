@@ -1,10 +1,11 @@
+import os
+
 from sentence_transformers import SentenceTransformer, \
     CrossEncoder  # SentenceTransformer -> model for embeddings, CrossEncoder -> re-ranker
 from ctransformers import AutoModelForCausalLM
 from torch import Tensor
 from google import genai
 from google.genai import types
-from app.key import KEY
 from app.chunks import Chunk
 import numpy as np # used only for type hints
 from app.settings import device, local_llm_config, local_generation_config, gemini_generation_config
@@ -89,7 +90,7 @@ class LocalLLM:
 
 class Gemini:
     def __init__(self, model="gemini-2.0-flash"):
-        self.client = genai.Client(api_key=KEY)
+        self.client = genai.Client(api_key=os.environ['GEMINI_API_KEY'])
         self.model = model
 
     def get_response(self, prompt: str, stream: bool = True, logging: bool = True,
