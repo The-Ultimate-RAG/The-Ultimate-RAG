@@ -11,6 +11,10 @@ jobs:
       with:
         fetch-depth: 0
         lfs: true
+    - name: Configure Git identity
+      run: |
+        git config --global user.name "Andrchest"
+        git config --global user.email "andreipolevoi220@gmail.com"
     - name: Push to Hugging Face Hub
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
