@@ -1,13 +1,3 @@
----
-title: The Ultimate RAG
-emoji: 🌍
-colorFrom: pink
-colorTo: indigo
-sdk: docker
-pinned: false
-short_description: An advanced RAG project to generate cited responses from a local database.
----
-
 <div align="center">
 
 # 🌍 The Ultimate RAG
