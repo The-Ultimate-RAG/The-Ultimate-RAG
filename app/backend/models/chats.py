@@ -2,6 +2,7 @@ from app.backend.models.base_model import Base
 from sqlalchemy import Integer, String, Column, ForeignKey
 from sqlalchemy.orm import relationship, Session
 from app.backend.controllers.base_controller import engine
+from app.backend.models.messages import Message
 
 class Chat(Base):
     __tablename__ = "chats"

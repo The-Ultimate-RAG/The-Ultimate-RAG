@@ -2,11 +2,11 @@ from qdrant_client import QdrantClient  # main component to provide the access t
 from qdrant_client.http.models import ScoredPoint
 from qdrant_client.models import VectorParams, Distance, \
     PointStruct  # VectorParams -> config of vectors that will be used as primary keys
-from app.models import Embedder  # Distance -> defines the metric
-from app.chunks import Chunk  # PointStruct -> instance that will be stored in db
+from app.core.models import Embedder  # Distance -> defines the metric
+from app.core.chunks import Chunk  # PointStruct -> instance that will be stored in db
 import numpy as np
 from uuid import UUID
-from app.settings import qdrant_client_config, max_delta
+from app.settings import settings
 import time
 from fastapi import HTTPException
 
@@ -16,8 +16,8 @@ class VectorDatabase:
         self.host: str = host
         self.client: QdrantClient = self._initialize_qdrant_client()
         self.embedder: Embedder = embedder  # embedder is used to convert a user's query
-        self.already_stored: np.array[np.array] = np.array([]).reshape(0, embedder.get_vector_dimensionality()) # should be already normalized
-
+        self.already_stored: np.array[np.array] = np.array([]).reshape(0,
+                                                                       embedder.get_vector_dimensionality())  # should be already normalized
 
     def store(self, collection_name: str, chunks: list[Chunk], batch_size: int = 1000) -> None:
         points: list[PointStruct] = []
@@ -36,22 +36,22 @@ class VectorDatabase:
             for group in range(0, len(points), batch_size):
                 self.client.upsert(
                     collection_name=collection_name,
-                    points=points[group : group + batch_size],
+                    points=points[group: group + batch_size],
                     wait=False,
                 )
-
 
     '''
     Measures a cosine of angle between tow vectors
     '''
+
     def cosine_similarity(self, vec1, vec2):
         return vec1 @ vec2 / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
-
 
     '''
     Defines weather the vector should be stored in the db by searching for the most
     similar one
     '''
+
     def accept_vector(self, collection_name: str, vector: np.array) -> bool:
         most_similar = self.client.query_points(
             collection_name=collection_name,
@@ -65,10 +65,9 @@ class VectorDatabase:
         else:
             most_similar = most_similar[0]
 
-        if 1 - self.cosine_similarity(vector, most_similar.vector) < max_delta:
+        if 1 - self.cosine_similarity(vector, most_similar.vector) < settings.max_delta:
             return False
         return True
-
 
     '''
     According to tests, re-ranker needs ~7-10 chunks to generate the most accurate hit
@@ -97,11 +96,10 @@ class VectorDatabase:
             ) for point in points
         ]
 
-
     def _initialize_qdrant_client(self, max_retries=5, delay=2) -> QdrantClient:
         for attempt in range(max_retries):
             try:
-                client = QdrantClient(**qdrant_client_config)
+                client = QdrantClient(**settings.qdrant.model_dump())
                 client.get_collections()
                 return client
             except Exception as e:
@@ -118,7 +116,6 @@ class VectorDatabase:
                 time.sleep(delay)
                 delay *= 2
 
-
     def _check_collection_exists(self, collection_name: str) -> bool:
         try:
             return self.client.collection_exists(collection_name)
@@ -126,7 +123,6 @@ class VectorDatabase:
             raise HTTPException(
                 500, f"Failed to check collection {collection_name} exists. Last error: {str(e)}"
             )
-
 
     def _create_collection(self, collection_name: str) -> None:
         try:
@@ -140,7 +136,6 @@ class VectorDatabase:
         except Exception as e:
             raise HTTPException(500, f"Failed to create collection {self.collection_name}: {str(e)}")
 
-
     def create_collection(self, collection_name: str) -> None:
         try:
             if self._check_collection_exists(collection_name):
@@ -150,11 +145,9 @@ class VectorDatabase:
             print(e)
             raise HTTPException(500, e)
 
-
     def __del__(self):
         if hasattr(self, "client"):
             self.client.close()
-
 
     def get_collections(self) -> list[str]:
         try:

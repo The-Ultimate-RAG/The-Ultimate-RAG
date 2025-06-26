@@ -1,19 +1,21 @@
 import os
 
+from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer, \
     CrossEncoder  # SentenceTransformer -> model for embeddings, CrossEncoder -> re-ranker
 from ctransformers import AutoModelForCausalLM
 from torch import Tensor
 from google import genai
 from google.genai import types
-from app.chunks import Chunk
-import numpy as np # used only for type hints
-from app.settings import device, local_llm_config, local_generation_config, gemini_generation_config
+from app.core.chunks import Chunk
+from app.settings import settings
+
+load_dotenv()
 
 
 class Embedder:
     def __init__(self, model: str = "BAAI/bge-m3"):
-        self.device: str = device
+        self.device: str = settings.device
         self.model_name: str = model
         self.model: SentenceTransformer = SentenceTransformer(model, device=self.device)
 
@@ -34,7 +36,7 @@ class Embedder:
 
 class Reranker:
     def __init__(self, model: str = "cross-encoder/ms-marco-MiniLM-L6-v2"):
-        self.device: str = device
+        self.device: str = settings.device
         self.model_name: str = model
         self.model: CrossEncoder = CrossEncoder(model, device=self.device)
 
@@ -53,7 +55,7 @@ class Reranker:
 
 class LocalLLM:
     def __init__(self):
-        self.model = AutoModelForCausalLM.from_pretrained(**local_llm_config)
+        self.model = AutoModelForCausalLM.from_pretrained(**settings.local_llm.model_dump())
 
     '''
     Produces the response to user's prompt
@@ -66,12 +68,12 @@ class LocalLLM:
     def get_response(self, prompt: str, stream: bool = True, logging: bool = True,
                      use_default_config: bool = True) -> str:
 
-        with open("prompt.txt", "w") as f:
+        with open("../prompt.txt", "w") as f:
             f.write(prompt)
 
         generated_text = ""
         tokenized_text: list[int] = self.model.tokenize(text=prompt)
-        response: list[int] = self.model.generate(tokens=tokenized_text, **local_generation_config)
+        response: list[int] = self.model.generate(tokens=tokenized_text, **settings.local_llm.model_dump())
 
         if logging:
             print(response)
@@ -90,18 +92,19 @@ class LocalLLM:
 
 class Gemini:
     def __init__(self, model="gemini-2.0-flash"):
-        self.client = genai.Client(api_key=os.environ['GEMINI_API_KEY'])
+        self.client = genai.Client(api_key=settings.api_key.get_secret_value())
         self.model = model
 
     def get_response(self, prompt: str, stream: bool = True, logging: bool = True,
                      use_default_config: bool = False) -> str:
-        with open("prompt.txt", "w", encoding="utf-8", errors="replace") as f:
+        with open("../prompt.txt", "w", encoding="utf-8", errors="replace") as f:
             f.write(prompt)
 
         response = self.client.models.generate_content(
             model=self.model,
             contents=prompt,
-            config=types.GenerateContentConfig(**gemini_generation_config) if use_default_config else None
+            config=types.GenerateContentConfig(
+                **settings.gemini_generation.model_dump()) if use_default_config else None
         )
 
         return response.text

@@ -1,9 +1,9 @@
-from app.models import LocalLLM, Embedder, Reranker, Gemini
-from app.processor import DocumentProcessor
-from app.database import VectorDatabase
+from app.core.models import LocalLLM, Embedder, Reranker, Gemini
+from app.core.processor import DocumentProcessor
+from app.core.database import VectorDatabase
 import time
 import os
-from app.settings import reranker_model, embedder_model, base_path, use_gemini
+from app.settings import settings, BASE_DIR
 
 
 # TODO: write a better prompt
@@ -11,18 +11,17 @@ from app.settings import reranker_model, embedder_model, base_path, use_gemini
 #
 class RagSystem:
     def __init__(self):
-        self.embedder = Embedder(model=embedder_model)
-        self.reranker = Reranker(model=reranker_model)
+        self.embedder = Embedder(model=settings.models.embedder_model)
+        self.reranker = Reranker(model=settings.models.reranker_model)
         self.processor = DocumentProcessor(self.embedder)
         self.db = VectorDatabase(embedder=self.embedder)
-        self.llm = Gemini() if use_gemini else LocalLLM()
+        self.llm = Gemini() if settings.user_gemini else LocalLLM()
 
     '''
     Provides a prompt with substituted context from chunks
 
     TODO: add template to prompt without docs
     '''
-
     def get_prompt_template(self, user_prompt: str, chunks: list) -> str:
         sources = ""
         prompt = ""
@@ -34,8 +33,8 @@ class RagSystem:
                         f"Start: {chunk.start_index}]\n\n")
             sources += f"Original text:\n{chunk.get_raw_text()}\nCitation:{citation}"
 
-        with open(os.path.join(base_path, "prompt_templates", "test2.txt")) as f:
-            prompt = f.read()
+        with open(os.path.join(BASE_DIR, "app", "prompt_templates", "test2.txt")) as prompt_file:
+            prompt = prompt_file.read()
 
         prompt += (
             "**QUESTION**: "

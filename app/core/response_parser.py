@@ -1,4 +1,4 @@
-from app.document_validator import path_is_valid
+from app.core.document_validator import path_is_valid
 import re
 
 '''

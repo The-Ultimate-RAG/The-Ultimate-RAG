@@ -1,15 +1,15 @@
 import os
-from app.settings import base_path
+from app.settings import BASE_DIR
 
 def initialize_system() -> bool:
     success = True
-    path = os.path.dirname(base_path)
+    path = os.path.dirname(BASE_DIR)
     temp_storage_path = os.path.join(path, "app", "temp_storage")
     pdfs_path = os.path.join(path, "app", "temp_storage", "pdfs")
     database_path = os.path.join(path, "database")
     chats_storage_path = os.path.join(path, "chats_storage")
 
-    print(f"Base path: {base_path}")
+    print(f"Base path: {BASE_DIR}")
     print(f"Parent path: {path}")
     print(f"Temp storage path: {temp_storage_path}")
     print(f"PDFs path: {pdfs_path}")

@@ -1,12 +1,12 @@
 from langchain_community.document_loaders import PyPDFLoader, UnstructuredWordDocumentLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
-from app.models import Embedder
-from app.chunks import Chunk
+from app.core.models import Embedder
+from app.core.chunks import Chunk
 import nltk # used for proper tokenizer workflow
 from uuid import uuid4 # for generating unique id as hex (uuid4 is used as it generates ids form pseudo random numbers unlike uuid1 and others)
 import numpy as np
-from app.settings import logging, text_splitter_config, embedder_model
+from app.settings import logging, settings
 
 
 # TODO: replace PDFloader since it is completely unusable OR try to fix it
@@ -29,7 +29,7 @@ class DocumentProcessor:
         self.processed: list[Document] = []
         self.unprocessed: list[Document] = []
         self.embedder = embedder
-        self.text_splitter = RecursiveCharacterTextSplitter(**text_splitter_config)
+        self.text_splitter = RecursiveCharacterTextSplitter(**settings.text_splitter.model_dump())
 
     '''
     Measures cosine between two vectors
@@ -228,3 +228,8 @@ class DocumentProcessor:
         chunks_copy: list[Chunk] = self.chunks.copy()
         self.clear_unsaved_chunks()
         return chunks_copy
+
+
+if __name__ == '__main__':
+    document = DocumentProcessor()
+    print(document.__getattribute__())

@@ -2,17 +2,19 @@ from fastapi import FastAPI, UploadFile, Form, File, HTTPException, Response, Re
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 
 from app.backend.controllers.users import create_user, authenticate_user, check_cookie, clear_cookie, get_current_user, get_latest_chat
 from app.backend.controllers.chats import create_new_chat, get_chat_with_messages, update_title
 from app.backend.controllers.messages import register_message
-from app.backend.controllers.schemas import SUser
+from app.backend.login_admin import login_as_admin
+from app.backend.schemas import SUser
 from app.backend.models.users import User
 
-from app.utils import TextHandler, PDFHandler, protect_chat, extend_context, initialize_rag, save_documents, construct_collection_name, create_collection
-from app.settings import base_path, url_user_not_required
-from app.document_validator import path_is_valid
-from app.response_parser import add_links
+from app.core.utils import TextHandler, PDFHandler, protect_chat, extend_context, initialize_rag, save_documents, construct_collection_name, create_collection
+from app.settings import BASE_DIR, url_user_not_required
+from app.core.document_validator import path_is_valid
+from app.core.response_parser import add_links
 
 from typing import Optional
 import os
@@ -22,10 +24,9 @@ import os
 
 api = FastAPI()
 
-api.mount("/chats_storage", StaticFiles(directory=os.path.join(os.path.dirname(base_path), "chats_storage")), name="chats_storage")
-api.mount("/static", StaticFiles(directory=os.path.join(base_path, "frontend", "static")), name="static")
-
-templates = Jinja2Templates(directory=os.path.join(base_path, "frontend", "templates"))
+api.mount("/chats_storage", StaticFiles(directory=os.path.join(os.path.dirname(BASE_DIR), "chats_storage")), name="chats_storage")
+api.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "app", "frontend", "static")), name="static")
+templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "app", "frontend", "templates"))
 rag = initialize_rag()
 
 # NOTE: carefully read documentation to require_user
@@ -204,10 +205,30 @@ def last_user_chat(request: Request, user: User = Depends(get_current_user)):
 def new_user(response: Response, user: SUser):
     return create_user(response, user.email, user.password)
 
+# TODO: remove admin validation as troubleshooting ends
 
+class LoginData(BaseModel):
+    email: str
+    password: str
+
+# TODO: Use normal authentification (without admin@mail.ru: admin)
+# TODO: same for html login file (change type=text to email)
 @api.post("/login")
-def login(response: Response, user: SUser):
-    return authenticate_user(response, user.email, user.password)
+def login(response: Response, user_data: LoginData):
+    # Special case for admin login
+    if user_data.email == "admin" and user_data.password == "admin":
+        return login_as_admin(response)
+
+    try:
+        # Validate the user data against the SUser schema for regular users
+        # This enforces email format and password complexity for non-admins
+        user_schema = SUser(email=user_data.email, password=user_data.password)
+    except ValueError as e:
+        # If validation fails, return a detailed error
+        raise HTTPException(status_code=422, detail=f"Validation error: {e}")
+
+    # If validation passes, proceed with the standard authentication process
+    return authenticate_user(response, user_schema.email, user_schema.password)
 
 
 @api.post("/new_chat")
@@ -225,3 +246,6 @@ def create_chat(request: Request, title: Optional[str] = "new chat", user: User 
         raise HTTPException(500, e)
     
     return RedirectResponse(url, status_code=303)
+
+if __name__ == "__main__":
+    pass

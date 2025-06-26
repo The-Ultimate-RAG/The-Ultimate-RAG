@@ -4,8 +4,8 @@ from fastapi import Request, UploadFile
 from app.backend.controllers.chats import list_user_chats, verify_ownership_rights
 from app.backend.controllers.users import get_current_user
 from app.backend.models.users import User
-from app.rag_generator import RagSystem
-from app.settings import base_path
+from app.core.rag_generator import RagSystem
+from app.settings import BASE_DIR
 
 from uuid import uuid4
 import os
@@ -65,7 +65,7 @@ def protect_chat(user: User, chat_id: int) -> bool:
 
 
 async def save_documents(collection_name: str, files: list[UploadFile], RAG: RagSystem, user: User, chat_id: int) -> None:
-    storage = os.path.join(os.path.dirname(base_path), "chats_storage", f"user_id={user.id}", f"chat_id={chat_id}", "documents")
+    storage = os.path.join(os.path.dirname(BASE_DIR), "chats_storage", f"user_id={user.id}", f"chat_id={chat_id}", "documents")
     docs = []
     
     if files is None or len(files) == 0:

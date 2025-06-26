@@ -1,10 +1,10 @@
-from app.settings import api_config, base_path
+from app.settings import settings
 import uvicorn
 import os
 from app.backend.models.db_service import automigrate
 
 def initialize_system() -> bool:
-    path = os.path.dirname(base_path)
+    path = os.path.dirname(settings.base_dir)
     chats_storage_path = os.path.join(path, "chats_storage")
     database_path = os.path.join(path, "database")
 
@@ -24,7 +24,7 @@ def initialize_system() -> bool:
 def main():
     automigrate() # Note: it will drop all existing dbs and create a new ones
     initialize_system()
-    uvicorn.run(**api_config)
+    uvicorn.run(**settings.api.model_dump())
 
 
 if __name__ == '__main__':
