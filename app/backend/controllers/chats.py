@@ -9,7 +9,7 @@ import os
 def create_new_chat(title: str | None, user: User) -> dict:
     chat_id = new_chat(title, user)
     try:
-        path_to_chat = os.path.join(os.path.dirname(BASE_DIR), "chats_storage", f"user_id={user.id}", f"chat_id={chat_id}", "documents")
+        path_to_chat = os.path.join(BASE_DIR, "chats_storage", f"user_id={user.id}", f"chat_id={chat_id}", "documents")
         os.makedirs(path_to_chat, exist_ok=True)
     except Exception as e:
         print(e)

@@ -1,3 +1,12 @@
+---
+title: The Ultimate RAG
+emoji: 🌍
+colorFrom: pink
+colorTo: indigo
+sdk: docker
+pinned: false
+short_description: the ultimate rag
+---
 <div align="center">
 
 # 🌍 The Ultimate RAG

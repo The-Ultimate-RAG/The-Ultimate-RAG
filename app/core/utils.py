@@ -65,7 +65,7 @@ def protect_chat(user: User, chat_id: int) -> bool:
 
 
 async def save_documents(collection_name: str, files: list[UploadFile], RAG: RagSystem, user: User, chat_id: int) -> None:
-    storage = os.path.join(os.path.dirname(BASE_DIR), "chats_storage", f"user_id={user.id}", f"chat_id={chat_id}", "documents")
+    storage = os.path.join(BASE_DIR, "chats_storage", f"user_id={user.id}", f"chat_id={chat_id}", "documents")
     docs = []
     
     if files is None or len(files) == 0:

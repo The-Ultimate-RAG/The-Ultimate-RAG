@@ -45,7 +45,9 @@ class VectorDatabase:
     '''
 
     def cosine_similarity(self, vec1, vec2):
-        return vec1 @ vec2 / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
+        vec1_np = np.array(vec1)
+        vec2_np = np.array(vec2)
+        return vec1_np @ vec2_np / (np.linalg.norm(vec1_np) * np.linalg.norm(vec2_np))
 
     '''
     Defines weather the vector should be stored in the db by searching for the most
@@ -78,6 +80,9 @@ class VectorDatabase:
     def search(self, collection_name: str, query: str, top_k: int = 5) -> list[Chunk]:
         query_embedded: np.ndarray = self.embedder.encode(query)
 
+        if isinstance(query_embedded, list):
+            query_embedded = query_embedded[0]
+            
         points: list[ScoredPoint] = self.client.query_points(
             collection_name=collection_name,
             query=query_embedded,

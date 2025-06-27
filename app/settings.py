@@ -72,6 +72,11 @@ class GeminiSettings(BaseModel):
     frequency_penalty: float = 0.0
 
 
+class GeminiEmbeddingSettings(BaseModel):
+    output_dimensionality: int = 382
+    task_type: str = "retrieval_document"
+
+
 class PostgresSettings(BaseModel):
     url: SecretStr = Field(...)
     echo: bool = False
@@ -92,6 +97,7 @@ class Settings(BaseSettings):
     text_splitter: TextSplitterSettings = Field(default_factory=TextSplitterSettings)
     api: APISettings = Field(default_factory=APISettings)
     gemini_generation: GeminiSettings = Field(default_factory=GeminiSettings)
+    gemini_embedding: GeminiEmbeddingSettings = Field(default_factory=GeminiEmbeddingSettings)
     postgres: PostgresSettings = Field(default_factory=PostgresSettings)
 
     user_gemini: bool = True

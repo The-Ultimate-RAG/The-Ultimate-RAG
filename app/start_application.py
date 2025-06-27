@@ -11,12 +11,17 @@ from app.backend.create_admin import create_admin_user
 def main():
     os.chdir(app.settings.BASE_DIR)
 
-    db_path = "../database"
-    shutil.rmtree(db_path)
+    db_path = os.path.join(app.settings.BASE_DIR, "database")
+    
+    try:
+        shutil.rmtree(db_path)
+    except Exception as e:
+        print(e)
+
     os.makedirs(db_path, exist_ok=True)
 
-    qdrant_container_name = "qdrant_instance"
 
+    qdrant_container_name = "qdrant_instance"
     check_exists_cmd = ["docker", "ps", "-a", "--filter", f"name={qdrant_container_name}", "--format", "{{.ID}}"]
     container_id_result = subprocess.run(check_exists_cmd, capture_output=True, text=True, check=True)
     container_id = container_id_result.stdout.strip()
@@ -26,9 +31,8 @@ def main():
 
     qdrant_docker_command = [
         "docker", "run",
-        "--name", qdrant_container_name,
         "--publish", f"{settings.qdrant.port}:{settings.qdrant.port}",
-        "--volume", os.path.abspath(db_path) + ":/qdrant/storage",
+        "--volume", db_path + ":/qdrant/storage",
         "qdrant/qdrant"
     ]
 

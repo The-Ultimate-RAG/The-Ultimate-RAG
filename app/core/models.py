@@ -8,7 +8,7 @@ from torch import Tensor
 from google import genai
 from google.genai import types
 from app.core.chunks import Chunk
-from app.settings import settings
+from app.settings import settings, BASE_DIR, GeminiEmbeddingSettings
 
 load_dotenv()
 
@@ -22,14 +22,12 @@ class Embedder:
     '''
     Encodes string to dense vector
     '''
-
     def encode(self, text: str | list[str]) -> Tensor | list[Tensor]:
         return self.model.encode(sentences=text, show_progress_bar=False, batch_size=32)
 
     '''
     Returns the dimensionality of dense vector
     '''
-
     def get_vector_dimensionality(self) -> (int | None):
         return self.model.get_sentence_embedding_dimension()
 
@@ -44,7 +42,6 @@ class Reranker:
     Returns re-sorted (by relevance) vector with dicts, from which we need only the 'corpus_id'
     since it is a position of chunk in original list
     '''
-
     def rank(self, query: str, chunks: list[Chunk]) -> list[dict[str, int]]:
         return self.model.rank(query, [chunk.get_raw_text() for chunk in chunks])
 
@@ -64,7 +61,6 @@ class LocalLLM:
 
     TODO: invent a way to really stream the answer (as return value)
     '''
-
     def get_response(self, prompt: str, stream: bool = True, logging: bool = True,
                      use_default_config: bool = True) -> str:
 
@@ -90,14 +86,15 @@ class LocalLLM:
         return generated_text
 
 
-class Gemini:
+class GeminiLLM:
     def __init__(self, model="gemini-2.0-flash"):
         self.client = genai.Client(api_key=settings.api_key.get_secret_value())
         self.model = model
 
     def get_response(self, prompt: str, stream: bool = True, logging: bool = True,
                      use_default_config: bool = False) -> str:
-        with open("../prompt.txt", "w", encoding="utf-8", errors="replace") as f:
+        path_to_prompt = os.path.join(BASE_DIR, "prompt.txt")
+        with open(path_to_prompt, "w", encoding="utf-8", errors="replace") as f:
             f.write(prompt)
 
         response = self.client.models.generate_content(
@@ -108,3 +105,35 @@ class Gemini:
         )
 
         return response.text
+
+
+class GeminiEmbed:
+    def __init__(self, model="text-embedding-004"):
+        self.client = genai.Client(api_key=settings.api_key.get_secret_value())
+        self.model = model
+        self.settings = GeminiEmbeddingSettings()
+
+    def encode(self, text: str | list[str]) -> list[Tensor]:
+
+        if isinstance(text, str):
+            text = [text]
+        
+        output: list[Tensor] = []
+        max_batch_size = 100 # can not be changed due to google restrictions
+
+        for i in range(0, len(text), max_batch_size):
+            batch = text[i:i + max_batch_size]
+            response = self.client.models.embed_content(
+            model=self.model,
+            contents=batch,
+            config=types.EmbedContentConfig(
+                **settings.gemini_embedding.model_dump())
+            ).embeddings
+
+            for i, emb in enumerate(response):
+                output.append(emb.values)
+
+        return output
+    
+    def get_vector_dimensionality(self) -> (int | None):
+        return getattr(self.settings, "output_dimensionality")
