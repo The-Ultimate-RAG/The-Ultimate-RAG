@@ -33,7 +33,7 @@ jobs:
           git remote add hf1 https://Andrchest:$HF_TOKEN@huggingface.co/spaces/Andrchest/RAG-Integration-test
           git push --force hf1 hf1-single-commit:main
       - name: Wait for HF1 deployment
-        run: sleep 180  # Adjust based on deployment time
+        run: sleep 300  # Adjust based on deployment time
       - name: Run integration tests on HF1
         env:
           HF1_URL: https://andrchest-rag-integration-test.hf.space  # Replace with actual HF1 URL
