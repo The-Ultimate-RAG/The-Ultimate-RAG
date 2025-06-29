@@ -49,35 +49,3 @@ jobs:
           git commit -m "Single commit for HF2"
           git remote add hf2 https://Andrchest:$HF_TOKEN@huggingface.co/spaces/Andrchest/The-Ultimate-RAG
           git push --force hf2 hf2-single-commit:main
-      - name: Notify on success
-        if: success()
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const message = 'Pipeline succeeded! Code deployed to HF1 and HF2.';
-            if (context.payload.pull_request) {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.payload.pull_request.number,
-                body: message
-              });
-            } else {
-              console.log(message);
-            }
-      - name: Notify on failure
-        if: failure()
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const message = 'Pipeline failed. Check GitHub Actions logs for details.';
-            if (context.payload.pull_request) {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.payload.pull_request.number,
-                body: message
-              });
-            } else {
-              console.log(message);
-            }

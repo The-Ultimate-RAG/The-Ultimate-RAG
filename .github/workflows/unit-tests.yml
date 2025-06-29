@@ -3,8 +3,6 @@ on:
   pull_request:
     branches:
       - main
-permissions:
-  issues: write
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -21,35 +19,3 @@ jobs:
       - name: Run unit tests
         run: |
           python -m unittest app/tests/unit/test.py
-      - name: Notify on success
-        if: success()
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const message = 'Unit tests succeeded!';
-            if (context.payload.pull_request) {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.payload.pull_request.number,
-                body: message
-              });
-            } else {
-              console.log(message);
-            }
-      - name: Notify on failure
-        if: failure()
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const message = 'Unit tests failed. Check GitHub Actions logs for details.';
-            if (context.payload.pull_request) {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.payload.pull_request.number,
-                body: message
-              });
-            } else {
-              console.log(message);
-            }
