@@ -7,23 +7,47 @@ jobs:
   sync-to-hub:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        lfs: true
-    - name: Configure Git identity
-      run: |
-        git config --global user.name "Andrchest"
-        git config --global user.email "andreipolevoi220@gmail.com"
-    - name: Push to Hugging Face Hub
-      env:
-        HF_TOKEN: ${{ secrets.HF_TOKEN }}
-      run: |
-        git checkout -b hf-single-commit
-        git reset --soft $(git rev-list --max-parents=0 HEAD)
-        git commit -m "Single commit for Hugging Face"
-        echo "samples/sample.pdf" >> .gitignore
-        git add .gitignore
-        git commit -m "Update .gitignore to ignore samples/sample.pdf"
-        git remote add hf https://Andrchest:$HF_TOKEN@huggingface.co/spaces/Andrchest/The-Ultimate-RAG
-        git push --force hf hf-single-commit:main
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+      - name: Configure Git identity
+        run: |
+          git config --global user.name "Andrchest"
+          git config --global user.email "andreipolevoi220@gmail.com"
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest httpx fastapi sqlalchemy psycopg2-binary qdrant-client
+      - name: Push to HF1
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          git checkout -b hf1-single-commit
+          git reset --soft $(git rev-list --max-parents=0 HEAD)
+          git commit -m "Single commit for HF1"
+          echo "samples/sample.pdf" >> .gitignore
+          git add .gitignore
+          git commit -m "Update .gitignore to ignore samples/sample.pdf"
+          git remote add hf1 https://Andrchest:$HF_TOKEN@huggingface.co/spaces/Andrchest/RAG-Integration-test
+          git push --force hf1 hf1-single-commit:main
+      - name: Wait for HF1 deployment
+        run: sleep 600  # Adjust based on deployment time
+      - name: Run integration tests on HF1
+        run: |
+          pytest app.tests.integration.test -v
+      - name: Push to HF2 if tests pass
+        if: success()
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          git checkout -b hf2-single-commit
+          git reset --soft $(git rev-list --max-parents=0 HEAD)
+          git commit -m "Single commit for HF2"
+          git remote add hf2 https://Andrchest:$HF_TOKEN@huggingface.co/spaces/Andrchest/The-Ultimate-RAG
+          git push --force hf2 hf2-single-commit:main

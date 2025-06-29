@@ -5,6 +5,9 @@ This file consolidates parameters for logging, database connections, model paths
 import torch
 import logging  # kind of advanced logger
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 base_path = os.path.dirname(os.path.realpath(__file__))
 
