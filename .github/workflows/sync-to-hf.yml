@@ -22,8 +22,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r app.requirements.txt
-          pip install pytest httpx fastapi sqlalchemy psycopg2-binary qdrant-client
+          pip install -r app/requirements.txt  # Adjust to app/requirements.txt if needed
       - name: Push to HF1
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
@@ -31,16 +30,15 @@ jobs:
           git checkout -b hf1-single-commit
           git reset --soft $(git rev-list --max-parents=0 HEAD)
           git commit -m "Single commit for HF1"
-          echo "samples/sample.pdf" >> .gitignore
-          git add .gitignore
-          git commit -m "Update .gitignore to ignore samples/sample.pdf"
           git remote add hf1 https://Andrchest:$HF_TOKEN@huggingface.co/spaces/Andrchest/RAG-Integration-test
           git push --force hf1 hf1-single-commit:main
       - name: Wait for HF1 deployment
-        run: sleep 600  # Adjust based on deployment time
+        run: sleep 180  # Adjust based on deployment time
       - name: Run integration tests on HF1
+        env:
+          HF1_URL: https://andrchest-rag-integration-test.hf.space  # Replace with actual HF1 URL
         run: |
-          pytest app.tests.integration.test -v
+          pytest app/tests/integration/test.py -v
       - name: Push to HF2 if tests pass
         if: success()
         env:
@@ -51,3 +49,35 @@ jobs:
           git commit -m "Single commit for HF2"
           git remote add hf2 https://Andrchest:$HF_TOKEN@huggingface.co/spaces/Andrchest/The-Ultimate-RAG
           git push --force hf2 hf2-single-commit:main
+      - name: Notify on success
+        if: success()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const message = 'Pipeline succeeded! Code deployed to HF1 and HF2.';
+            if (context.payload.pull_request) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: message
+              });
+            } else {
+              console.log(message);
+            }
+      - name: Notify on failure
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const message = 'Pipeline failed. Check GitHub Actions logs for details.';
+            if (context.payload.pull_request) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: message
+              });
+            } else {
+              console.log(message);
+            }
