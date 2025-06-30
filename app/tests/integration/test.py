@@ -1,12 +1,9 @@
-import pytest
-import httpx
-from app.backend.models.users import find_user_by_email, add_new_user
-from app.backend.models.chats import get_chat_by_id
-from app.backend.controllers.users import hash_access_string, create_access_token
-from app.api import get_latest_chat
-from uuid import uuid4
-from app.utils import initialize_rag
 import os
+from uuid import uuid4
+
+import httpx
+
+from app.backend.models.users import find_user_by_email
 from app.settings import base_path
 
 BASE_DIR = os.path.dirname(base_path)
