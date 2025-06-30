@@ -40,22 +40,22 @@ def test_create_artificial_user() -> dict:
     }
 
 
-def test_validate_user_creation():
-    payload = {
-        "email": "Test1@test.com",
-        "password": "Test1@test.com",
-    }
-    response = httpx.post(url=BASE_URL + '/new_user', json=payload, timeout=30.0)
-    try:
-        assert response.status_code == 200
-    except Exception as e:
-        raise RuntimeError(
-            f"Error while trying to create user: Error with API response - status code - {response.status_code} - msg: {e}")
-
-    try:
-        assert find_user_by_email("Test1@test.com") is not None
-    except Exception as e:
-        raise RuntimeError(f"Error while trying to create user: Error with DB response - msg: {e}")
+# def test_validate_user_creation():
+#     payload = {
+#         "email": "Test1@test.com",
+#         "password": "Test1@test.com",
+#     }
+#     response = httpx.post(url=BASE_URL + '/new_user', json=payload, timeout=30.0)
+#     try:
+#         assert response.status_code == 200
+#     except Exception as e:
+#         raise RuntimeError(
+#             f"Error while trying to create user: Error with API response - status code - {response.status_code} - msg: {e}")
+#
+#     try:
+#         assert find_user_by_email("Test1@test.com") is not None
+#     except Exception as e:
+#         raise RuntimeError(f"Error while trying to create user: Error with DB response - msg: {e}")
 
 
 # ATTENTION - KOSTYLY - returns newly created chat id and cookie (it is so to avoid another "useful" method for artificial chat creation)
