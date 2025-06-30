@@ -12,7 +12,7 @@ BASE_DIR = os.path.dirname(base_path)
 BASE_URL = os.environ.get('HF1_URL')
 
 
-def create_artificial_user() -> dict:
+def test_create_artificial_user() -> dict:
     email = "Test" + str(uuid4()) + "@test.com"
     password = "Goida123!"
     payload = {"email": email, "password": password}
@@ -40,7 +40,7 @@ def create_artificial_user() -> dict:
     }
 
 
-def validate_user_creation():
+def test_validate_user_creation():
     payload = {
         "email": "Test1@test.com",
         "password": "Test1@test.com",
@@ -59,8 +59,8 @@ def validate_user_creation():
 
 
 # ATTENTION - KOSTYLY - returns newly created chat id and cookie (it is so to avoid another "useful" method for artificial chat creation)
-def validate_chat_creation() -> dict:
-    user = create_artificial_user()
+def test_validate_chat_creation() -> dict:
+    user = test_create_artificial_user()
     print(f"Created user: {user['email']}")
 
     # Log in to get a valid token
@@ -103,8 +103,8 @@ def validate_chat_creation() -> dict:
     }
 
 
-def validate_message_sending():
-    data = validate_chat_creation()
+def test_validate_message_sending():
+    data = test_validate_chat_creation()
     if data is None:
         raise RuntimeError("validate_chat_creation returned None")
 
@@ -121,8 +121,8 @@ def validate_message_sending():
         raise RuntimeError(f"Error while trying to send message - status: {response.status_code} - error: {e}")
 
 
-def validate_docs_uploading():
-    data = validate_chat_creation()
+def test_validate_docs_uploading():
+    data = test_validate_chat_creation()
     file_path = os.path.join(BASE_DIR, "app", "tests", "integration", "testfile.txt")
 
     # Create a test file if it doesn't exist
@@ -153,12 +153,12 @@ def validate_docs_uploading():
         raise RuntimeError(f"Error while trying to send docs - error - {e}")
 
 
-if __name__ == '__main__':
-    try:
-        validate_user_creation()
-        validate_chat_creation()
-        validate_message_sending()
-        validate_docs_uploading()
-    except Exception as e:
-        print(f"Test failed: {str(e)}")
-        raise
+# if __name__ == '__main__':
+#     try:
+#         test_validate_user_creation()
+#         test_validate_chat_creation()
+#         test_validate_message_sending()
+#         test_validate_docs_uploading()
+#     except Exception as e:
+#         print(f"Test failed: {str(e)}")
+#         raise
