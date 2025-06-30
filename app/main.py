@@ -28,5 +28,5 @@ def main():
 
 
 if __name__ == '__main__':
-    # ATTENTION:  run from base dir ---> python -m app.main
+    # ATTENTION: run from base dir ---> python -m app.main
     main()

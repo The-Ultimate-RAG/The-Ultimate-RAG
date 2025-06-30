@@ -26,18 +26,9 @@ jobs:
       - name: Run integration tests
         env:
           HF1_URL: https://andrchest-rag-integration-test.hf.space
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
           PYTHONPATH: ${{ github.workspace }}
         working-directory: ./
         run: |
           echo "PYTHONPATH: $PYTHONPATH"
           python -m pytest app/tests/integration/test.py -v
-      - name: Push to HF2 if tests pass
-        if: success()
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: |
-          git checkout -b hf2-single-commit
-          git reset --soft $(git rev-list --max-parents=0 HEAD)
-          git commit -m "Single commit for HF2"
-          git remote add hf2 https://Andrchest:$HF_TOKEN@huggingface.co/spaces/Andrchest/The-Ultimate-RAG
-          git push --force hf2 hf2-single-commit:main
