@@ -11,6 +11,10 @@ jobs:
         with:
           fetch-depth: 0
           lfs: true
+      - name: Configure Git identity
+        run: |
+          git config --global user.name "Andrchest"
+          git config --global user.email "andreipolevoi220@gmail.com
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
