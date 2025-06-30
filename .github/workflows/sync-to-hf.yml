@@ -21,8 +21,12 @@ jobs:
           pip install pytest
           pip install -r app/requirements.txt
       - name: Initialize directories
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          PYTHONPATH: ${{ github.workspace }}
+        working-directory: ./
         run: |
-          python -m app/initializer.py
+          python -m app.initializer
       - name: Debug directory structure
         run: |
           ls -R
