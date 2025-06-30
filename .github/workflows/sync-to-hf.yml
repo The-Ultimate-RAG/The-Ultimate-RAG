@@ -11,10 +11,6 @@ jobs:
         with:
           fetch-depth: 0
           lfs: true
-      - name: Configure Git identity
-        run: |
-          git config --global user.name "Andrchest"
-          git config --global user.email "andreipolevoi220@gmail.com"
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -22,23 +18,19 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r app/requirements.txt  # Adjust to app/requirements.txt if needed
-      - name: Push to HF1
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          pip install pytest
+          pip install -r app/requirements.txt
+      - name: Debug directory structure
         run: |
-          git checkout -b hf1-single-commit
-          git reset --soft $(git rev-list --max-parents=0 HEAD)
-          git commit -m "Single commit for HF1"
-          git remote add hf1 https://Andrchest:$HF_TOKEN@huggingface.co/spaces/Andrchest/RAG-Integration-test
-          git push --force hf1 hf1-single-commit:main
-      - name: Wait for HF1 deployment
-        run: sleep 300  # Adjust based on deployment time
-      - name: Run integration tests on HF1
+          ls -R
+      - name: Run integration tests
         env:
-          HF1_URL: https://andrchest-rag-integration-test.hf.space  # Replace with actual HF1 URL
+          HF1_URL: https://andrchest-rag-integration-test.hf.space
+          PYTHONPATH: ${{ github.workspace }}
+        working-directory: ./
         run: |
-          pytest app/tests/integration/test.py -v
+          echo "PYTHONPATH: $PYTHONPATH"
+          python -m pytest app/tests/integration/test.py -v
       - name: Push to HF2 if tests pass
         if: success()
         env:
