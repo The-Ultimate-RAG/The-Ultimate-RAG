@@ -100,7 +100,7 @@ class Settings(BaseSettings):
     gemini_embedding: GeminiEmbeddingSettings = Field(default_factory=GeminiEmbeddingSettings)
     postgres: PostgresSettings = Field(default_factory=PostgresSettings)
 
-    user_gemini: bool = True
+    use_gemini: bool = True
     max_delta: float = 0.15  # defines what is the minimum boundary for vectors to be considered similar
     max_cookie_lifetime: timedelta = timedelta(seconds=3000)
     password_reset_token_lifetime: timedelta = timedelta(seconds=3000)

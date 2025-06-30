@@ -7,3 +7,4 @@ __pycache__
 /chats_storage
 .env
 /key
+tests

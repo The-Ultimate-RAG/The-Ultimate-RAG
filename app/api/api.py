@@ -12,10 +12,10 @@ from app.backend.schemas import SUser
 from app.backend.models.users import User
 
 from app.core.utils import TextHandler, PDFHandler, protect_chat, extend_context, initialize_rag, save_documents, construct_collection_name, create_collection
+from app.tests.integration.test import validate_user_creation
 from app.settings import BASE_DIR, url_user_not_required
 from app.core.document_validator import path_is_valid
 from app.core.response_parser import add_links
-
 from typing import Optional
 import os
 
@@ -24,7 +24,7 @@ import os
 
 api = FastAPI()
 
-api.mount("/chats_storage", StaticFiles(directory=os.path.join(os.path.dirname(BASE_DIR), "chats_storage")), name="chats_storage")
+api.mount("/chats_storage", StaticFiles(directory=os.path.join(BASE_DIR, "chats_storage")), name="chats_storage")
 api.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "app", "frontend", "static")), name="static")
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "app", "frontend", "templates"))
 rag = initialize_rag()
@@ -53,7 +53,7 @@ url_user_not_required list in settings.py (/ should be removed)
 '''
 @api.middleware("http")
 async def require_user(request: Request, call_next):
-    print(request.url.path, request.method)
+    print(request.url.path, request.method, request.url.port)
 
     awaitable_response = AwaitableResponse(RedirectResponse("/login", status_code=303))
     stripped_path = request.url.path.strip('/')
@@ -82,7 +82,7 @@ def root(request: Request):
 @api.post("/message_with_docs")
 async def send_message(request: Request, files: list[UploadFile] = File(None), prompt: str = Form(...), chat_id = Form(None), user: User = Depends(get_current_user)):
     response = ""
-
+    status = 200
     try:
         collection_name = construct_collection_name(user, chat_id)
 
@@ -96,11 +96,12 @@ async def send_message(request: Request, files: list[UploadFile] = File(None), p
         register_message(content=response, sender="assistant", chat_id=int(chat_id))
         print(response)
     except Exception as e:
+        status = 500
         print(e)
 
     print(response)
     
-    return {"response": response, "status": 200}
+    return {"response": response, "status": status}
 
 
 @api.get("/viewer")
@@ -111,7 +112,7 @@ def show_document(request: Request, path: str, page: Optional[int] = 1, lines: O
     ext = path.split(".")[-1]
     if ext == 'pdf':
         return PDFHandler(request, path=path, page=page, templates=templates)
-    elif ext in ('txt', 'csv', 'md'):
+    elif ext in ('txt', 'csv', 'md', 'json'):
         return TextHandler(request, path=path, lines=lines, templates=templates)
     elif ext in ('docx', 'doc'):
         return TextHandler(request, path=path, lines=lines, templates=templates)  # should be a bit different handler

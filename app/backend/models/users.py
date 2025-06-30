@@ -67,3 +67,4 @@ def get_user_last_chat(user: User) -> Chat | None:
             return chats[-1]
         
         return None
+

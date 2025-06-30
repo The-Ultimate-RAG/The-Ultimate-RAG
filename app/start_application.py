@@ -12,6 +12,7 @@ def main():
     os.chdir(app.settings.BASE_DIR)
 
     db_path = os.path.join(app.settings.BASE_DIR, "database")
+    print(db_path)
     
     try:
         shutil.rmtree(db_path)

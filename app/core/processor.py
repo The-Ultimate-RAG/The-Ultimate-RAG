@@ -1,4 +1,4 @@
-from langchain_community.document_loaders import PyPDFLoader, UnstructuredWordDocumentLoader, TextLoader
+from langchain_community.document_loaders import PyPDFLoader, UnstructuredWordDocumentLoader, TextLoader, CSVLoader, JSONLoader, UnstructuredMarkdownLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 from app.core.models import Embedder
@@ -19,7 +19,7 @@ class DocumentProcessor:
     chunks -> the list of chunks from loaded files
     chunks_unsaved -> the list of recently added chunks that have not been saved to db yet
     processed -> the list of files that were already splitted into chunks
-    upprocessed -> !processed
+    unprocessed -> !processed
     text_splitter -> text splitting strategy
     '''
 
@@ -72,14 +72,20 @@ class DocumentProcessor:
             loader = UnstructuredWordDocumentLoader(file_path=filepath)
         elif filepath.endswith(".txt"):
             loader = TextLoader(file_path=filepath)
-
+        elif filepath.endswith(".csv"):
+            loader = CSVLoader(file_path=filepath)
+        elif filepath.endswith(".json"):
+            loader = TextLoader(file_path=filepath)
+        elif filepath.endswith(".md"):
+            loader = UnstructuredMarkdownLoader(file_path=filepath)
+            
         if loader is None:
             raise RuntimeError("Unsupported type of file")
 
-        documents: list[
-            Document] = []  # We can not assign a single value to the document since .pdf are splitted into several files
+        documents: list[Document] = []  # We can not assign a single value to the document since .pdf are splitted into several files
         try:
             documents = loader.load()
+            # print("-" * 100, documents, "-" * 100, sep="\n")
         except Exception:
             raise RuntimeError("File is corrupted")
 
@@ -133,7 +139,6 @@ class DocumentProcessor:
             lines: list[str] = document.page_content.split("\n")
 
             for chunk in text:
-
                 start_l, end_l = self.get_start_end_lines(
                     splitted_text=lines,
                     start_char=chunk.metadata.get("start_index", 0),
@@ -159,7 +164,6 @@ class DocumentProcessor:
                 self.chunks_unsaved.append(newChunk)
 
             self.unprocessed = []
-            print(len(self.chunks_unsaved))
         return most_relevant
 
     '''

@@ -1,10 +1,10 @@
-from app.settings import settings
+from app.settings import settings, BASE_DIR
 import uvicorn
 import os
 from app.backend.models.db_service import automigrate
 
 def initialize_system() -> bool:
-    path = os.path.dirname(settings.base_dir)
+    path = BASE_DIR
     chats_storage_path = os.path.join(path, "chats_storage")
     database_path = os.path.join(path, "database")
 

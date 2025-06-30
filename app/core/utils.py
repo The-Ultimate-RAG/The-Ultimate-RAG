@@ -8,6 +8,7 @@ from app.core.rag_generator import RagSystem
 from app.settings import BASE_DIR
 
 from uuid import uuid4
+import markdown
 import os
 
 rag = None
@@ -109,6 +110,10 @@ def create_collection(user: User, chat_id: int, RAG: RagSystem) -> None:
     print(rag.get_collections_names())
 
 
+def lines_to_markdown(lines: list[str]) -> list[str]:
+    return [markdown.markdown(line) for line in lines]
+
+
 # <----------------------- Handlers ----------------------->
 def PDFHandler(request: Request, path: str, page: int, templates) -> Jinja2Templates.TemplateResponse:
     print(path)
@@ -156,9 +161,9 @@ def TextHandler(request: Request, path: str, lines: str, templates) -> Jinja2Tem
         current_template, 
         extend_context({
         "request": request, 
-        "text_before_citation": text_before_citation,
-        "text_after_citation": text_after_citation,
-        "citation": citation,
+        "text_before_citation": lines_to_markdown(text_before_citation),
+        "text_after_citation": lines_to_markdown(text_after_citation),
+        "citation": lines_to_markdown(citation),
         "anchor_added": anchor_added,
         "user": get_current_user(request)
         })

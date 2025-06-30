@@ -11,11 +11,11 @@ from app.settings import settings, BASE_DIR
 #
 class RagSystem:
     def __init__(self):
-        self.embedder = GeminiEmbed() if settings.user_gemini else Embedder(model=settings.models.embedder_model)
+        self.embedder = GeminiEmbed() if settings.use_gemini else Embedder(model=settings.models.embedder_model)
         self.reranker = Reranker(model=settings.models.reranker_model)
         self.processor = DocumentProcessor(self.embedder)
         self.db = VectorDatabase(embedder=self.embedder)
-        self.llm = GeminiLLM() if settings.user_gemini else LocalLLM()
+        self.llm = GeminiLLM() if settings.use_gemini else LocalLLM()
 
     '''
     Provides a prompt with substituted context from chunks
@@ -42,7 +42,7 @@ class RagSystem:
             "**CONTEXT DOCUMENTS**:\n"
             f"{sources}\n"
         )
-
+        print(prompt)
         return prompt
 
     '''
