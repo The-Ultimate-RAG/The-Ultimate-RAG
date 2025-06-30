@@ -1,8 +1,10 @@
-from sqlalchemy import Column, String, Integer
-from sqlalchemy.orm import relationship, Session
-from app.backend.models.base_model import Base
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import Session, relationship
+
 from app.backend.controllers.base_controller import engine
+from app.backend.models.base_model import Base
 from app.backend.models.chats import Chat
+
 
 class User(Base):
     __tablename__ = "users"
@@ -17,27 +19,37 @@ class User(Base):
 
 def add_new_user(email: str, password_hash: str, access_string_hash: str) -> None:
     with Session(autoflush=False, bind=engine) as db:
-        db.add(User(email=email, password_hash=password_hash, access_string_hash=access_string_hash))
+        db.add(
+            User(
+                email=email,
+                password_hash=password_hash,
+                access_string_hash=access_string_hash,
+            )
+        )
         db.commit()
 
 
 def find_user_by_id(id: int) -> User | None:
     with Session(autoflush=False, bind=engine) as db:
         return db.query(User).where(User.id == id).first()
-    
+
 
 def find_user_by_email(email: str) -> User | None:
     with Session(autoflush=False, bind=engine) as db:
         return db.query(User).where(User.email == email).first()
-    
+
 
 def find_user_by_access_string(access_string_hash: str) -> User | None:
     with Session(autoflush=False, bind=engine, expire_on_commit=False) as db:
-        user = db.query(User).where(User.access_string_hash == access_string_hash).first()
+        user = (
+            db.query(User).where(User.access_string_hash == access_string_hash).first()
+        )
         return user
-    
 
-def update_user(user: User, language: str = None, theme: str = None, access_string_hash: str = None) -> None:
+
+def update_user(
+    user: User, language: str = None, theme: str = None, access_string_hash: str = None
+) -> None:
     with Session(autoflush=False, bind=engine) as db:
         user = db.merge(user)
         if language:
@@ -53,15 +65,15 @@ def get_user_chats(user: User) -> list[Chat]:
     with Session(autoflush=False, bind=engine) as db:
         user = db.get(User, user.id)
         return user.chats
-    
+
 
 def get_user_last_chat(user: User) -> Chat | None:
     with Session(autoflush=False, bind=engine) as db:
         user = db.get(User, user.id)
-        
+
         chats = user.chats
 
         if chats is not None and len(chats):
             return chats[-1]
-        
+
         return None

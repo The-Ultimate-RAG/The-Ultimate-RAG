@@ -16,8 +16,10 @@ class TestSUserPasswordValidation(unittest.TestCase):
 
     def test_password_too_long(self):
         with self.assertRaises(ValueError) as cm:
-            SUser(email="test@example.ru",
-                  password="Strong.Password123!Strong.Password123!Strong.Password123!Strong.Password123!Strong.Passwor")
+            SUser(
+                email="test@example.ru",
+                password="Strong.Password123!Strong.Password123!Strong.Password123!Strong.Password123!Strong.Passwor",
+            )
         self.assertIn("String should have at most 32 characters", str(cm.exception))
 
     def test_email(self):
@@ -33,6 +35,6 @@ class TestSUserPasswordValidation(unittest.TestCase):
         except ValueError as e:
             self.fail(f"Valid password raised ValidationError: {e}")
 
-if __name__ == '__main__':
-    unittest.main()
 
+if __name__ == "__main__":
+    unittest.main()

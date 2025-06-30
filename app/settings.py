@@ -2,9 +2,10 @@
 This file consolidates parameters for logging, database connections, model paths, API settings, and security.
 """
 
-import torch
 import logging  # kind of advanced logger
 import os
+
+import torch
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -15,7 +16,7 @@ base_path = os.path.dirname(os.path.realpath(__file__))
 logging.basicConfig(
     level=logging.INFO,
     format="%(levelname)s: %(message)s",
-    handlers=[logging.StreamHandler()]
+    handlers=[logging.StreamHandler()],
 )
 
 # Qdrant vector database connection.
@@ -25,7 +26,7 @@ qdrant_client_config = {
 }
 
 # Automatically detects CUDA or uses CPU.
-device = "cuda" if torch.cuda.is_available() else 'cpu'
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
 embedder_model = "all-MiniLM-L6-v2"
 
@@ -70,17 +71,19 @@ gemini_generation_config = {
     "candidate_count": 1,
     "seed": 5,
     "max_output_tokens": 1001,
-    "stop_sequences": ['STOP!'],
+    "stop_sequences": ["STOP!"],
     "presence_penalty": 0.0,
     "frequency_penalty": 0.0,
 }
 
 use_gemini: bool = True
 
-max_delta = 0.15  # defines what is the minimum boundary for vectors to be considered similar
+max_delta = (
+    0.15  # defines what is the minimum boundary for vectors to be considered similar
+)
 
 postgres_client_config = {
-    "url": os.environ['DATABASE_URL'],
+    "url": os.environ["DATABASE_URL"],
     "echo": False,
 }
 

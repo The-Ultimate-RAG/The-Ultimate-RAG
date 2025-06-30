@@ -1,15 +1,15 @@
-import pytest
 import os
 from uuid import uuid4
 
 import httpx
 
-from app.backend.models.users import find_user_by_email
+from app.backend.models.messages import get_messages_by_chat_id
 from app.settings import base_path
 
 BASE_DIR = os.path.dirname(base_path)
 
-BASE_URL = os.environ.get('HF1_URL')
+# BASE_URL = os.environ.get("HF1_URL")
+BASE_URL = "https://andrchest-rag-integration-test.hf.space"
 
 
 def test_create_artificial_user() -> dict:
@@ -18,10 +18,12 @@ def test_create_artificial_user() -> dict:
     payload = {"email": email, "password": password}
 
     # Create user via API
-    response = httpx.post(url=BASE_URL + '/new_user', json=payload, timeout=30.0)
+    response = httpx.post(url=BASE_URL + "/new_user", json=payload, timeout=30.0)
     print(f"New user response: {response.status_code} - {response.text}")
     if response.status_code != 200:
-        raise RuntimeError(f"Failed to create artificial user: {response.status_code} - {response.text}")
+        raise RuntimeError(
+            f"Failed to create artificial user: {response.status_code} - {response.text}"
+        )
 
     # Log in to get access token
     response = httpx.post(url=BASE_URL + "/login", json=payload, timeout=30.0)
@@ -29,15 +31,13 @@ def test_create_artificial_user() -> dict:
     if response.status_code != 200:
         raise RuntimeError(f"Login failed: {response.status_code} - {response.text}")
 
-    access_token = response.cookies.get("access_token") or response.json().get("access_token")
+    access_token = response.cookies.get("access_token") or response.json().get(
+        "access_token"
+    )
     if not access_token:
         raise RuntimeError("No access token received from login")
 
-    return {
-        "email": email,
-        "password": password,
-        "access_token": access_token
-    }
+    return {"email": email, "password": password, "access_token": access_token}
 
 
 # def test_validate_user_creation():
@@ -69,17 +69,23 @@ def test_validate_chat_creation() -> dict:
     print(f"Login response: {response.status_code} - {response.text}")
     if response.status_code != 200:
         raise RuntimeError(f"Login failed: {response.status_code} - {response.text}")
-    access_token = response.cookies.get("access_token") or response.json().get("access_token")
+    access_token = response.cookies.get("access_token") or response.json().get(
+        "access_token"
+    )
     if not access_token:
         raise RuntimeError("No access token received from login")
     cookie = {"access_token": access_token}
     print(f"Access token: {access_token}")
 
     # Create chat
-    response = httpx.post(url=BASE_URL + '/new_chat', timeout=30.0, cookies=cookie)
-    print(f"New chat response: {response.status_code} - {response.headers.get('location')}")
+    response = httpx.post(url=BASE_URL + "/new_chat", timeout=30.0, cookies=cookie)
+    print(
+        f"New chat response: {response.status_code} - {response.headers.get('location')}"
+    )
     if response.status_code != 303:
-        raise RuntimeError(f"Error while trying to create chat: {response.status_code} - {response.text}")
+        raise RuntimeError(
+            f"Error while trying to create chat: {response.status_code} - {response.text}"
+        )
 
     redirect_to = response.headers.get("location")
     if not redirect_to or "login" in redirect_to:
@@ -89,10 +95,12 @@ def test_validate_chat_creation() -> dict:
     response = httpx.get(url=BASE_URL + redirect_to, cookies=cookie)
     print(f"Redirect response: {response.status_code}")
     if response.status_code != 200:
-        raise RuntimeError(f"Error while accessing chat: {response.status_code} - {response.text}")
+        raise RuntimeError(
+            f"Error while accessing chat: {response.status_code} - {response.text}"
+        )
 
     try:
-        chat_id = int(redirect_to.split('/')[-1].split('id=')[-1])
+        chat_id = int(redirect_to.split("/")[-1].split("id=")[-1])
         print(f"Parsed chat_id: {chat_id}")
     except ValueError as e:
         raise RuntimeError(f"Failed to parse chat_id from URL: {redirect_to} - {e}")
@@ -108,17 +116,21 @@ def test_validate_message_sending():
     if data is None:
         raise RuntimeError("validate_chat_creation returned None")
 
-    payload = {
-        "prompt": "How is your day?",
-        "chat_id": data["chat_id"]
-    }
-    response = httpx.post(url=BASE_URL + "/message_with_docs", cookies=data["cookie"], data=payload, timeout=180)
+    payload = {"prompt": "How is your day?", "chat_id": data["chat_id"]}
+    response = httpx.post(
+        url=BASE_URL + "/message_with_docs",
+        cookies=data["cookie"],
+        data=payload,
+        timeout=180,
+    )
     print(f"Message sending response: {response.status_code} - {response.text}")
 
     try:
         assert response.status_code == 200
     except Exception as e:
-        raise RuntimeError(f"Error while trying to send message - status: {response.status_code} - error: {e}")
+        raise RuntimeError(
+            f"Error while trying to send message - status: {response.status_code} - error: {e}"
+        )
 
 
 def test_validate_docs_uploading():
@@ -151,6 +163,36 @@ def test_validate_docs_uploading():
         assert response.status_code == 200
     except Exception as e:
         raise RuntimeError(f"Error while trying to send docs - error - {e}")
+
+
+def test_validate_message_registration():
+    data = test_validate_chat_creation()
+    initial = get_messages_by_chat_id(data["chat_id"]).count()
+
+    payload = {"prompt": "How is your day?", "chat_id": data["chat_id"]}
+    response = httpx.post(
+        url=BASE_URL + "/message_with_docs",
+        cookies=data["cookie"],
+        data=payload,
+        timeout=180,
+    )
+    print(f"Message sending response: {response.status_code} - {response.text}")
+
+    try:
+        assert response.status_code == 200
+    except Exception as e:
+        raise RuntimeError(
+            f"Error while trying to send message - status: {response.status_code} - error: {e}"
+        )
+
+    after_sending = get_messages_by_chat_id(data["chat_id"]).count()
+    print(after_sending, initial)
+    try:
+        assert after_sending - initial == 2
+    except Exception as e:
+        raise RuntimeError(
+            f"Error while trying to registrate new message - status: {response.status_code} - error: {e}"
+        )
 
 
 # if __name__ == '__main__':

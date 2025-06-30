@@ -1,14 +1,19 @@
+import time
+from uuid import UUID
+
+import numpy as np
+from fastapi import HTTPException
 from qdrant_client import QdrantClient  # main component to provide the access to db
 from qdrant_client.http.models import ScoredPoint
-from qdrant_client.models import VectorParams, Distance, \
-    PointStruct  # VectorParams -> config of vectors that will be used as primary keys
-from app.models import Embedder  # Distance -> defines the metric
+from qdrant_client.models import (  # VectorParams -> config of vectors that will be used as primary keys
+    Distance,
+    PointStruct,
+    VectorParams,
+)
+
 from app.chunks import Chunk  # PointStruct -> instance that will be stored in db
-import numpy as np
-from uuid import UUID
-from app.settings import qdrant_client_config, max_delta
-import time
-from fastapi import HTTPException
+from app.models import Embedder  # Distance -> defines the metric
+from app.settings import max_delta, qdrant_client_config
 
 
 class VectorDatabase:
@@ -16,21 +21,29 @@ class VectorDatabase:
         self.host: str = host
         self.client: QdrantClient = self._initialize_qdrant_client()
         self.embedder: Embedder = embedder  # embedder is used to convert a user's query
-        self.already_stored: np.array[np.array] = np.array([]).reshape(0, embedder.get_vector_dimensionality()) # should be already normalized
+        self.already_stored: np.array[np.array] = np.array([]).reshape(
+            0, embedder.get_vector_dimensionality()
+        )  # should be already normalized
 
-
-    def store(self, collection_name: str, chunks: list[Chunk], batch_size: int = 1000) -> None:
+    def store(
+        self, collection_name: str, chunks: list[Chunk], batch_size: int = 1000
+    ) -> None:
         points: list[PointStruct] = []
 
         vectors = self.embedder.encode([chunk.get_raw_text() for chunk in chunks])
 
         for vector, chunk in zip(vectors, chunks):
             if self.accept_vector(collection_name, vector):
-                points.append(PointStruct(
-                    id=str(chunk.id),
-                    vector=vector,
-                    payload={"metadata": chunk.get_metadata(), "text": chunk.get_raw_text()}
-                ))
+                points.append(
+                    PointStruct(
+                        id=str(chunk.id),
+                        vector=vector,
+                        payload={
+                            "metadata": chunk.get_metadata(),
+                            "text": chunk.get_raw_text(),
+                        },
+                    )
+                )
 
         if len(points):
             for group in range(0, len(points), batch_size):
@@ -40,24 +53,21 @@ class VectorDatabase:
                     wait=False,
                 )
 
-
-    '''
+    """
     Measures a cosine of angle between tow vectors
-    '''
+    """
+
     def cosine_similarity(self, vec1, vec2):
         return vec1 @ vec2 / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
 
-
-    '''
+    """
     Defines weather the vector should be stored in the db by searching for the most
     similar one
-    '''
+    """
+
     def accept_vector(self, collection_name: str, vector: np.array) -> bool:
         most_similar = self.client.query_points(
-            collection_name=collection_name,
-            query=vector,
-            limit=1,
-            with_vectors=True
+            collection_name=collection_name, query=vector, limit=1, with_vectors=True
         ).points
 
         if not len(most_similar):
@@ -69,20 +79,17 @@ class VectorDatabase:
             return False
         return True
 
-
-    '''
+    """
     According to tests, re-ranker needs ~7-10 chunks to generate the most accurate hit
 
     TODO: implement hybrid search
-    '''
+    """
 
     def search(self, collection_name: str, query: str, top_k: int = 5) -> list[Chunk]:
         query_embedded: np.ndarray = self.embedder.encode(query)
 
         points: list[ScoredPoint] = self.client.query_points(
-            collection_name=collection_name,
-            query=query_embedded,
-            limit=top_k
+            collection_name=collection_name, query=query_embedded, limit=top_k
         ).points
 
         return [
@@ -93,10 +100,10 @@ class VectorDatabase:
                 start_index=point.payload.get("metadata", {}).get("start_index", 0),
                 start_line=point.payload.get("metadata", {}).get("start_line", 0),
                 end_line=point.payload.get("metadata", {}).get("end_line", 0),
-                text=point.payload.get("text", "")
-            ) for point in points
+                text=point.payload.get("text", ""),
+            )
+            for point in points
         ]
-
 
     def _initialize_qdrant_client(self, max_retries=5, delay=2) -> QdrantClient:
         for attempt in range(max_retries):
@@ -109,24 +116,25 @@ class VectorDatabase:
                     raise HTTPException(
                         500,
                         f"Failed to connect to Qdrant server after {max_retries} attempts. "
-                        f"Last error: {str(e)}"
+                        f"Last error: {str(e)}",
                     )
 
-                print(f"Connection attempt {attempt + 1} out of {max_retries} failed. "
-                      f"Retrying in {delay} seconds...")
+                print(
+                    f"Connection attempt {attempt + 1} out of {max_retries} failed. "
+                    f"Retrying in {delay} seconds..."
+                )
 
                 time.sleep(delay)
                 delay *= 2
-
 
     def _check_collection_exists(self, collection_name: str) -> bool:
         try:
             return self.client.collection_exists(collection_name)
         except Exception as e:
             raise HTTPException(
-                500, f"Failed to check collection {collection_name} exists. Last error: {str(e)}"
+                500,
+                f"Failed to check collection {collection_name} exists. Last error: {str(e)}",
             )
-
 
     def _create_collection(self, collection_name: str) -> None:
         try:
@@ -134,12 +142,13 @@ class VectorDatabase:
                 collection_name=collection_name,
                 vectors_config=VectorParams(
                     size=self.embedder.get_vector_dimensionality(),
-                    distance=Distance.COSINE
-                )
+                    distance=Distance.COSINE,
+                ),
             )
         except Exception as e:
-            raise HTTPException(500, f"Failed to create collection {self.collection_name}: {str(e)}")
-
+            raise HTTPException(
+                500, f"Failed to create collection {self.collection_name}: {str(e)}"
+            )
 
     def create_collection(self, collection_name: str) -> None:
         try:
@@ -150,11 +159,9 @@ class VectorDatabase:
             print(e)
             raise HTTPException(500, e)
 
-
     def __del__(self):
         if hasattr(self, "client"):
             self.client.close()
-
 
     def get_collections(self) -> list[str]:
         try:

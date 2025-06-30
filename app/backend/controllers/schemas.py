@@ -1,11 +1,13 @@
-from pydantic import BaseModel, Field, EmailStr, field_validator
 import re
+
+from pydantic import BaseModel, EmailStr, Field, field_validator
+
 
 class SUser(BaseModel):
     email: EmailStr
     password: str = Field(default=..., min_length=8, max_length=32)
 
-    @field_validator('password', mode='before')
+    @field_validator("password", mode="before")
     def validate_password(cls, password_to_validate):
         """
         Validates the strength of the password.

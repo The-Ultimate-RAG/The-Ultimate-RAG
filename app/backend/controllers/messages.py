@@ -1,10 +1,13 @@
-from app.backend.models.messages import new_message
 import re
+
+from app.backend.models.messages import new_message
 
 
 def remove_html_tags(content: str) -> str:
     pattern = "<(.*?)>"
-    replace_with = "<a href=https://www.youtube.com/results?search_query=rickroll>click me</a>"
+    replace_with = (
+        "<a href=https://www.youtube.com/results?search_query=rickroll>click me</a>"
+    )
     de_taggeed = re.sub(pattern, "REPLACE_WITH_RICKROLL", content)
 
     return de_taggeed.replace("REPLACE_WITH_RICKROLL", replace_with)
