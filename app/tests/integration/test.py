@@ -1,6 +1,6 @@
-from app.backend.models.users import User
-from app.backend.models.chats import Chat
-from app.backend.models.messages import Message
+from app.backend.models.users import User  # noqa: F401
+from app.backend.models.chats import Chat  # noqa: F401
+from app.backend.models.messages import Message  # noqa: F401
 import os
 from uuid import uuid4
 
@@ -13,6 +13,7 @@ BASE_DIR = os.path.dirname(base_path)
 
 # BASE_URL = os.environ.get("HF1_URL")
 BASE_URL = "https://andrchest-rag-integration-test.hf.space"
+
 
 def test_create_artificial_user() -> dict:
     email = "Test" + str(uuid4()) + "@test.com"
@@ -170,7 +171,8 @@ def test_validate_message_registration():
     try:
         assert after_sending - initial == 2
     except Exception as e:
-        raise RuntimeError(f"Error while trying to registrate new message - status: {response.status_code} - error: {e}")
+        raise RuntimeError(
+            f"Error while trying to registrate new message - status: {response.status_code} - error: {e}")
 
 # if __name__ == '__main__':
 #     try:
