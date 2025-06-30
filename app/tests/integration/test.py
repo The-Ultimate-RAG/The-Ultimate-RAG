@@ -1,3 +1,6 @@
+from app.backend.models.users import User
+from app.backend.models.chats import Chat
+from app.backend.models.messages import Message
 import os
 from uuid import uuid4
 
@@ -10,7 +13,6 @@ BASE_DIR = os.path.dirname(base_path)
 
 # BASE_URL = os.environ.get("HF1_URL")
 BASE_URL = "https://andrchest-rag-integration-test.hf.space"
-
 
 def test_create_artificial_user() -> dict:
     email = "Test" + str(uuid4()) + "@test.com"
@@ -38,24 +40,6 @@ def test_create_artificial_user() -> dict:
         raise RuntimeError("No access token received from login")
 
     return {"email": email, "password": password, "access_token": access_token}
-
-
-# def test_validate_user_creation():
-#     payload = {
-#         "email": "Test1@test.com",
-#         "password": "Test1@test.com",
-#     }
-#     response = httpx.post(url=BASE_URL + '/new_user', json=payload, timeout=30.0)
-#     try:
-#         assert response.status_code == 200
-#     except Exception as e:
-#         raise RuntimeError(
-#             f"Error while trying to create user: Error with API response - status code - {response.status_code} - msg: {e}")
-#
-#     try:
-#         assert find_user_by_email("Test1@test.com") is not None
-#     except Exception as e:
-#         raise RuntimeError(f"Error while trying to create user: Error with DB response - msg: {e}")
 
 
 # ATTENTION - KOSTYLY - returns newly created chat id and cookie (it is so to avoid another "useful" method for artificial chat creation)
@@ -169,31 +153,24 @@ def test_validate_message_registration():
     data = test_validate_chat_creation()
     initial = get_messages_by_chat_id(data["chat_id"]).count()
 
-    payload = {"prompt": "How is your day?", "chat_id": data["chat_id"]}
-    response = httpx.post(
-        url=BASE_URL + "/message_with_docs",
-        cookies=data["cookie"],
-        data=payload,
-        timeout=180,
-    )
+    payload = {
+        "prompt": "How is your day?",
+        "chat_id": data["chat_id"]
+    }
+    response = httpx.post(url=BASE_URL + "/message_with_docs", cookies=data["cookie"], data=payload, timeout=180)
     print(f"Message sending response: {response.status_code} - {response.text}")
 
     try:
         assert response.status_code == 200
     except Exception as e:
-        raise RuntimeError(
-            f"Error while trying to send message - status: {response.status_code} - error: {e}"
-        )
+        raise RuntimeError(f"Error while trying to send message - status: {response.status_code} - error: {e}")
 
     after_sending = get_messages_by_chat_id(data["chat_id"]).count()
     print(after_sending, initial)
     try:
         assert after_sending - initial == 2
     except Exception as e:
-        raise RuntimeError(
-            f"Error while trying to registrate new message - status: {response.status_code} - error: {e}"
-        )
-
+        raise RuntimeError(f"Error while trying to registrate new message - status: {response.status_code} - error: {e}")
 
 # if __name__ == '__main__':
 #     try:
