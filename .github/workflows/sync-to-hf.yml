@@ -20,6 +20,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest
           pip install -r app/requirements.txt
+      - name: Initialize directories
+        run: |
+          python -m app/initializer.py
       - name: Debug directory structure
         run: |
           ls -R
