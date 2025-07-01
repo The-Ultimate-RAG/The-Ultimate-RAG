@@ -131,17 +131,22 @@ Get user from token stored in cookies
 
 
 def get_current_user(request: Request) -> User | None:
+    user = None
     token: str | None = request.cookies.get("access_token")
     if not token:
         return None
 
-    access_string = jwt.decode(
-        jwt=bytes(token, encoding='utf-8'),
-        key=settings.secret_pepper.get_secret_value(),
-        algorithms=[settings.jwt_algorithm.get_secret_value()]
-    ).get('access_string')
+    try:
+        access_string = jwt.decode(
+            jwt=bytes(token, encoding='utf-8'),
+            key=settings.secret_pepper.get_secret_value(),
+            algorithms=[settings.jwt_algorithm.get_secret_value()]
+        ).get('access_string')
 
-    user = find_user_by_access_string(hash_access_string(access_string))
+        user = find_user_by_access_string(hash_access_string(access_string))
+    except Exception as e:
+        print(e)
+    
     if not user:
         return None
 

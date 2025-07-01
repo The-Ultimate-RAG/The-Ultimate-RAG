@@ -6,6 +6,7 @@ from email.mime.text import MIMEText
 from secrets import token_urlsafe
 
 from sympy.liealgebras.type_e import TypeE
+from app.backend.auth.exceptions import AuthorizationError
 from app.backend.auth.utils import hash_access_string, create_access_token
 from app.backend.models.users import UserController, User, UserAlreadyExistsError, UserNotFoundError
 from utils import hash_password, create_access_string, verify_password

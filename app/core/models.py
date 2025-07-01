@@ -106,6 +106,21 @@ class GeminiLLM:
 
         return response.text
 
+    async def get_streaming_response(self, prompt: str, stream: bool = True, logging: bool = True,
+                     use_default_config: bool = False):
+        path_to_prompt = os.path.join(BASE_DIR, "prompt.txt")
+        with open(path_to_prompt, "w", encoding="utf-8", errors="replace") as f:
+            f.write(prompt)
+
+        response = self.client.models.generate_content_stream(
+            model=self.model,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                **settings.gemini_generation.model_dump()) if use_default_config else None
+        )
+
+        for chunk in response:
+            yield chunk
 
 class GeminiEmbed:
     def __init__(self, model="text-embedding-004"):

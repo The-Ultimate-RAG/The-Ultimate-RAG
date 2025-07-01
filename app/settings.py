@@ -108,6 +108,8 @@ class Settings(BaseSettings):
     device: str = Field(default_factory=lambda: "cuda" if torch.cuda.is_available() else "cpu")
     base_dir: Path = BASE_DIR
 
+    stream: bool = True
+    
     secret_pepper: SecretStr = Field(..., validation_alias="SECRET_PEPPER")
     jwt_algorithm: SecretStr = Field(..., validation_alias="JWT_ALGORITHM")
     api_key: SecretStr = Field(..., validation_alias="GEMINI_API_KEY")

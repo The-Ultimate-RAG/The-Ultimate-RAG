@@ -113,7 +113,6 @@ def create_collection(user: User, chat_id: int, RAG: RagSystem) -> None:
 def lines_to_markdown(lines: list[str]) -> list[str]:
     return [markdown.markdown(line) for line in lines]
 
-
 # <----------------------- Handlers ----------------------->
 def PDFHandler(request: Request, path: str, page: int, templates) -> Jinja2Templates.TemplateResponse:
     print(path)

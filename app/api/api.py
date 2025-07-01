@@ -1,5 +1,5 @@
 from fastapi import FastAPI, UploadFile, Form, File, HTTPException, Response, Request, Depends
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse, RedirectResponse, StreamingResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -12,8 +12,7 @@ from app.backend.schemas import SUser
 from app.backend.models.users import User
 
 from app.core.utils import TextHandler, PDFHandler, protect_chat, extend_context, initialize_rag, save_documents, construct_collection_name, create_collection
-from app.tests.integration.test import validate_user_creation
-from app.settings import BASE_DIR, url_user_not_required
+from app.settings import BASE_DIR, url_user_not_required, settings
 from app.core.document_validator import path_is_valid
 from app.core.response_parser import add_links
 from typing import Optional
@@ -80,8 +79,9 @@ def root(request: Request):
 
 
 @api.post("/message_with_docs")
-async def send_message(request: Request, files: list[UploadFile] = File(None), prompt: str = Form(...), chat_id = Form(None), user: User = Depends(get_current_user)):
-    response = ""
+async def send_message(request: Request, files: list[UploadFile] = File(None), prompt: str = Form(...), chat_id = Form(None), 
+                       user: User = Depends(get_current_user)) -> StreamingResponse:
+    # response = ""
     status = 200
     try:
         collection_name = construct_collection_name(user, chat_id)
@@ -90,18 +90,24 @@ async def send_message(request: Request, files: list[UploadFile] = File(None), p
         
         await save_documents(collection_name, files=files, RAG=rag, user=user, chat_id=chat_id)
 
-        response_raw = rag.generate_response(collection_name=collection_name, user_prompt=prompt)
-        response = add_links(response_raw)
-
-        register_message(content=response, sender="assistant", chat_id=int(chat_id))
-        print(response)
+        # response = rag.generate_response_stream(collection_name=collection_name, user_prompt=prompt, stream=True)
+        # async def stream_response():
+        #     async for chunk in response:
+        #         yield chunk.json()
+        
+        return StreamingResponse(rag.generate_response_stream(collection_name=collection_name, user_prompt=prompt, 
+                                stream=True), status, media_type="text/event-stream")
     except Exception as e:
         status = 500
         print(e)
 
-    print(response)
-    
-    return {"response": response, "status": status}
+
+@api.post("/replace_message")
+async def replace_message(request: Request):
+    data = await request.json()
+    updated_message = add_links(data.get("message", ""))
+    register_message(content=updated_message, sender="assistant", chat_id=int(data.get("chat_id", 0)))
+    return JSONResponse({"updated_message": updated_message})
 
 
 @api.get("/viewer")
