@@ -84,7 +84,7 @@ class GeminiEmbeddingSettings(BaseModel):
 
 
 class PostgresSettings(BaseModel):
-    url: str = os.environ["POSTGRES_URL"]
+    url: str = os.environ["DATABASE_URL"]
     echo: bool = False
 
 

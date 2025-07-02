@@ -1,5 +1,5 @@
 import pytest
-from app.backend.controllers.schemas import SUser
+from app.backend.schemas import SUser
 
 
 def test_password_no_digit():

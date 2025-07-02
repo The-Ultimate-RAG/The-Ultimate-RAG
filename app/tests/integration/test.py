@@ -7,12 +7,12 @@ from uuid import uuid4
 import httpx
 
 from app.backend.models.messages import get_messages_by_chat_id
-from app.settings import base_path
+from app.settings import BASE_DIR
 
-BASE_DIR = os.path.dirname(base_path)
+# BASE_DIR = os.path.dirname(base_path)
 
 # BASE_URL = os.environ.get("HF1_URL")
-BASE_URL = "https://andrchest-rag-integration-test.hf.space"
+BASE_URL = os.environ.get('HF1_URL')
 
 
 def test_create_artificial_user() -> dict:
