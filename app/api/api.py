@@ -1,49 +1,56 @@
-import os
-from typing import Optional
-
 from fastapi import (
-    Depends,
     FastAPI,
-    File,
-    Form,
-    HTTPException,
-    Request,
-    Response,
     UploadFile,
+    Form,
+    File,
+    HTTPException,
+    Response,
+    Request,
+    Depends,
 )
-from fastapi.responses import FileResponse, RedirectResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi.responses import (
+    FileResponse,
+    RedirectResponse,
+    StreamingResponse,
+    JSONResponse,
+)
 from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 
+from app.backend.controllers.users import (
+    create_user,
+    authenticate_user,
+    check_cookie,
+    clear_cookie,
+    get_current_user,
+    get_latest_chat,
+)
 from app.backend.controllers.chats import (
     create_new_chat,
     get_chat_with_messages,
     update_title,
 )
 from app.backend.controllers.messages import register_message
-from app.backend.controllers.schemas import SUser
-from app.backend.controllers.users import (
-    authenticate_user,
-    check_cookie,
-    clear_cookie,
-    create_user,
-    get_current_user,
-    get_latest_chat,
-)
+from app.backend.login_admin import login_as_admin
+from app.backend.schemas import SUser
 from app.backend.models.users import User
-from app.document_validator import path_is_valid
-from app.response_parser import add_links
-from app.settings import base_path, url_user_not_required
-from app.utils import (
-    PDFHandler,
+
+from app.core.utils import (
     TextHandler,
-    construct_collection_name,
-    create_collection,
+    PDFHandler,
+    protect_chat,
     extend_context,
     initialize_rag,
-    protect_chat,
     save_documents,
+    construct_collection_name,
+    create_collection,
 )
+from app.settings import BASE_DIR, url_user_not_required
+from app.core.document_validator import path_is_valid
+from app.core.response_parser import add_links
+from typing import Optional
+import os
 
 # TODO: implement a better TextHandler
 # TODO: optionally implement DocHandler
@@ -52,16 +59,17 @@ api = FastAPI()
 
 api.mount(
     "/chats_storage",
-    StaticFiles(directory=os.path.join(os.path.dirname(base_path), "chats_storage")),
+    StaticFiles(directory=os.path.join(BASE_DIR, "chats_storage")),
     name="chats_storage",
 )
 api.mount(
     "/static",
-    StaticFiles(directory=os.path.join(base_path, "frontend", "static")),
+    StaticFiles(directory=os.path.join(BASE_DIR, "app", "frontend", "static")),
     name="static",
 )
-
-templates = Jinja2Templates(directory=os.path.join(base_path, "frontend", "templates"))
+templates = Jinja2Templates(
+    directory=os.path.join(BASE_DIR, "app", "frontend", "templates")
+)
 rag = initialize_rag()
 
 # NOTE: carefully read documentation to require_user
@@ -92,7 +100,7 @@ url_user_not_required list in settings.py (/ should be removed)
 
 @api.middleware("http")
 async def require_user(request: Request, call_next):
-    print(request.url.path, request.method)
+    print(request.url.path, request.method, request.url.port)
 
     awaitable_response = AwaitableResponse(RedirectResponse("/login", status_code=303))
     stripped_path = request.url.path.strip("/")
@@ -129,9 +137,9 @@ async def send_message(
     prompt: str = Form(...),
     chat_id=Form(None),
     user: User = Depends(get_current_user),
-):
-    response = ""
-
+) -> StreamingResponse:
+    # response = ""
+    status = 200
     try:
         collection_name = construct_collection_name(user, chat_id)
 
@@ -141,19 +149,31 @@ async def send_message(
             collection_name, files=files, RAG=rag, user=user, chat_id=chat_id
         )
 
-        response_raw = rag.generate_response(
-            collection_name=collection_name, user_prompt=prompt
-        )
-        response = add_links(response_raw)
+        # response = rag.generate_response_stream(collection_name=collection_name, user_prompt=prompt, stream=True)
+        # async def stream_response():
+        #     async for chunk in response:
+        #         yield chunk.json()
 
-        register_message(content=response, sender="assistant", chat_id=int(chat_id))
-        print(response)
+        return StreamingResponse(
+            rag.generate_response_stream(
+                collection_name=collection_name, user_prompt=prompt, stream=True
+            ),
+            status,
+            media_type="text/event-stream",
+        )
     except Exception as e:
+        status = 500
         print(e)
 
-    print(response)
 
-    return {"response": response, "status": 200}
+@api.post("/replace_message")
+async def replace_message(request: Request):
+    data = await request.json()
+    updated_message = add_links(data.get("message", ""))
+    register_message(
+        content=updated_message, sender="assistant", chat_id=int(data.get("chat_id", 0))
+    )
+    return JSONResponse({"updated_message": updated_message})
 
 
 @api.get("/viewer")
@@ -170,7 +190,7 @@ def show_document(
     ext = path.split(".")[-1]
     if ext == "pdf":
         return PDFHandler(request, path=path, page=page, templates=templates)
-    elif ext in ("txt", "csv", "md"):
+    elif ext in ("txt", "csv", "md", "json"):
         return TextHandler(request, path=path, lines=lines, templates=templates)
     elif ext in ("docx", "doc"):
         return TextHandler(
@@ -182,7 +202,7 @@ def show_document(
 
 # <--------------------------------- Get --------------------------------->
 @api.get("/new_user")
-def new_user_get(request: Request):
+def new_user_post(request: Request):
     current_template = "pages/registration.html"
     return templates.TemplateResponse(
         current_template, extend_context({"request": request})
@@ -266,13 +286,36 @@ def last_user_chat(request: Request, user: User = Depends(get_current_user)):
 
 # <--------------------------------- Post --------------------------------->
 @api.post("/new_user")
-def new_user_post(response: Response, user: SUser):
+def new_user(response: Response, user: SUser):
     return create_user(response, user.email, user.password)
 
 
+# TODO: remove admin validation as troubleshooting ends
+
+
+class LoginData(BaseModel):
+    email: str
+    password: str
+
+
+# TODO: Use normal authentification (without admin@mail.ru: admin)
+# TODO: same for html login file (change type=text to email)
 @api.post("/login")
-def login_post(response: Response, user: SUser):
-    return authenticate_user(response, user.email, user.password)
+def login_post(response: Response, user_data: LoginData):
+    # Special case for admin login
+    if user_data.email == "admin" and user_data.password == "admin":
+        return login_as_admin(response)
+
+    try:
+        # Validate the user data against the SUser schema for regular users
+        # This enforces email format and password complexity for non-admins
+        user_schema = SUser(email=user_data.email, password=user_data.password)
+    except ValueError as e:
+        # If validation fails, return a detailed error
+        raise HTTPException(status_code=422, detail=f"Validation error: {e}")
+
+    # If validation passes, proceed with the standard authentication process
+    return authenticate_user(response, user_schema.email, user_schema.password)
 
 
 @api.post("/new_chat")
@@ -294,3 +337,7 @@ def create_chat(
         raise HTTPException(500, e)
 
     return RedirectResponse(url, status_code=303)
+
+
+if __name__ == "__main__":
+    pass

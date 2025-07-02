@@ -1,10 +1,9 @@
-import os
+from app.core.models import LocalLLM, Embedder, Reranker, GeminiLLM, GeminiEmbed
+from app.core.processor import DocumentProcessor
+from app.core.database import VectorDatabase
 import time
-
-from app.database import VectorDatabase
-from app.models import Embedder, Gemini, LocalLLM, Reranker
-from app.processor import DocumentProcessor
-from app.settings import base_path, embedder_model, reranker_model, use_gemini
+import os
+from app.settings import settings, BASE_DIR
 
 
 # TODO: write a better prompt
@@ -12,11 +11,15 @@ from app.settings import base_path, embedder_model, reranker_model, use_gemini
 #
 class RagSystem:
     def __init__(self):
-        self.embedder = Embedder(model=embedder_model)
-        self.reranker = Reranker(model=reranker_model)
+        self.embedder = (
+            GeminiEmbed()
+            if settings.use_gemini
+            else Embedder(model=settings.models.embedder_model)
+        )
+        self.reranker = Reranker(model=settings.models.reranker_model)
         self.processor = DocumentProcessor(self.embedder)
         self.db = VectorDatabase(embedder=self.embedder)
-        self.llm = Gemini() if use_gemini else LocalLLM()
+        self.llm = GeminiLLM() if settings.use_gemini else LocalLLM()
 
     """
     Provides a prompt with substituted context from chunks
@@ -37,8 +40,10 @@ class RagSystem:
             )
             sources += f"Original text:\n{chunk.get_raw_text()}\nCitation:{citation}"
 
-        with open(os.path.join(base_path, "prompt_templates", "test2.txt")) as f:
-            prompt = f.read()
+        with open(
+            os.path.join(BASE_DIR, "app", "prompt_templates", "test2.txt")
+        ) as prompt_file:
+            prompt = prompt_file.read()
 
         prompt += (
             "**QUESTION**: "
@@ -46,7 +51,7 @@ class RagSystem:
             "**CONTEXT DOCUMENTS**:\n"
             f"{sources}\n"
         )
-
+        print(prompt)
         return prompt
 
     """
@@ -99,19 +104,22 @@ class RagSystem:
                     f"loading time = {loading_time}, chunk generation time = {chunk_generating_time}, saving time = {db_saving_time}\n"
                 )
 
+    def extract_text(self, response) -> str:
+        text = ""
+        try:
+            text = response.candidates[0].content.parts[0].text
+        except Exception as e:
+            print(e)
+        return text
+
     """
     Produces answer to user's request. First, finds the most relevant chunks, generates prompt with them, and asks llm
     """
 
-    def generate_response(self, collection_name: str, user_prompt: str) -> str:
+    async def generate_response(
+        self, collection_name: str, user_prompt: str, stream: bool = True
+    ) -> str:
         relevant_chunks = self.db.search(collection_name, query=user_prompt, top_k=15)
-        # try:
-        #     relevant_chunks = [relevant_chunks[ranked["corpus_id"]]
-        #                     for ranked in self.reranker.rank(query=user_prompt, chunks=relevant_chunks)[:min(3, len(relevant_chunks))]]
-        # except Exception as e:
-        #     print(e)
-        #     relevant_chunks = []
-
         if relevant_chunks is not None and len(relevant_chunks) > 0:
             ranks = self.reranker.rank(query=user_prompt, chunks=relevant_chunks)[
                 : min(5, len(relevant_chunks))
@@ -123,7 +131,29 @@ class RagSystem:
         general_prompt = self.get_prompt_template(
             user_prompt=user_prompt, chunks=relevant_chunks
         )
+
         return self.llm.get_response(prompt=general_prompt)
+
+    async def generate_response_stream(
+        self, collection_name: str, user_prompt: str, stream: bool = True
+    ) -> str:
+        relevant_chunks = self.db.search(collection_name, query=user_prompt, top_k=15)
+        if relevant_chunks is not None and len(relevant_chunks) > 0:
+            ranks = self.reranker.rank(query=user_prompt, chunks=relevant_chunks)[
+                : min(5, len(relevant_chunks))
+            ]
+            relevant_chunks = [relevant_chunks[rank["corpus_id"]] for rank in ranks]
+        else:
+            relevant_chunks = []
+
+        general_prompt = self.get_prompt_template(
+            user_prompt=user_prompt, chunks=relevant_chunks
+        )
+
+        async for chunk in self.llm.get_streaming_response(
+            prompt=general_prompt, stream=True
+        ):
+            yield self.extract_text(chunk)
 
     """
     Produces the list of the most relevant chunkВs

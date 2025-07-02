@@ -1,8 +1,7 @@
-from sqlalchemy import Column, ForeignKey, Integer, String
-from sqlalchemy.orm import Session, relationship
-
-from app.backend.controllers.base_controller import engine
 from app.backend.models.base_model import Base
+from sqlalchemy import Integer, String, Column, ForeignKey
+from sqlalchemy.orm import relationship, Session
+from app.backend.controllers.base_controller import engine
 
 
 class Chat(Base):

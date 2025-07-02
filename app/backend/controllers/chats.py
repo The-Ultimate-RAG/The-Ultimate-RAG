@@ -1,24 +1,22 @@
-import os
-from datetime import datetime, timedelta
-
-from fastapi import HTTPException
-
+from app.backend.models.users import User, get_user_chats
 from app.backend.models.chats import (
+    new_chat,
     get_chat_by_id,
     get_chats_by_user_id,
-    new_chat,
     refresh_title,
 )
-from app.backend.models.messages import Message, get_messages_by_chat_id
-from app.backend.models.users import User, get_user_chats
-from app.settings import base_path
+from app.backend.models.messages import get_messages_by_chat_id, Message
+from app.settings import BASE_DIR
+from fastapi import HTTPException
+from datetime import datetime, timedelta
+import os
 
 
 def create_new_chat(title: str | None, user: User) -> dict:
     chat_id = new_chat(title, user)
     try:
         path_to_chat = os.path.join(
-            os.path.dirname(base_path),
+            BASE_DIR,
             "chats_storage",
             f"user_id={user.id}",
             f"chat_id={chat_id}",

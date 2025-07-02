@@ -1,19 +1,17 @@
-import time
-from uuid import UUID
-
-import numpy as np
-from fastapi import HTTPException
 from qdrant_client import QdrantClient  # main component to provide the access to db
 from qdrant_client.http.models import ScoredPoint
-from qdrant_client.models import (  # VectorParams -> config of vectors that will be used as primary keys
+from qdrant_client.models import (
+    VectorParams,
     Distance,
     PointStruct,
-    VectorParams,
-)
-
-from app.chunks import Chunk  # PointStruct -> instance that will be stored in db
-from app.models import Embedder  # Distance -> defines the metric
-from app.settings import max_delta, qdrant_client_config
+)  # VectorParams -> config of vectors that will be used as primary keys
+from app.core.models import Embedder  # Distance -> defines the metric
+from app.core.chunks import Chunk  # PointStruct -> instance that will be stored in db
+import numpy as np
+from uuid import UUID
+from app.settings import settings
+import time
+from fastapi import HTTPException
 
 
 class VectorDatabase:
@@ -58,7 +56,9 @@ class VectorDatabase:
     """
 
     def cosine_similarity(self, vec1, vec2):
-        return vec1 @ vec2 / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
+        vec1_np = np.array(vec1)
+        vec2_np = np.array(vec2)
+        return vec1_np @ vec2_np / (np.linalg.norm(vec1_np) * np.linalg.norm(vec2_np))
 
     """
     Defines weather the vector should be stored in the db by searching for the most
@@ -75,7 +75,7 @@ class VectorDatabase:
         else:
             most_similar = most_similar[0]
 
-        if 1 - self.cosine_similarity(vector, most_similar.vector) < max_delta:
+        if 1 - self.cosine_similarity(vector, most_similar.vector) < settings.max_delta:
             return False
         return True
 
@@ -87,6 +87,9 @@ class VectorDatabase:
 
     def search(self, collection_name: str, query: str, top_k: int = 5) -> list[Chunk]:
         query_embedded: np.ndarray = self.embedder.encode(query)
+
+        if isinstance(query_embedded, list):
+            query_embedded = query_embedded[0]
 
         points: list[ScoredPoint] = self.client.query_points(
             collection_name=collection_name, query=query_embedded, limit=top_k
@@ -108,7 +111,7 @@ class VectorDatabase:
     def _initialize_qdrant_client(self, max_retries=5, delay=2) -> QdrantClient:
         for attempt in range(max_retries):
             try:
-                client = QdrantClient(**qdrant_client_config)
+                client = QdrantClient(**settings.qdrant.model_dump())
                 client.get_collections()
                 return client
             except Exception as e:

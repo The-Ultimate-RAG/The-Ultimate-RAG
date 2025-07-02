@@ -50,18 +50,14 @@
             const query = document.getElementById('queryInput').value.trim();
             if (!query) return alert('Please enter a question');
 
-            // Add user message
             addMessageToChat('user', escapeHTML(query));
             document.getElementById('queryInput').value = '';
-
-            // Show loading indicator
-            const loadingId = addMessageToChat('assistant', 'Thinking...', true);
+            const loadingId = addMessageToChat('assistant', '', true);
 
             try {
                 const formData = new FormData();
                 const fileInput = document.getElementById('fileInput');
                 const files = fileInput.files;
-
                 for (let i = 0; i < files.length; i++) {
                     formData.append('files', files[i]);
                 }
@@ -74,27 +70,55 @@
                 });
 
                 if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-                
-                const data = await response.json();
-                
-                // Update conversation ID if new
-                if (!conversationId && data.chat_id) {
-                    conversationId = data.chat_id;
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder("utf-8");
+                let fullMessage = "";
+
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value, { stream: true });
+                    fullMessage += chunk;
+                    updateMessageContent(loadingId, marked.parse(fullMessage));
                 }
-                
-                // Update UI
+
                 removeMessage(loadingId);
-                addMessageToChat('assistant', data.response);
-                
-                // Store history (optional)
-                conversationHistory = data.history || [];
-                
+                const finalId = addMessageToChat('assistant', marked.parse(fullMessage));
+
+                try {
+                    const response = await fetch('/replace_message', {
+                        method: 'POST',
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ message: fullMessage, chat_id: initialChatId })
+                    });
+
+                    if (!response.ok) throw new Error(`Replace error: ${response.status}`);
+
+                    const data = await response.json(); // expects { "updated_message": "..." }
+
+                    updateMessageContent(finalId, marked.parse(data.updated_message));
+
+                } catch (error) {
+                    console.error("Error replacing message:", error);
+                }
+
             } catch (error) {
                 removeMessage(loadingId);
                 addMessageToChat('assistant', `Error: ${error.message}`, false, 'error');
                 console.error('Error:', error);
             }
         });
+
+        function updateMessageContent(messageId, newContent) {
+            const element = document.getElementById(messageId);
+            if (element) {
+                const contentDiv = element.querySelector('.message-content');
+                if (contentDiv) contentDiv.innerHTML = newContent;
+            }
+        }
+
 
         // Message display helper
         function addMessageToChat(role, content, isTemporary = false, className = '') {
@@ -113,7 +137,7 @@
             chatMessages.appendChild(messageDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
-            return isTemporary ? messageId : null;
+            return messageId; // always return the ID so you can update it later
         }
 
 

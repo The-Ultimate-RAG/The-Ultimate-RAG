@@ -1,6 +1,5 @@
+from app.core.document_validator import path_is_valid
 import re
-
-from app.document_validator import path_is_valid
 
 """
 Replaces the matched regular exp with link via html <a></a>

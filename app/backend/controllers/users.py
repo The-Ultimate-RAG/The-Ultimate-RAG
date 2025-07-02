@@ -1,22 +1,21 @@
-import hashlib
-import hmac
-from datetime import datetime, timedelta
-from secrets import token_urlsafe
-
-import jwt
-from bcrypt import checkpw, gensalt, hashpw
-from fastapi import HTTPException, Request, Response
-
-from app.backend.models.chats import Chat
 from app.backend.models.users import (
     User,
     add_new_user,
-    find_user_by_access_string,
     find_user_by_email,
-    get_user_last_chat,
+    find_user_by_access_string,
     update_user,
+    get_user_last_chat,
 )
-from app.settings import jwt_algorithm, max_cookie_lifetime, very_secret_pepper
+from app.backend.models.chats import Chat
+from bcrypt import gensalt, hashpw, checkpw
+from app.settings import settings
+from fastapi import HTTPException
+import jwt
+from datetime import datetime, timedelta
+from fastapi import Response, Request
+from secrets import token_urlsafe
+import hmac
+import hashlib
 
 # A vot nado bilo izuchat kak web dev rabotaet
 
@@ -33,8 +32,7 @@ string with 4 sections (valid jwt token)
 
 
 def create_access_token(
-    access_string: str,
-    expires_delta: timedelta = timedelta(seconds=max_cookie_lifetime),
+    access_string: str, expires_delta: timedelta = settings.max_cookie_lifetime
 ) -> str:
     token_payload = {
         "access_string": access_string,
@@ -42,7 +40,7 @@ def create_access_token(
 
     token_payload.update({"exp": datetime.now() + expires_delta})
     encoded_jwt: str = jwt.encode(
-        token_payload, very_secret_pepper, algorithm=jwt_algorithm
+        token_payload, settings.secret_pepper, algorithm=settings.jwt_algorithm
     )
 
     return encoded_jwt
@@ -69,7 +67,7 @@ salt
 
 def hash_access_string(string: str) -> str:
     return hmac.new(
-        key=very_secret_pepper.encode("utf-8"),
+        key=str(settings.secret_pepper).encode("utf-8"),
         msg=string.encode("utf-8"),
         digestmod=hashlib.sha256,
     ).hexdigest()
@@ -109,7 +107,7 @@ def create_user(response: Response, email: str, password: str) -> dict:
         key="access_token",
         value=access_token,
         path="/",
-        max_age=max_cookie_lifetime,
+        max_age=settings.max_cookie_lifetime,
         httponly=True,
     )
 
@@ -140,7 +138,7 @@ def authenticate_user(response: Response, email: str, password: str) -> dict:
         key="access_token",
         value=access_token,
         path="/",
-        max_age=max_cookie_lifetime,
+        max_age=settings.max_cookie_lifetime,
         httponly=True,
     )
 
@@ -153,17 +151,22 @@ Get user from token stored in cookies
 
 
 def get_current_user(request: Request) -> User | None:
+    user = None
     token: str | None = request.cookies.get("access_token")
     if not token:
         return None
 
-    access_string = jwt.decode(
-        jwt=bytes(token, encoding="utf-8"),
-        key=very_secret_pepper,
-        algorithms=[jwt_algorithm],
-    ).get("access_string")
+    try:
+        access_string = jwt.decode(
+            jwt=bytes(token, encoding="utf-8"),
+            key=settings.secret_pepper,
+            algorithms=[settings.jwt_algorithm],
+        ).get("access_string")
 
-    user = find_user_by_access_string(hash_access_string(access_string))
+        user = find_user_by_access_string(hash_access_string(access_string))
+    except Exception as e:
+        print(e)
+
     if not user:
         return None
 

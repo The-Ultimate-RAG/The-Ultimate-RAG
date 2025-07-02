@@ -1,8 +1,8 @@
-from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import Session, relationship
+from sqlalchemy import Column, String, Integer
+from sqlalchemy.orm import relationship, Session
 
-from app.backend.controllers.base_controller import engine
 from app.backend.models.base_model import Base
+from app.backend.controllers.base_controller import engine
 from app.backend.models.chats import Chat
 
 

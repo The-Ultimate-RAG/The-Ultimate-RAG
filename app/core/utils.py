@@ -1,14 +1,15 @@
-import os
-from uuid import uuid4
-
-from fastapi import Request, UploadFile
 from fastapi.templating import Jinja2Templates
+from fastapi import Request, UploadFile
 
 from app.backend.controllers.chats import list_user_chats, verify_ownership_rights
 from app.backend.controllers.users import get_current_user
 from app.backend.models.users import User
-from app.rag_generator import RagSystem
-from app.settings import base_path
+from app.core.rag_generator import RagSystem
+from app.settings import BASE_DIR
+
+from uuid import uuid4
+import markdown
+import os
 
 rag = None
 
@@ -71,7 +72,7 @@ async def save_documents(
     chat_id: int,
 ) -> None:
     storage = os.path.join(
-        os.path.dirname(base_path),
+        BASE_DIR,
         "chats_storage",
         f"user_id={user.id}",
         f"chat_id={chat_id}",
@@ -120,6 +121,10 @@ def create_collection(user: User, chat_id: int, RAG: RagSystem) -> None:
 
     RAG.create_new_collection(construct_collection_name(user, chat_id))
     print(rag.get_collections_names())
+
+
+def lines_to_markdown(lines: list[str]) -> list[str]:
+    return [markdown.markdown(line) for line in lines]
 
 
 # <----------------------- Handlers ----------------------->
@@ -176,9 +181,9 @@ def TextHandler(
         extend_context(
             {
                 "request": request,
-                "text_before_citation": text_before_citation,
-                "text_after_citation": text_after_citation,
-                "citation": citation,
+                "text_before_citation": lines_to_markdown(text_before_citation),
+                "text_after_citation": lines_to_markdown(text_after_citation),
+                "citation": lines_to_markdown(citation),
                 "anchor_added": anchor_added,
                 "user": get_current_user(request),
             }

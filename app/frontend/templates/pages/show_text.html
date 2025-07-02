@@ -16,7 +16,7 @@
     <div class="text-viewer">
         {% if text_before_citation %}
             {% for line in text_before_citation -%}
-                <div>{{ line }}</div>
+                <div>{{ line | safe }}</div>
             {%- endfor %}
         {% endif %}
 
@@ -27,14 +27,14 @@
         {% if citation %}
             <div class="citation">
                 {% for line in citation -%}
-                    <div>{{ line }}</div>
+                    <div>{{ line | safe }}</div>
                 {%- endfor %}
             </div>
         {% endif %}
 
         {% if text_after_citation %}
             {% for line in text_after_citation -%}
-                <div>{{ line }}</div>
+                <div>{{ line | safe }}</div>
             {%- endfor %}
         {% endif %}
     </div>
