@@ -15,6 +15,6 @@ echo "step 3 is ready"
 python -m app.automigration
 echo "step 4 is ready"
 # Start the main application
-uvicorn app.api:api --host 0.0.0.0 --port 7860
+uvicorn app.api.api:api --host 0.0.0.0 --port 7860
 #python -m app.main
 echo "step 5 is ready"

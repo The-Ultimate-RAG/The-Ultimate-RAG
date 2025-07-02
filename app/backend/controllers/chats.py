@@ -1,42 +1,33 @@
-import os
-from datetime import datetime, timedelta
-
-from fastapi import HTTPException
-
-from app.backend.models.chats import (
-    get_chat_by_id,
-    get_chats_by_user_id,
-    new_chat,
-    refresh_title,
-)
-from app.backend.models.messages import Message, get_messages_by_chat_id
 from app.backend.models.users import User, get_user_chats
-from app.settings import base_path
-
+from app.backend.models.chats import new_chat, get_chat_by_id, get_chats_by_user_id, refresh_title, Chat
+from app.backend.models.messages import get_messages_by_chat_id, Message
+from app.settings import BASE_DIR
+from fastapi import HTTPException
+from datetime import datetime, timedelta
+import os 
 
 def create_new_chat(title: str | None, user: User) -> dict:
     chat_id = new_chat(title, user)
     try:
-        path_to_chat = os.path.join(
-            os.path.dirname(base_path),
-            "chats_storage",
-            f"user_id={user.id}",
-            f"chat_id={chat_id}",
-            "documents",
-        )
+        path_to_chat = os.path.join(BASE_DIR, "chats_storage", f"user_id={user.id}", f"chat_id={chat_id}", "documents")
         os.makedirs(path_to_chat, exist_ok=True)
     except Exception as e:
         print(e)
         raise HTTPException(500, "Unable to create a new chat")
-
-    return {"url": f"/chats/id={chat_id}", "chat_id": chat_id}
+    
+    return {"url" :f"/chats/id={chat_id}", "chat_id": chat_id}
 
 
 def dump_messages_dict(messages: list[Message], dst: dict) -> None:
     history = []
 
     for message in messages:
-        history.append({"role": message.sender, "content": message.content})
+        history.append(
+            {
+                "role": message.sender,
+                "content": message.content
+            }
+        )
         print(message.sender, message.content[:100])
 
     dst.update({"history": history})
@@ -48,7 +39,7 @@ def get_chat_with_messages(id: int) -> dict:
     chat = get_chat_by_id(id=id)
     if chat is None:
         raise HTTPException(418, f"Invalid chat id. Chat with id={id} does not exists!")
-
+    
     messages = get_messages_by_chat_id(id=id)
     dump_messages_dict(messages, response)
 
@@ -56,7 +47,10 @@ def get_chat_with_messages(id: int) -> dict:
 
 
 def create_dict_from_chat(chat) -> dict:
-    return {"id": chat.id, "title": chat.title}
+    return {
+        "id": chat.id,
+        "title": chat.title
+    }
 
 
 def list_user_chats(user_id: int) -> list[dict]:
@@ -82,34 +76,20 @@ def list_user_chats(user_id: int) -> list[dict]:
 
     # da da eto ochen ploho ...
     if len(today):
-        result.append(
-            {"title": "TODAY", "chats": [create_dict_from_chat(chat) for chat in today]}
-        )
+        result.append({"title": "TODAY", "chats":[create_dict_from_chat(chat) for chat in today]})
     if len(last_week):
-        result.append(
-            {
-                "title": "LAST WEEK",
-                "chats": [create_dict_from_chat(chat) for chat in last_week],
-            }
-        )
+        result.append({"title": "LAST WEEK", "chats":[create_dict_from_chat(chat) for chat in last_week]})
     if len(last_month):
-        result.append(
-            {
-                "title": "LAST MONTH",
-                "chats": [create_dict_from_chat(chat) for chat in last_month],
-            }
-        )
+        result.append({"title": "LAST MONTH", "chats":[create_dict_from_chat(chat) for chat in last_month]})
     if len(other):
-        result.append(
-            {"title": "LATER", "chats": [create_dict_from_chat(chat) for chat in other]}
-        )
+        result.append({"title": "LATER", "chats":[create_dict_from_chat(chat) for chat in other]})
 
     return result
 
 
 def verify_ownership_rights(user: User, chat_id: int) -> bool:
     return chat_id in [chat.id for chat in get_user_chats(user)]
-
+        
 
 def update_title(chat_id: int) -> bool:
     return refresh_title(chat_id)
