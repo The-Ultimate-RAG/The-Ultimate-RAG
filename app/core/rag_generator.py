@@ -1,4 +1,5 @@
-from app.core.models import LocalLLM, Embedder, Reranker, GeminiLLM, GeminiEmbed
+from typing import Any, AsyncGenerator
+from app.core.models import LocalLLM, Embedder, Reranker, GeminiLLM, GeminiEmbed, Wrapper
 from app.core.processor import DocumentProcessor
 from app.core.database import VectorDatabase
 import time
@@ -6,9 +7,6 @@ import os
 from app.settings import settings, BASE_DIR
 
 
-# TODO: write a better prompt
-# TODO: wrap original(user's) prompt with LLM's one
-#
 class RagSystem:
     def __init__(self):
         self.embedder = (
@@ -20,6 +18,7 @@ class RagSystem:
         self.processor = DocumentProcessor(self.embedder)
         self.db = VectorDatabase(embedder=self.embedder)
         self.llm = GeminiLLM() if settings.use_gemini else LocalLLM()
+        self.wrapper = Wrapper()
 
     """
     Provides a prompt with substituted context from chunks
@@ -27,11 +26,20 @@ class RagSystem:
     TODO: add template to prompt without docs
     """
 
-    def get_prompt_template(self, user_prompt: str, chunks: list) -> str:
+    def get_general_prompt(self, user_prompt: str, collection_name: str) -> str:
+        relevant_chunks = self.db.search(collection_name, query=user_prompt, top_k=15)
+        if relevant_chunks is not None and len(relevant_chunks) > 0:
+            ranks = self.reranker.rank(query=user_prompt, chunks=relevant_chunks)[
+                : min(5, len(relevant_chunks))
+            ]
+            relevant_chunks = [relevant_chunks[rank["corpus_id"]] for rank in ranks]
+        else:
+            relevant_chunks = []
+
         sources = ""
         prompt = ""
 
-        for chunk in chunks:
+        for chunk in relevant_chunks:
             citation = (
                 f"[Source: {chunk.filename}, "
                 f"Page: {chunk.page_number}, "
@@ -47,12 +55,20 @@ class RagSystem:
 
         prompt += (
             "**QUESTION**: "
-            f"{user_prompt.strip()}\n"
+            f"{self.enhance_prompt(user_prompt.strip())}\n"
             "**CONTEXT DOCUMENTS**:\n"
             f"{sources}\n"
         )
         print(prompt)
         return prompt
+
+
+    def enhance_prompt(self, original_prompt: str) -> str:
+        path_to_wrapping_prompt = os.path.join(BASE_DIR, "app", "prompt_templates", "wrapper.txt")
+        enhanced_prompt = ""
+        with open(path_to_wrapping_prompt, "r") as f:
+            enhanced_prompt = f.read().replace("[USERS_PROMPT]", original_prompt)
+        return self.wrapper.wrap(enhanced_prompt)
 
     """
     Splits the list of documents into groups with 'split_by' docs (done to avoid qdrant_client connection error handling), loads them,
@@ -119,35 +135,17 @@ class RagSystem:
     async def generate_response(
         self, collection_name: str, user_prompt: str, stream: bool = True
     ) -> str:
-        relevant_chunks = self.db.search(collection_name, query=user_prompt, top_k=15)
-        if relevant_chunks is not None and len(relevant_chunks) > 0:
-            ranks = self.reranker.rank(query=user_prompt, chunks=relevant_chunks)[
-                : min(5, len(relevant_chunks))
-            ]
-            relevant_chunks = [relevant_chunks[rank["corpus_id"]] for rank in ranks]
-        else:
-            relevant_chunks = []
-
-        general_prompt = self.get_prompt_template(
-            user_prompt=user_prompt, chunks=relevant_chunks
+        general_prompt = self.get_general_prompt(
+            user_prompt=user_prompt, collection_name=collection_name
         )
 
         return self.llm.get_response(prompt=general_prompt)
 
     async def generate_response_stream(
         self, collection_name: str, user_prompt: str, stream: bool = True
-    ) -> str:
-        relevant_chunks = self.db.search(collection_name, query=user_prompt, top_k=15)
-        if relevant_chunks is not None and len(relevant_chunks) > 0:
-            ranks = self.reranker.rank(query=user_prompt, chunks=relevant_chunks)[
-                : min(5, len(relevant_chunks))
-            ]
-            relevant_chunks = [relevant_chunks[rank["corpus_id"]] for rank in ranks]
-        else:
-            relevant_chunks = []
-
-        general_prompt = self.get_prompt_template(
-            user_prompt=user_prompt, chunks=relevant_chunks
+    ) -> AsyncGenerator[Any, Any]:
+        general_prompt = self.get_general_prompt(
+            user_prompt=user_prompt, collection_name=collection_name
         )
 
         async for chunk in self.llm.get_streaming_response(
