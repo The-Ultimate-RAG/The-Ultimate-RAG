@@ -1,8 +1,8 @@
 name: Sync to Hugging Face Hub
 on:
   push:
-    branches: [main]
-  workflow_dispatch:
+    branches: [main] # Replace with your branch name if different
+  workflow_dispatch: # Allows manual triggering
 jobs:
   sync-to-hub:
     runs-on: ubuntu-latest
@@ -11,19 +11,9 @@ jobs:
       with:
         fetch-depth: 0
         lfs: true
-    - name: Configure Git identity
-      run: |
-        git config --global user.name "Andrchest"
-        git config --global user.email "andreipolevoi220@gmail.com"
     - name: Push to Hugging Face Hub
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
       run: |
-        git checkout -b hf-single-commit
-        git reset --soft $(git rev-list --max-parents=0 HEAD)
-        git commit -m "Single commit for Hugging Face"
-        echo "samples/sample.pdf" >> .gitignore
-        git add .gitignore
-        git commit -m "Update .gitignore to ignore samples/sample.pdf"
         git remote add hf https://Andrchest:$HF_TOKEN@huggingface.co/spaces/Andrchest/The-Ultimate-RAG
-        git push --force hf hf-single-commit:main
+        git push --force hf main

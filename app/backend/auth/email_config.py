@@ -20,11 +20,11 @@ class EmailConfig:
         load_dotenv()
 
         env_var_map: dict[str, str] = {
-            "smtp_host": "SMTP_HOST",
-            "smtp_port": "SMTP_PORT",
-            "smtp_email": "SMTP_EMAIL",
-            "smtp_password": "SMTP_PASSWORD",
-            "application_server_url": "APPLICATION_SERVER_URL",
+            "smtp_host": os.environ["SMTP_HOST"],
+            "smtp_port": os.environ["SMTP_PORT"],
+            "smtp_email": os.environ["SMTP_EMAIL"],
+            "smtp_password": os.environ["SMTP_PASSWORD"],
+            "application_server_url": os.environ["APPLICATION_SERVER_URL"],
         }
 
         config_values: dict[str, Any] = {}

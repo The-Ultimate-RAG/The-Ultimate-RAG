@@ -13,7 +13,7 @@ def create_access_token(access_string: str, expires_delta: timedelta = settings.
     }
 
     token_payload.update({"exp": datetime.now() + expires_delta})
-    encoded_jwt: str = jwt.encode(token_payload, settings.secret_pepper.get_secret_value(),
+    encoded_jwt: str = jwt.encode(token_payload, settings.secret_pepper,
                                   algorithm=settings.jwt_algorithm)
 
     return encoded_jwt

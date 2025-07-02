@@ -2,6 +2,7 @@
 This file consolidates parameters for logging, database connections, model paths, API settings, and security.
 """
 # Standard Library Imports
+import os
 import logging
 from datetime import timedelta
 from typing import Callable, List, Optional
@@ -78,17 +79,17 @@ class GeminiEmbeddingSettings(BaseModel):
 
 
 class PostgresSettings(BaseModel):
-    url: SecretStr = Field(...)
+    url: str = os.environ['POSTGRES_URL']
     echo: bool = False
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        env_nested_delimiter="_",
-        extra="ignore"
-    )
+    # model_config = SettingsConfigDict(
+    #     env_file=".env",
+    #     env_file_encoding="utf-8",
+    #     env_nested_delimiter="_",
+    #     extra="ignore"
+    # )
 
     qdrant: QdrantSettings = Field(default_factory=QdrantSettings)
     local_llm: LocalLLMSettings = Field(default_factory=LocalLLMSettings)
@@ -110,9 +111,9 @@ class Settings(BaseSettings):
 
     stream: bool = True
     
-    secret_pepper: SecretStr = Field(..., validation_alias="SECRET_PEPPER")
-    jwt_algorithm: SecretStr = Field(..., validation_alias="JWT_ALGORITHM")
-    api_key: SecretStr = Field(..., validation_alias="GEMINI_API_KEY")
+    secret_pepper: str = os.environ["SECRET_PEPPER"]
+    jwt_algorithm: str = os.environ["JWT_ALGORITHM"]
+    api_key: str = os.environ["GEMINI_API_KEY"]
 
     @computed_field
     @property

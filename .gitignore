@@ -3,8 +3,7 @@ __pycache__
 /database
 /new_env
 /prompt.txt
+/app/key.py
 /app/env_vars.py
 /chats_storage
-.env
-/key
-tests
+/.env

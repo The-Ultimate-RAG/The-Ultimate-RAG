@@ -101,6 +101,7 @@ class VectorDatabase:
             ) for point in points
         ]
 
+
     def _initialize_qdrant_client(self, max_retries=5, delay=2) -> QdrantClient:
         for attempt in range(max_retries):
             try:
@@ -121,6 +122,7 @@ class VectorDatabase:
                 time.sleep(delay)
                 delay *= 2
 
+
     def _check_collection_exists(self, collection_name: str) -> bool:
         try:
             return self.client.collection_exists(collection_name)
@@ -128,6 +130,7 @@ class VectorDatabase:
             raise HTTPException(
                 500, f"Failed to check collection {collection_name} exists. Last error: {str(e)}"
             )
+
 
     def _create_collection(self, collection_name: str) -> None:
         try:
@@ -150,9 +153,11 @@ class VectorDatabase:
             print(e)
             raise HTTPException(500, e)
 
+
     def __del__(self):
         if hasattr(self, "client"):
             self.client.close()
+
 
     def get_collections(self) -> list[str]:
         try:

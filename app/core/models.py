@@ -88,7 +88,7 @@ class LocalLLM:
 
 class GeminiLLM:
     def __init__(self, model="gemini-2.0-flash"):
-        self.client = genai.Client(api_key=settings.api_key.get_secret_value())
+        self.client = genai.Client(api_key=settings.api_key)
         self.model = model
 
     def get_response(self, prompt: str, stream: bool = True, logging: bool = True,
@@ -124,7 +124,7 @@ class GeminiLLM:
 
 class GeminiEmbed:
     def __init__(self, model="text-embedding-004"):
-        self.client = genai.Client(api_key=settings.api_key.get_secret_value())
+        self.client = genai.Client(api_key=settings.api_key)
         self.model = model
         self.settings = GeminiEmbeddingSettings()
 
