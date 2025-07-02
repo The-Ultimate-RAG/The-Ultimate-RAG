@@ -154,17 +154,21 @@ def test_validate_message_registration():
     data = test_validate_chat_creation()
     initial = get_messages_by_chat_id(data["chat_id"]).count()
 
-    payload = {
-        "prompt": "How is your day?",
-        "chat_id": data["chat_id"]
-    }
-    response = httpx.post(url=BASE_URL + "/message_with_docs", cookies=data["cookie"], data=payload, timeout=180)
+    payload = {"prompt": "How is your day?", "chat_id": data["chat_id"]}
+    response = httpx.post(
+        url=BASE_URL + "/message_with_docs",
+        cookies=data["cookie"],
+        data=payload,
+        timeout=180,
+    )
     print(f"Message sending response: {response.status_code} - {response.text}")
 
     try:
         assert response.status_code == 200
     except Exception as e:
-        raise RuntimeError(f"Error while trying to send message - status: {response.status_code} - error: {e}")
+        raise RuntimeError(
+            f"Error while trying to send message - status: {response.status_code} - error: {e}"
+        )
 
     after_sending = get_messages_by_chat_id(data["chat_id"]).count()
     print(after_sending, initial)
@@ -172,7 +176,9 @@ def test_validate_message_registration():
         assert after_sending - initial == 2
     except Exception as e:
         raise RuntimeError(
-            f"Error while trying to registrate new message - status: {response.status_code} - error: {e}")
+            f"Error while trying to registrate new message - status: {response.status_code} - error: {e}"
+        )
+
 
 # if __name__ == '__main__':
 #     try:

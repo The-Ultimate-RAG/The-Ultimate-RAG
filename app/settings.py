@@ -1,6 +1,7 @@
 """
 This file consolidates parameters for logging, database connections, model paths, API settings, and security.
 """
+
 # Standard Library Imports
 import os
 import logging
@@ -11,8 +12,8 @@ from typing import Callable, List, Optional
 import torch
 from dotenv import load_dotenv
 from pathlib import Path
-from pydantic import BaseModel, Field, computed_field, SecretStr
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import BaseModel, Field, computed_field
+from pydantic_settings import BaseSettings
 
 load_dotenv()
 
@@ -41,8 +42,12 @@ class LocalLLMSettings(BaseModel):
 
 
 class GenerationSettings(BaseModel):
-    last_n_tokens: int = 128  # The most recent of tokens that will be penalized (if it was repeated)
-    temperature: float = 0.3  # Controls the randomness of output. Higher value - higher randomness
+    last_n_tokens: int = (
+        128  # The most recent of tokens that will be penalized (if it was repeated)
+    )
+    temperature: float = (
+        0.3  # Controls the randomness of output. Higher value - higher randomness
+    )
     repetition_penalty: float = 1.2
 
 
@@ -68,7 +73,7 @@ class GeminiSettings(BaseModel):
     candidate_count: int = 1
     seed: int = 5
     max_output_tokens: int = 1001
-    stop_sequences: List[str] = Field(default_factory=lambda: ['STOP!'])
+    stop_sequences: List[str] = Field(default_factory=lambda: ["STOP!"])
     presence_penalty: float = 0.0
     frequency_penalty: float = 0.0
 
@@ -79,7 +84,7 @@ class GeminiEmbeddingSettings(BaseModel):
 
 
 class PostgresSettings(BaseModel):
-    url: str = os.environ['POSTGRES_URL']
+    url: str = os.environ["POSTGRES_URL"]
     echo: bool = False
 
 
@@ -98,19 +103,25 @@ class Settings(BaseSettings):
     text_splitter: TextSplitterSettings = Field(default_factory=TextSplitterSettings)
     api: APISettings = Field(default_factory=APISettings)
     gemini_generation: GeminiSettings = Field(default_factory=GeminiSettings)
-    gemini_embedding: GeminiEmbeddingSettings = Field(default_factory=GeminiEmbeddingSettings)
+    gemini_embedding: GeminiEmbeddingSettings = Field(
+        default_factory=GeminiEmbeddingSettings
+    )
     postgres: PostgresSettings = Field(default_factory=PostgresSettings)
 
     use_gemini: bool = True
-    max_delta: float = 0.15  # defines what is the minimum boundary for vectors to be considered similar
+    max_delta: float = (
+        0.15  # defines what is the minimum boundary for vectors to be considered similar
+    )
     max_cookie_lifetime: timedelta = timedelta(seconds=3000)
     password_reset_token_lifetime: timedelta = timedelta(seconds=3000)
 
-    device: str = Field(default_factory=lambda: "cuda" if torch.cuda.is_available() else "cpu")
+    device: str = Field(
+        default_factory=lambda: "cuda" if torch.cuda.is_available() else "cpu"
+    )
     base_dir: Path = BASE_DIR
 
     stream: bool = True
-    
+
     secret_pepper: str = os.environ["SECRET_PEPPER"]
     jwt_algorithm: str = os.environ["JWT_ALGORITHM"]
     api_key: str = os.environ["GEMINI_API_KEY"]
@@ -129,13 +140,13 @@ settings = Settings()
 logging.basicConfig(
     level=logging.INFO,
     format="%(levelname)s: %(message)s",
-    handlers=[logging.StreamHandler()]
+    handlers=[logging.StreamHandler()],
 )
 
 if __name__ == "__main__":
+
     def bold_text(text: str):
         return "\033[1m" + text + "\033[0m"
-
 
     print(bold_text("--- Successfully loaded settings ---"))
     print(f"{bold_text("Base Directory:")} {settings.base_dir}")

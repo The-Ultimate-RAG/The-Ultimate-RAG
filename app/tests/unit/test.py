@@ -16,7 +16,7 @@ def test_password_too_long():
     with pytest.raises(ValueError, match="String should have at most 32 characters"):
         SUser(
             email="test@example.ru",
-            password="Strong.Password123!Strong.Password123!Strong.Password123!Strong.Password123!Strong.Passwor"
+            password="Strong.Password123!Strong.Password123!Strong.Password123!Strong.Password123!Strong.Passwor",
         )
 
 

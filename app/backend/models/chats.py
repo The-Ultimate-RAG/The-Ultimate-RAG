@@ -2,7 +2,7 @@ from app.backend.models.base_model import Base
 from sqlalchemy import Integer, String, Column, ForeignKey
 from sqlalchemy.orm import relationship, Session
 from app.backend.controllers.base_controller import engine
-from app.backend.models.messages import Message
+
 
 class Chat(Base):
     __tablename__ = "chats"
@@ -28,13 +28,15 @@ def new_chat(title: str | None, user) -> int:
 
 def get_chat_by_id(id: int) -> Chat | None:
     with Session(autoflush=False, bind=engine) as db:
-        return db.query(Chat).where(Chat.id==id).first()
+        return db.query(Chat).where(Chat.id == id).first()
 
 
 def get_chats_by_user_id(id: int) -> list[Chat]:
     with Session(autoflush=False, bind=engine) as db:
-        return db.query(Chat).filter(Chat.user_id==id).order_by(Chat.created_at.desc())
-    
+        return (
+            db.query(Chat).filter(Chat.user_id == id).order_by(Chat.created_at.desc())
+        )
+
 
 def refresh_title(chat_id: int) -> bool:
     with Session(autoflush=False, bind=engine) as db:
@@ -43,10 +45,10 @@ def refresh_title(chat_id: int) -> bool:
 
         if messages is None or len(messages) == 0:
             return False
-        
+
         chat.title = messages[0].content[:47]
         if len(messages[0].content) > 46:
             chat.title += "..."
-        
+
         db.commit()
         return True

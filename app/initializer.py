@@ -28,7 +28,8 @@ def initialize_system() -> bool:
 
     return success
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     print(1111111111111111111111111111111111111111111111)
     print(initialize_system())
     print(2222222222222222222222222222222222222222222222)
