@@ -6,6 +6,7 @@ on:
 jobs:
   sync-to-hub:
     runs-on: ubuntu-latest
+    environment: Integration test
     steps:
       - uses: actions/checkout@v4
         with:
@@ -15,15 +16,6 @@ jobs:
         run: |
           git config --global user.name "Andrchest"
           git config --global user.email "andreipolevoi220@gmail.com"
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.12'
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pytest pytest-cov  # Add pytest-cov
-          pip install -r app/requirements.txt
       - name: Push to HF1
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
@@ -33,8 +25,17 @@ jobs:
           git commit -m "Single commit for HF1"
           git remote add hf1 https://Andrchest:$HF_TOKEN@huggingface.co/spaces/Andrchest/RAG-Integration-test
           git push --force hf1 hf1-single-commit:main
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov  # Add pytest-cov
+          pip install -r app/requirements.txt
       - name: Wait for HF1 deployment
-        run: sleep 300  # Adjust based on deployment time
+        run: sleep 120  # Adjust based on deployment time
       - name: Initialize directories
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
