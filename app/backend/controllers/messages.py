@@ -1,5 +1,5 @@
 import re
-
+from uuid import uuid4
 from app.backend.models.messages import new_message
 
 
@@ -13,6 +13,7 @@ def remove_html_tags(content: str) -> str:
     return de_taggeed.replace("REPLACE_WITH_RICKROLL", replace_with)
 
 
-def register_message(content: str, sender: str, chat_id: int) -> None:
+def register_message(content: str, sender: str, chat_id: str) -> None:
+    id = str(uuid4())
     message = content if sender == "assistant" else remove_html_tags(content)
-    return new_message(chat_id=chat_id, sender=sender, content=message)
+    return new_message(id=id, chat_id=chat_id, sender=sender, content=message)

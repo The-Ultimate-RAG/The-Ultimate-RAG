@@ -1,21 +1,15 @@
 from app.backend.models.users import (
     User,
     add_new_user,
-    find_user_by_email,
-    find_user_by_access_string,
-    update_user,
     get_user_last_chat,
+    find_user_by_id
 )
 from app.backend.models.chats import Chat
-from bcrypt import gensalt, hashpw, checkpw
 from app.settings import settings
-from fastapi import HTTPException
 import jwt
 from datetime import datetime, timedelta
 from fastapi import Response, Request
-from secrets import token_urlsafe
-import hmac
-import hashlib
+from uuid import uuid4
 
 # A vot nado bilo izuchat kak web dev rabotaet
 
@@ -32,10 +26,10 @@ string with 4 sections (valid jwt token)
 
 
 def create_access_token(
-    access_string: str, expires_delta: timedelta = settings.max_cookie_lifetime
+    user_id: str, expires_delta: timedelta = settings.max_cookie_lifetime
 ) -> str:
     token_payload = {
-        "access_string": access_string,
+        "user_id": user_id,
     }
 
     token_payload.update({"exp": datetime.now() + expires_delta})
@@ -45,16 +39,6 @@ def create_access_token(
 
     return encoded_jwt
 
-
-"""
-Safely creates random string of 16 chars
-"""
-
-
-def create_access_string() -> str:
-    return token_urlsafe(16)
-
-
 """
 Hashes access string using hmac and sha256
 
@@ -63,14 +47,6 @@ since we need to know a salt to get similar hash, but since
 we put a raw string (non-hashed) we won't be able to guess
 salt
 """
-
-
-def hash_access_string(string: str) -> str:
-    return hmac.new(
-        key=str(settings.secret_pepper).encode("utf-8"),
-        msg=string.encode("utf-8"),
-        digestmod=hashlib.sha256,
-    ).hexdigest()
 
 
 """
@@ -85,64 +61,27 @@ Dict to send a response in JSON
 """
 
 
-def create_user(response: Response, email: str, password: str) -> dict:
-    user: User = find_user_by_email(email=email)
-    if user is not None:
-        return HTTPException(418, "The user with similar email already exists")
+def create_user(response: Response) -> dict:
 
-    salt: bytes = gensalt(rounds=16)
-    password_hashed: str = hashpw(password.encode("utf-8"), salt).decode("utf-8")
-
-    access_string: str = create_access_string()
-    access_string_hashed: str = hash_access_string(string=access_string)
+    new_user_id = str(uuid4())
 
     add_new_user(
-        email=email,
-        password_hash=password_hashed,
-        access_string_hash=access_string_hashed,
+        id=new_user_id
     )
 
-    access_token: str = create_access_token(access_string=access_string)
+    access_token: str = create_access_token(user_id=new_user_id)
     response.set_cookie(
         key="access_token",
         value=access_token,
         path="/",
         max_age=settings.max_cookie_lifetime,
         httponly=True,
+        # secure=True,
+        samesite='lax'
     )
 
     return {"status": "ok"}
 
-
-"""
-Finds user by email. If user is found, sets a cookie with token
-"""
-
-
-def authenticate_user(response: Response, email: str, password: str) -> dict:
-    user: User = find_user_by_email(email=email)
-
-    if not user:
-        raise HTTPException(418, "User does not exists")
-
-    if not checkpw(password.encode("utf-8"), user.password_hash.encode("utf-8")):
-        raise HTTPException(418, "Wrong credentials")
-
-    access_string: str = create_access_string()
-    access_string_hashed: str = hash_access_string(string=access_string)
-
-    update_user(user, access_string_hash=access_string_hashed)
-
-    access_token = create_access_token(access_string)
-    response.set_cookie(
-        key="access_token",
-        value=access_token,
-        path="/",
-        max_age=settings.max_cookie_lifetime,
-        httponly=True,
-    )
-
-    return {"status": "ok"}
 
 
 """
@@ -151,19 +90,20 @@ Get user from token stored in cookies
 
 
 def get_current_user(request: Request) -> User | None:
+    print("------------------------------------------------------------")
     user = None
     token: str | None = request.cookies.get("access_token")
     if not token:
         return None
 
     try:
-        access_string = jwt.decode(
+        user_id = jwt.decode(
             jwt=bytes(token, encoding="utf-8"),
             key=settings.secret_pepper,
             algorithms=[settings.jwt_algorithm],
-        ).get("access_string")
-
-        user = find_user_by_access_string(hash_access_string(access_string))
+        ).get("user_id")
+        user = find_user_by_id(id=user_id)
+        print(user if user is not None else '!' * 100)
     except Exception as e:
         print(e)
 

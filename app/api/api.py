@@ -4,7 +4,6 @@ from fastapi import (
     Form,
     File,
     HTTPException,
-    Response,
     Request,
     Depends,
 )
@@ -16,13 +15,10 @@ from fastapi.responses import (
 )
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
 
 from app.backend.controllers.users import (
     create_user,
-    authenticate_user,
     check_cookie,
-    clear_cookie,
     get_current_user,
     get_latest_chat,
 )
@@ -32,8 +28,6 @@ from app.backend.controllers.chats import (
     update_title,
 )
 from app.backend.controllers.messages import register_message
-from app.backend.login_admin import login_as_admin
-from app.backend.schemas import SUser
 from app.backend.models.users import User
 
 from app.core.utils import (
@@ -74,19 +68,6 @@ rag = initialize_rag()
 
 # NOTE: carefully read documentation to require_user
 # <--------------------------------- Middleware --------------------------------->
-"""
-Special class to have an opportunity to redirect user to login page in middleware
-"""
-
-
-class AwaitableResponse:
-    def __init__(self, response: Response):
-        self.response = response
-
-    def __await__(self):
-        yield
-        return self.response
-
 
 """
 TODO: remove KOSTYLY -> find better way to skip requesting to login while showing pdf
@@ -102,7 +83,6 @@ url_user_not_required list in settings.py (/ should be removed)
 async def require_user(request: Request, call_next):
     print(request.url.path, request.method, request.url.port)
 
-    awaitable_response = AwaitableResponse(RedirectResponse("/login", status_code=303))
     stripped_path = request.url.path.strip("/")
 
     if (
@@ -115,27 +95,20 @@ async def require_user(request: Request, call_next):
 
     user = get_current_user(request)
     if user is None:
-        return await awaitable_response
-
-    response = await call_next(request)
-    return response
+        temp_response = RedirectResponse(url=request.url, status_code=307)
+        create_user(temp_response)
+        return temp_response
+    
+    return await call_next(request)
 
 
 # <--------------------------------- Common routes --------------------------------->
-@api.get("/")
-def root(request: Request):
-    current_template = "pages/main.html"
-    return templates.TemplateResponse(
-        current_template, extend_context({"request": request})
-    )
-
-
 @api.post("/message_with_docs")
 async def send_message(
     request: Request,
     files: list[UploadFile] = File(None),
     prompt: str = Form(...),
-    chat_id=Form(None),
+    chat_id: str =Form(None),
     user: User = Depends(get_current_user),
 ) -> StreamingResponse:
     # response = ""
@@ -143,16 +116,11 @@ async def send_message(
     try:
         collection_name = construct_collection_name(user, chat_id)
 
-        register_message(content=prompt, sender="user", chat_id=int(chat_id))
+        register_message(content=prompt, sender="user", chat_id=chat_id)
 
         await save_documents(
             collection_name, files=files, RAG=rag, user=user, chat_id=chat_id
         )
-
-        # response = rag.generate_response_stream(collection_name=collection_name, user_prompt=prompt, stream=True)
-        # async def stream_response():
-        #     async for chunk in response:
-        #         yield chunk.json()
 
         return StreamingResponse(
             rag.generate_response_stream(
@@ -171,7 +139,7 @@ async def replace_message(request: Request):
     data = await request.json()
     updated_message = add_links(data.get("message", ""))
     register_message(
-        content=updated_message, sender="assistant", chat_id=int(data.get("chat_id", 0))
+        content=updated_message, sender="assistant", chat_id=data.get("chat_id")
     )
     return JSONResponse({"updated_message": updated_message})
 
@@ -201,22 +169,6 @@ def show_document(
 
 
 # <--------------------------------- Get --------------------------------->
-@api.get("/new_user")
-def new_user_post(request: Request):
-    current_template = "pages/registration.html"
-    return templates.TemplateResponse(
-        current_template, extend_context({"request": request})
-    )
-
-
-@api.get("/login")
-def login_get(request: Request):
-    current_template = "pages/login.html"
-    return templates.TemplateResponse(
-        current_template, extend_context({"request": request})
-    )
-
-
 @api.get("/cookie_test")
 def test_cookie(request: Request):
     return check_cookie(request)
@@ -232,16 +184,13 @@ login in other case
 def test(request: Request, user: User = Depends(get_current_user)):
     return {
         "user": {
-            "email": user.email,
-            "password_hash": user.password_hash,
-            # "chats": user.chats, # Note: it will rise error since due to the optimization associated fields are not loaded
-            # it is just a reference, but the session is closed, however you are trying to get access to the data through this session
+            "id": user.id,
         }
     }
 
 
 @api.get("/chats/id={chat_id}")
-def show_chat(request: Request, chat_id: int):
+def show_chat(request: Request, chat_id: str):
     current_template = "pages/chat.html"
 
     chat = get_chat_with_messages(chat_id)
@@ -258,12 +207,7 @@ def show_chat(request: Request, chat_id: int):
     return templates.TemplateResponse(current_template, context)
 
 
-@api.get("/logout")
-def logout(response: Response):
-    return clear_cookie(response)
-
-
-@api.get("/last_user_chat")
+@api.get("/")
 def last_user_chat(request: Request, user: User = Depends(get_current_user)):
     chat = get_latest_chat(user)
     url = None
@@ -285,39 +229,6 @@ def last_user_chat(request: Request, user: User = Depends(get_current_user)):
 
 
 # <--------------------------------- Post --------------------------------->
-@api.post("/new_user")
-def new_user(response: Response, user: SUser):
-    return create_user(response, user.email, user.password)
-
-
-# TODO: remove admin validation as troubleshooting ends
-
-
-class LoginData(BaseModel):
-    email: str
-    password: str
-
-
-# TODO: Use normal authentification (without admin@mail.ru: admin)
-# TODO: same for html login file (change type=text to email)
-@api.post("/login")
-def login_post(response: Response, user_data: LoginData):
-    # Special case for admin login
-    if user_data.email == "admin" and user_data.password == "admin":
-        return login_as_admin(response)
-
-    try:
-        # Validate the user data against the SUser schema for regular users
-        # This enforces email format and password complexity for non-admins
-        user_schema = SUser(email=user_data.email, password=user_data.password)
-    except ValueError as e:
-        # If validation fails, return a detailed error
-        raise HTTPException(status_code=422, detail=f"Validation error: {e}")
-
-    # If validation passes, proceed with the standard authentication process
-    return authenticate_user(response, user_schema.email, user_schema.password)
-
-
 @api.post("/new_chat")
 def create_chat(
     request: Request,

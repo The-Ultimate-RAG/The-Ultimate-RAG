@@ -10,10 +10,11 @@ from app.settings import BASE_DIR
 from fastapi import HTTPException
 from datetime import datetime, timedelta
 import os
-
+from uuid import uuid4
 
 def create_new_chat(title: str | None, user: User) -> dict:
-    chat_id = new_chat(title, user)
+    chat_id = str(uuid4())
+    new_chat(id=chat_id, title=title, user=user)
     try:
         path_to_chat = os.path.join(
             BASE_DIR,
@@ -40,7 +41,7 @@ def dump_messages_dict(messages: list[Message], dst: dict) -> None:
     dst.update({"history": history})
 
 
-def get_chat_with_messages(id: int) -> dict:
+def get_chat_with_messages(id: str) -> dict:
     response = {"chat_id": id}
 
     chat = get_chat_by_id(id=id)
@@ -57,7 +58,7 @@ def create_dict_from_chat(chat) -> dict:
     return {"id": chat.id, "title": chat.title}
 
 
-def list_user_chats(user_id: int) -> list[dict]:
+def list_user_chats(user_id: str) -> list[dict]:
     current_date = datetime.now()
 
     today = []
@@ -78,7 +79,6 @@ def list_user_chats(user_id: int) -> list[dict]:
 
     result = []
 
-    # da da eto ochen ploho ...
     if len(today):
         result.append(
             {"title": "TODAY", "chats": [create_dict_from_chat(chat) for chat in today]}
@@ -105,9 +105,9 @@ def list_user_chats(user_id: int) -> list[dict]:
     return result
 
 
-def verify_ownership_rights(user: User, chat_id: int) -> bool:
+def verify_ownership_rights(user: User, chat_id: str) -> bool:
     return chat_id in [chat.id for chat in get_user_chats(user)]
 
 
-def update_title(chat_id: int) -> bool:
+def update_title(chat_id: str) -> bool:
     return refresh_title(chat_id)
