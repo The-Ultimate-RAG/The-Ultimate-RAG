@@ -13,7 +13,7 @@ class Chat(Base):
     messages = relationship("Message", back_populates="chat")
 
 
-def new_chat(id: str, title: str | None, user) -> None:
+def add_new_chat(id: str, title: str | None, user) -> None:
     with Session(autoflush=False, bind=engine) as db:
         user = db.merge(user)
         new_chat = Chat(id=id, user_id=user.id, user=user)

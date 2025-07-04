@@ -1,55 +1,58 @@
-from fastapi import (
-    FastAPI,
-    UploadFile,
-    Form,
-    File,
-    HTTPException,
-    Request,
-    Depends,
-)
-from fastapi.responses import (
-    FileResponse,
-    RedirectResponse,
-    StreamingResponse,
-    JSONResponse,
-)
-from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
-
-from app.backend.controllers.users import (
-    create_user,
-    check_cookie,
-    get_current_user,
-    get_latest_chat,
-)
+from app.backend.controllers.messages import register_message
+from app.core.document_validator import path_is_valid
+from app.core.response_parser import add_links
+from app.backend.models.users import User
+from app.settings import BASE_DIR
 from app.backend.controllers.chats import (
-    create_new_chat,
     get_chat_with_messages,
+    create_new_chat,
     update_title,
 )
-from app.backend.controllers.messages import register_message
-from app.backend.models.users import User
-
+from app.backend.controllers.users import (
+    extract_user_from_context,
+    get_current_user,
+    get_latest_chat,
+    refresh_cookie,
+    authorize_user,
+    check_cookie,
+    create_user
+)
 from app.core.utils import (
-    TextHandler,
-    PDFHandler,
-    protect_chat,
+    construct_collection_name,
+    create_collection,
     extend_context,
     initialize_rag,
     save_documents,
-    construct_collection_name,
-    create_collection,
+    protect_chat,
+    TextHandler,
+    PDFHandler,
 )
-from app.settings import BASE_DIR, url_user_not_required
-from app.core.document_validator import path_is_valid
-from app.core.response_parser import add_links
+
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
+from fastapi import (
+    HTTPException,
+    UploadFile,
+    Request,
+    Depends,
+    FastAPI,
+    Form,
+    File,
+)
+from fastapi.responses import (
+    StreamingResponse,
+    RedirectResponse,
+    FileResponse,
+    JSONResponse,
+)
+
 from typing import Optional
 import os
 
-# TODO: implement a better TextHandler
-# TODO: optionally implement DocHandler
 
+# <------------------------------------- API ------------------------------------->
 api = FastAPI()
+rag = initialize_rag()
 
 api.mount(
     "/chats_storage",
@@ -64,43 +67,45 @@ api.mount(
 templates = Jinja2Templates(
     directory=os.path.join(BASE_DIR, "app", "frontend", "templates")
 )
-rag = initialize_rag()
 
-# NOTE: carefully read documentation to require_user
+
 # <--------------------------------- Middleware --------------------------------->
-
-"""
-TODO: remove KOSTYLY -> find better way to skip requesting to login while showing pdf
-
-Middleware that requires user to log in into the system before accessing any utl
-
-NOTE: For now it is applied to all routes, but if you want to skip any, add it to the
-url_user_not_required list in settings.py (/ should be removed)
-"""
-
-
 @api.middleware("http")
 async def require_user(request: Request, call_next):
-    print(request.url.path, request.method, request.url.port)
+    print("&" * 40, "START MIDDLEWARE", "&" * 40)
+    try:
+        print(f"Path ----> {request.url.path}, Method ----> {request.method}, Port ----> {request.url.port}\n")
 
-    stripped_path = request.url.path.strip("/")
+        stripped_path = request.url.path.strip("/")
 
-    if (
-        stripped_path in url_user_not_required
-        or stripped_path.startswith("pdfs")
-        or "static/styles.css" in stripped_path
-        or "favicon.ico" in stripped_path
-    ):
-        return await call_next(request)
+        if (
+            stripped_path.startswith("pdfs")
+            or "static/styles.css" in stripped_path
+            or "favicon.ico" in stripped_path
+        ):
+            return await call_next(request)
 
-    user = get_current_user(request)
-    if user is None:
-        temp_response = RedirectResponse(url=request.url, status_code=307)
-        create_user(temp_response)
-        return temp_response
-    
-    return await call_next(request)
+        user = get_current_user(request)
+        authorized = True
+        if user is None:
+            authorized = False
+            user = create_user()
 
+        print(f"User in Context ----> {user.id}\n")
+
+        request.state.current_user = user
+        response = await call_next(request)
+
+        if authorized:
+            refresh_cookie(request=request, response=response)
+        else:
+            authorize_user(response, user)
+        return response
+
+    except Exception as exception:
+        raise exception
+    finally:
+        print("&" * 40, "END MIDDLEWARE", "&" * 40, "\n\n")
 
 # <--------------------------------- Common routes --------------------------------->
 @api.post("/message_with_docs")
@@ -109,11 +114,11 @@ async def send_message(
     files: list[UploadFile] = File(None),
     prompt: str = Form(...),
     chat_id: str =Form(None),
-    user: User = Depends(get_current_user),
 ) -> StreamingResponse:
-    # response = ""
     status = 200
     try:
+        user = extract_user_from_context(request)
+        print("-" * 100, "User ---->", user, "-" * 100, "\n\n")
         collection_name = construct_collection_name(user, chat_id)
 
         register_message(content=prompt, sender="user", chat_id=chat_id)
@@ -194,7 +199,7 @@ def show_chat(request: Request, chat_id: str):
     current_template = "pages/chat.html"
 
     chat = get_chat_with_messages(chat_id)
-    user = get_current_user(request)
+    user = extract_user_from_context(request)
 
     update_title(chat["chat_id"])
 
@@ -208,7 +213,8 @@ def show_chat(request: Request, chat_id: str):
 
 
 @api.get("/")
-def last_user_chat(request: Request, user: User = Depends(get_current_user)):
+def last_user_chat(request: Request):
+    user = extract_user_from_context(request)
     chat = get_latest_chat(user)
     url = None
 
@@ -233,8 +239,8 @@ def last_user_chat(request: Request, user: User = Depends(get_current_user)):
 def create_chat(
     request: Request,
     title: Optional[str] = "new chat",
-    user: User = Depends(get_current_user),
 ):
+    user = extract_user_from_context(request)
     new_chat = create_new_chat(title, user)
     url = new_chat.get("url")
     chat_id = new_chat.get("chat_id")

@@ -14,7 +14,7 @@ class Message(Base):
     chat = relationship("Chat", back_populates="messages")
 
 
-def new_message(id: str, chat_id: str, sender: str, content: str):
+def add_new_message(id: str, chat_id: str, sender: str, content: str):
     with Session(autoflush=False, bind=engine) as db:
         new_message = Message(id=id, content=content, sender=sender, chat_id=chat_id)
         db.add(new_message)

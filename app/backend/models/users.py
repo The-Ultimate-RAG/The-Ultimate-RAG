@@ -1,12 +1,15 @@
-from sqlalchemy import Column, String
-from sqlalchemy.orm import relationship, Session
-
-from app.backend.models.base_model import Base
 from app.backend.controllers.base_controller import engine
+from app.backend.models.base_model import Base
 from app.backend.models.chats import Chat
+
+from sqlalchemy.orm import relationship, Session
+from sqlalchemy import Column, String
 
 
 class User(Base):
+    '''
+    Base model for users table
+    '''
     __tablename__ = "users"
     id = Column("id", String, primary_key=True, unique=True)
     language = Column("language", String, default="English", nullable=False)
@@ -14,12 +17,12 @@ class User(Base):
     chats = relationship("Chat", back_populates="user")
 
 
-def add_new_user(id: str) -> None:
-    with Session(autoflush=False, bind=engine) as db:
-        db.add(
-            User(id=id)
-        )
+def add_new_user(id: str) -> User:
+    with Session(autoflush=False, bind=engine, expire_on_commit=False) as db:
+        new_user = User(id=id)
+        db.add(new_user)
         db.commit()
+    return new_user
 
 
 def find_user_by_id(id: str) -> User | None:

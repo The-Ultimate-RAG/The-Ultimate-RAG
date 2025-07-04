@@ -1,6 +1,6 @@
-import re
+from app.backend.models.messages import add_new_message
 from uuid import uuid4
-from app.backend.models.messages import new_message
+import re
 
 
 def remove_html_tags(content: str) -> str:
@@ -14,6 +14,13 @@ def remove_html_tags(content: str) -> str:
 
 
 def register_message(content: str, sender: str, chat_id: str) -> None:
-    id = str(uuid4())
-    message = content if sender == "assistant" else remove_html_tags(content)
-    return new_message(id=id, chat_id=chat_id, sender=sender, content=message)
+    print("-" * 40, "START Registering Message", "-" * 40)
+    try:
+        id = str(uuid4())
+        message = content if sender == "assistant" else remove_html_tags(content)
+
+        print(f"Message -----> {message[:min(30, len(message))]}")
+
+        return add_new_message(id=id, chat_id=chat_id, sender=sender, content=message)
+    finally:
+        print("-" * 40, "END Registering Message", "-" * 40, "\n\n")
