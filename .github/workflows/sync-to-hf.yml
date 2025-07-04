@@ -23,7 +23,7 @@ jobs:
           git checkout -b hf1-single-commit
           git reset --soft $(git rev-list --max-parents=0 HEAD)
           git commit -m "Single commit for HF1"
-          git remote add hf1 https://Andrchest:$HF_TOKEN@huggingface.co/spaces/Andrchest/RAG-Integration-test
+          git remote add hf1 https://The-Ultimate-RAG-HF:$HF_TOKEN@huggingface.co/spaces/The-Ultimate-RAG-HF/RAG-Integration-test
           git push --force hf1 hf1-single-commit:main
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -89,5 +89,5 @@ jobs:
           git checkout -b hf2-single-commit
           git reset --soft $(git rev-list --max-parents=0 HEAD)
           git commit -m "Single commit for HF2"
-          git remote add hf2 https://Andrchest:$HF_TOKEN@huggingface.co/spaces/Andrchest/The-Ultimate-RAG
+          git remote add hf2 https://The-Ultimate-RAG-HF:$HF_TOKEN@huggingface.co/spaces/The-Ultimate-RAG-HF/The-Ultimate-RAG
           git push --force hf2 hf2-single-commit:main
