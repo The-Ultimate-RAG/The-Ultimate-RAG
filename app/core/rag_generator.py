@@ -27,9 +27,11 @@ class RagSystem:
     """
 
     def get_general_prompt(self, user_prompt: str, collection_name: str) -> str:
-        relevant_chunks = self.db.search(collection_name, query=user_prompt, top_k=15)
+        enhanced_prompt = self.enhance_prompt(user_prompt.strip())
+
+        relevant_chunks = self.db.search(collection_name, query=enhanced_prompt, top_k=30)
         if relevant_chunks is not None and len(relevant_chunks) > 0:
-            ranks = self.reranker.rank(query=user_prompt, chunks=relevant_chunks)[
+            ranks = self.reranker.rank(query=enhanced_prompt, chunks=relevant_chunks)[
                 : min(5, len(relevant_chunks))
             ]
             relevant_chunks = [relevant_chunks[rank["corpus_id"]] for rank in ranks]
@@ -55,7 +57,7 @@ class RagSystem:
 
         prompt += (
             "**QUESTION**: "
-            f"{self.enhance_prompt(user_prompt.strip())}\n"
+            f"{enhanced_prompt}\n"
             "**CONTEXT DOCUMENTS**:\n"
             f"{sources}\n"
         )

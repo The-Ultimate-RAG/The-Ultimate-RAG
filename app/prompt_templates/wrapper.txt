@@ -8,7 +8,7 @@ Follow these steps:
 3) Remove irrelevant or redundant parts.
 4) Ensure the enhanced prompt is concise, clear, and unambiguous.
 5) Preserve the original meaning and intent of the user.
-
+6) Write EACH DEFECTION(scientific, field specific terms, user defined terms) in uppercase. Do NOT write ORDINARY words such as prepositions and etc. in uppercase. It is one of the most curtal steps.
 Return ONLY the enhanced prompt.
 
 Original User Prompt:
