@@ -64,7 +64,6 @@ class RagSystem:
         print(prompt)
         return prompt
 
-
     def enhance_prompt(self, original_prompt: str) -> str:
         path_to_wrapping_prompt = os.path.join(BASE_DIR, "app", "prompt_templates", "wrapper.txt")
         enhanced_prompt = ""

@@ -21,6 +21,7 @@ import time
 from fastapi import HTTPException
 import re
 
+
 class VectorDatabase:
     def __init__(self, embedder: Embedder, host: str = "qdrant", port: int = 6333):
         self.host: str = host
@@ -91,14 +92,14 @@ class VectorDatabase:
         filters = []
 
         print(keywords)
-        
+
         for word in keywords:
             if len(word) > 30 or len(word) < 2:
                 continue
             filters.append(FieldCondition(key="text", match=MatchText(text=word)))
 
         return filters
-    
+
     """
     According to tests, re-ranker needs ~7-10 chunks to generate the most accurate hit
 
