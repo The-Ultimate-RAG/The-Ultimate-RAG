@@ -1,9 +1,16 @@
 from qdrant_client import QdrantClient  # main component to provide the access to db
-from qdrant_client.http.models import ScoredPoint
+from qdrant_client.http.models import (
+    ScoredPoint,
+    Filter,
+    FieldCondition,
+    MatchText
+)
 from qdrant_client.models import (
     VectorParams,
     Distance,
     PointStruct,
+    TextIndexParams,
+    TokenizerType
 )  # VectorParams -> config of vectors that will be used as primary keys
 from app.core.models import Embedder  # Distance -> defines the metric
 from app.core.chunks import Chunk  # PointStruct -> instance that will be stored in db
@@ -12,7 +19,7 @@ from uuid import UUID
 from app.settings import settings
 import time
 from fastapi import HTTPException
-
+import re
 
 class VectorDatabase:
     def __init__(self, embedder: Embedder, host: str = "qdrant", port: int = 6333):
@@ -21,7 +28,7 @@ class VectorDatabase:
         self.embedder: Embedder = embedder  # embedder is used to convert a user's query
         self.already_stored: np.array[np.array] = np.array([]).reshape(
             0, embedder.get_vector_dimensionality()
-        )  # should be already normalized
+        )
 
     def store(
         self, collection_name: str, chunks: list[Chunk], batch_size: int = 1000
@@ -79,6 +86,19 @@ class VectorDatabase:
             return False
         return True
 
+    def construct_keywords_list(self, query: str) -> list[FieldCondition]:
+        keywords = re.findall(r'\b[A-Z]{2,}\b', query)
+        filters = []
+
+        print(keywords)
+        
+        for word in keywords:
+            if len(word) > 30 or len(word) < 2:
+                continue
+            filters.append(FieldCondition(key="text", match=MatchText(text=word)))
+
+        return filters
+    
     """
     According to tests, re-ranker needs ~7-10 chunks to generate the most accurate hit
 
@@ -91,9 +111,20 @@ class VectorDatabase:
         if isinstance(query_embedded, list):
             query_embedded = query_embedded[0]
 
-        points: list[ScoredPoint] = self.client.query_points(
-            collection_name=collection_name, query=query_embedded, limit=top_k
+        keywords = self.construct_keywords_list(query)
+
+        dense_result: list[ScoredPoint] = self.client.query_points(
+            collection_name=collection_name, query=query_embedded, limit=int(top_k * 0.7)
         ).points
+
+        sparse_result: list[ScoredPoint] = self.client.query_points(
+            collection_name=collection_name, query=query_embedded, limit=int(top_k * 0.3),
+            query_filter=Filter(should=keywords)
+        ).points
+
+        combined = [*dense_result, *sparse_result]
+
+        print(len(combined))
 
         return [
             Chunk(
@@ -105,7 +136,7 @@ class VectorDatabase:
                 end_line=point.payload.get("metadata", {}).get("end_line", 0),
                 text=point.payload.get("text", ""),
             )
-            for point in points
+            for point in combined
         ]
 
     def _initialize_qdrant_client(self, max_retries=5, delay=2) -> QdrantClient:
@@ -147,6 +178,17 @@ class VectorDatabase:
                     size=self.embedder.get_vector_dimensionality(),
                     distance=Distance.COSINE,
                 ),
+            )
+            self.client.create_payload_index(
+                collection_name=collection_name,
+                field_name="text",
+                field_schema=TextIndexParams(
+                    type="text",
+                    tokenizer=TokenizerType.WORD,
+                    min_token_len=2,
+                    max_token_len=30,
+                    lowercase=True
+                )
             )
         except Exception as e:
             raise HTTPException(

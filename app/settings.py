@@ -83,6 +83,18 @@ class GeminiEmbeddingSettings(BaseModel):
     task_type: str = "retrieval_document"
 
 
+class GeminiWrapperSettings(BaseModel):
+    temperature: float = 0.0
+    top_p: float = 0.95
+    top_k: int = 20
+    candidate_count: int = 1
+    seed: int = 5
+    max_output_tokens: int = 100
+    stop_sequences: List[str] = Field(default_factory=lambda: ["STOP!"])
+    presence_penalty: float = 0.0
+    frequency_penalty: float = 0.0
+
+
 class PostgresSettings(BaseModel):
     url: str = os.environ["DATABASE_URL"]
     echo: bool = False
@@ -105,6 +117,9 @@ class Settings(BaseSettings):
     gemini_generation: GeminiSettings = Field(default_factory=GeminiSettings)
     gemini_embedding: GeminiEmbeddingSettings = Field(
         default_factory=GeminiEmbeddingSettings
+    )
+    gemini_wrapper: GeminiWrapperSettings = Field(
+        default_factory=GeminiWrapperSettings
     )
     postgres: PostgresSettings = Field(default_factory=PostgresSettings)
 

@@ -186,3 +186,18 @@ class GeminiEmbed:
 
     def get_vector_dimensionality(self) -> int | None:
         return getattr(self.settings, "output_dimensionality")
+
+
+class Wrapper:
+    def __init__(self, model: str = "gemini-2.0-flash"):
+        self.model = model
+        self.client = genai.Client(api_key=settings.api_key)
+
+    def wrap(self, prompt: str) -> str:
+        response = self.client.models.generate_content(
+            model=self.model,
+            contents=prompt,
+            config=types.GenerateContentConfig(**settings.gemini_wrapper.model_dump())
+        )
+
+        return response.text
