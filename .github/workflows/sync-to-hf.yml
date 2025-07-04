@@ -32,13 +32,29 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest pytest-cov  # Add pytest-cov
+          pip install pytest pytest-cov
           pip install -r app/requirements.txt
       - name: Wait for HF1 deployment
-        run: sleep 120  # Adjust based on deployment time
+        run: sleep 120
+      - name: Debug environment variables
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SECRET_PEPPER: ${{ secrets.SECRET_PEPPER }}
+          JWT_ALGORITHM: ${{ secrets.JWT_ALGORITHM }}
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          echo "DATABASE_URL is set: ${DATABASE_URL:+set}"
+          echo "GEMINI_API_KEY is set: ${GEMINI_API_KEY:+set}"
+          echo "SECRET_PEPPER is set: ${SECRET_PEPPER:+set}"
+          echo "JWT_ALGORITHM is set: ${JWT_ALGORITHM:+set}"
+          env | grep -E 'DATABASE_URL|GEMINI_API_KEY|SECRET_PEPPER|JWT_ALGORITHM'
       - name: Initialize directories
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SECRET_PEPPER: ${{ secrets.SECRET_PEPPER }}
+          JWT_ALGORITHM: ${{ secrets.JWT_ALGORITHM }}
           PYTHONPATH: ${{ github.workspace }}
         working-directory: ./
         run: |
@@ -48,8 +64,11 @@ jobs:
           ls -R
       - name: Run integration tests with coverage
         env:
-          HF1_URL: https://andrchest-rag-integration-test.hf.space
+          HF1_URL: ${{ secrets.HF1_URL }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SECRET_PEPPER: ${{ secrets.SECRET_PEPPER }}
+          JWT_ALGORITHM: ${{ secrets.JWT_ALGORITHM }}
           PYTHONPATH: ${{ github.workspace }}
         working-directory: ./
         run: |
