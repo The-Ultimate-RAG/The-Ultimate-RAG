@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-description: Template for reporting bugs with reproduction steps.
+about: Template for reporting bugs with reproduction steps.
 title: "BUG: [Brief Description]"
 labels: ["bug"]
 assignees: ""

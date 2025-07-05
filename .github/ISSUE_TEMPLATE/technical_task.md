@@ -1,6 +1,6 @@
 ---
 name: Technical Task
-description: Template for technical tasks with subtasks.
+about: Template for technical tasks with subtasks.
 title: "TECH TASK: [Brief Description]"
 labels: ["refactor", "technical"]
 assignees: ""
