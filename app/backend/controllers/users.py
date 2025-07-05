@@ -1,10 +1,10 @@
 from app.backend.models.chats import Chat
 from app.settings import settings
 from app.backend.models.users import (
-    User,
-    add_new_user,
     get_user_last_chat,
-    find_user_by_id
+    find_user_by_id,
+    add_new_user,
+    User,
 )
 
 from fastapi import Response, Request, HTTPException

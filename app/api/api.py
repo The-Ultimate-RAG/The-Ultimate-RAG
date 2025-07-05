@@ -107,6 +107,7 @@ async def require_user(request: Request, call_next):
     finally:
         print("&" * 40, "END MIDDLEWARE", "&" * 40, "\n\n")
 
+
 # <--------------------------------- Common routes --------------------------------->
 @api.post("/message_with_docs")
 async def send_message(
@@ -168,7 +169,7 @@ def show_document(
     elif ext in ("docx", "doc"):
         return TextHandler(
             request, path=path, lines=lines, templates=templates
-        )  # should be a bit different handler
+        )
     else:
         return FileResponse(path=path)
 
@@ -177,12 +178,6 @@ def show_document(
 @api.get("/cookie_test")
 def test_cookie(request: Request):
     return check_cookie(request)
-
-
-"""
-Use only for testing. For now, provides user info for logged ones, and redirects to
-login in other case
-"""
 
 
 @api.get("/test")

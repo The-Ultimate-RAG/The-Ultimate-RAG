@@ -3,10 +3,10 @@ from app.backend.models.users import User, get_user_chats
 from app.backend.controllers.utils import get_group_title
 from app.settings import BASE_DIR
 from app.backend.models.chats import (
-    add_new_chat,
-    get_chat_by_id,
     get_chats_by_user_id,
+    get_chat_by_id,
     refresh_title,
+    add_new_chat,
 )
 
 from datetime import datetime, timedelta
