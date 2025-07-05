@@ -106,7 +106,7 @@ class VectorDatabase:
     TODO: implement hybrid search
     """
 
-    def search(self, collection_name: str, query: str, top_k: int = 5) -> list[Chunk]:
+    def search(self, collection_name: str, query: str, top_k: int = 5) -> set[Chunk]:
         query_embedded: np.ndarray = self.embedder.encode(query)
 
         if isinstance(query_embedded, list):
@@ -127,7 +127,7 @@ class VectorDatabase:
 
         print(len(combined))
 
-        return [
+        return set([
             Chunk(
                 id=UUID(point.payload.get("metadata", {}).get("id", "")),
                 filename=point.payload.get("metadata", {}).get("filename", ""),
@@ -138,7 +138,7 @@ class VectorDatabase:
                 text=point.payload.get("text", ""),
             )
             for point in combined
-        ]
+        ])
 
     def _initialize_qdrant_client(self, max_retries=5, delay=2) -> QdrantClient:
         for attempt in range(max_retries):
