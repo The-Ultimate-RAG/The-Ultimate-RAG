@@ -29,11 +29,9 @@ class RagSystem:
     def get_general_prompt(self, user_prompt: str, collection_name: str) -> str:
         enhanced_prompt = self.enhance_prompt(user_prompt.strip())
 
-        relevant_chunks = self.db.search(collection_name, query=enhanced_prompt, top_k=30)
+        relevant_chunks = list(self.db.search(collection_name, query=enhanced_prompt, top_k=30))
         if relevant_chunks is not None and len(relevant_chunks) > 0:
-            ranks = self.reranker.rank(query=enhanced_prompt, chunks=relevant_chunks)[
-                : min(5, len(relevant_chunks))
-            ]
+            ranks = self.reranker.rank(query=enhanced_prompt, chunks=relevant_chunks)
             relevant_chunks = [relevant_chunks[rank["corpus_id"]] for rank in ranks]
         else:
             relevant_chunks = []
@@ -41,7 +39,7 @@ class RagSystem:
         sources = ""
         prompt = ""
 
-        for chunk in relevant_chunks:
+        for chunk in relevant_chunks[: min(5, len(relevant_chunks))]:
             citation = (
                 f"[Source: {chunk.filename}, "
                 f"Page: {chunk.page_number}, "

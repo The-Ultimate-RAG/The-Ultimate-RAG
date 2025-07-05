@@ -1,6 +1,6 @@
+from app.backend.models.messages import add_new_message
+from uuid import uuid4
 import re
-
-from app.backend.models.messages import new_message
 
 
 def remove_html_tags(content: str) -> str:
@@ -13,6 +13,14 @@ def remove_html_tags(content: str) -> str:
     return de_taggeed.replace("REPLACE_WITH_RICKROLL", replace_with)
 
 
-def register_message(content: str, sender: str, chat_id: int) -> None:
-    message = content if sender == "assistant" else remove_html_tags(content)
-    return new_message(chat_id=chat_id, sender=sender, content=message)
+def register_message(content: str, sender: str, chat_id: str) -> None:
+    print("-" * 40, "START Registering Message", "-" * 40)
+    try:
+        id = str(uuid4())
+        message = content if sender == "assistant" else remove_html_tags(content)
+
+        print(f"Message -----> {message[:min(30, len(message))]}")
+
+        return add_new_message(id=id, chat_id=chat_id, sender=sender, content=message)
+    finally:
+        print("-" * 40, "END Registering Message", "-" * 40, "\n\n")

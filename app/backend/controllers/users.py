@@ -1,181 +1,114 @@
-from app.backend.models.users import (
-    User,
-    add_new_user,
-    find_user_by_email,
-    find_user_by_access_string,
-    update_user,
-    get_user_last_chat,
-)
 from app.backend.models.chats import Chat
-from bcrypt import gensalt, hashpw, checkpw
 from app.settings import settings
-from fastapi import HTTPException
+from app.backend.models.users import (
+    get_user_last_chat,
+    find_user_by_id,
+    add_new_user,
+    User,
+)
+
+from fastapi import Response, Request, HTTPException
+from datetime import datetime, timedelta, timezone
+
+from uuid import uuid4
 import jwt
-from datetime import datetime, timedelta
-from fastapi import Response, Request
-from secrets import token_urlsafe
-import hmac
-import hashlib
-
-# A vot nado bilo izuchat kak web dev rabotaet
-
-"""
-Creates a jwt token by access string
-
-Param:
-access_string - randomly (safe methods) generated string (by default - 16 len)
-expires_delta - time in seconds, defines a token lifetime
-
-Returns:
-string with 4 sections (valid jwt token)
-"""
 
 
-def create_access_token(
-    access_string: str, expires_delta: timedelta = settings.max_cookie_lifetime
-) -> str:
-    token_payload = {
-        "access_string": access_string,
-    }
+def extract_user_from_context(request: Request) -> User | None:
+    if hasattr(request.state, "current_user"):
+        return request.state.current_user
+    print("*" * 40, "No attribute 'current_user`", "*" * 40, "\n")
+    return None
 
+
+def create_access_token(user_id: str, expires_delta: timedelta = settings.max_cookie_lifetime) -> str:
+    token_payload = {"user_id": user_id,}
     token_payload.update({"exp": datetime.now() + expires_delta})
-    encoded_jwt: str = jwt.encode(
-        token_payload, settings.secret_pepper, algorithm=settings.jwt_algorithm
-    )
+
+    try:
+        encoded_jwt: str = jwt.encode(
+            token_payload, settings.secret_pepper, algorithm=settings.jwt_algorithm
+        )
+    except Exception:
+        raise HTTPException(status_code=500, detail="json encoding error")
+
+    print("^" * 40, "New JWT token was created", "^" * 40)
+    print(encoded_jwt)
+    print("^" * 105, "\n\n")
 
     return encoded_jwt
 
 
-"""
-Safely creates random string of 16 chars
-"""
-
-
-def create_access_string() -> str:
-    return token_urlsafe(16)
-
-
-"""
-Hashes access string using hmac and sha256
-
-We can not use the same methods as we do to save password
-since we need to know a salt to get similar hash, but since
-we put a raw string (non-hashed) we won't be able to guess
-salt
-"""
-
-
-def hash_access_string(string: str) -> str:
-    return hmac.new(
-        key=str(settings.secret_pepper).encode("utf-8"),
-        msg=string.encode("utf-8"),
-        digestmod=hashlib.sha256,
-    ).hexdigest()
-
-
-"""
-Creates a new user and sets a cookie with jwt token
-
-Params:
-response - needed to set a cookie
-...
-
-Returns:
-Dict to send a response in JSON
-"""
-
-
-def create_user(response: Response, email: str, password: str) -> dict:
-    user: User = find_user_by_email(email=email)
-    if user is not None:
-        return HTTPException(418, "The user with similar email already exists")
-
-    salt: bytes = gensalt(rounds=16)
-    password_hashed: str = hashpw(password.encode("utf-8"), salt).decode("utf-8")
-
-    access_string: str = create_access_string()
-    access_string_hashed: str = hash_access_string(string=access_string)
-
-    add_new_user(
-        email=email,
-        password_hash=password_hashed,
-        access_string_hash=access_string_hashed,
-    )
-
-    access_token: str = create_access_token(access_string=access_string)
-    response.set_cookie(
-        key="access_token",
-        value=access_token,
-        path="/",
-        max_age=settings.max_cookie_lifetime,
-        httponly=True,
-    )
-
-    return {"status": "ok"}
-
-
-"""
-Finds user by email. If user is found, sets a cookie with token
-"""
-
-
-def authenticate_user(response: Response, email: str, password: str) -> dict:
-    user: User = find_user_by_email(email=email)
-
-    if not user:
-        raise HTTPException(418, "User does not exists")
-
-    if not checkpw(password.encode("utf-8"), user.password_hash.encode("utf-8")):
-        raise HTTPException(418, "Wrong credentials")
-
-    access_string: str = create_access_string()
-    access_string_hashed: str = hash_access_string(string=access_string)
-
-    update_user(user, access_string_hash=access_string_hashed)
-
-    access_token = create_access_token(access_string)
-    response.set_cookie(
-        key="access_token",
-        value=access_token,
-        path="/",
-        max_age=settings.max_cookie_lifetime,
-        httponly=True,
-    )
-
-    return {"status": "ok"}
-
-
-"""
-Get user from token stored in cookies
-"""
-
-
-def get_current_user(request: Request) -> User | None:
-    user = None
-    token: str | None = request.cookies.get("access_token")
-    if not token:
-        return None
-
+def create_user() -> User | None:
+    new_user_id = str(uuid4())
     try:
-        access_string = jwt.decode(
-            jwt=bytes(token, encoding="utf-8"),
-            key=settings.secret_pepper,
-            algorithms=[settings.jwt_algorithm],
-        ).get("access_string")
-
-        user = find_user_by_access_string(hash_access_string(access_string))
+        user = add_new_user(id=new_user_id)
     except Exception as e:
-        print(e)
+        raise HTTPException(status_code=418, detail=e)
 
-    if not user:
-        return None
+    print("$" * 40, "New User was created", "$" * 40)
+    print("Created user - {user.id}")
+    print("$" * 100, "\n\n")
 
     return user
 
 
-"""
-Checks if cookie with access token is present
-"""
+def authorize_user(response: Response, user: User) -> dict:
+    print("%" * 40, "START Authorizing User", "%" * 40)
+    try:
+        access_token: str = create_access_token(user_id=user.id)
+        expires = datetime.now(timezone.utc) + settings.max_cookie_lifetime
+
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            path="/",
+            expires=expires.strftime("%a, %d %b %Y %H:%M:%S GMT"),
+            max_age=settings.max_cookie_lifetime,
+            httponly=True,
+            # secure=True,
+            samesite='lax'
+        )
+
+        return {"status": "ok"}
+    finally:
+        print("%" * 40, "END Authorizing User", "%" * 40)
+
+
+def get_current_user(request: Request) -> User | None:
+    print("-" * 40, "START Getting User", "-" * 40)
+    try:
+        user = None
+        token: str | None = request.cookies.get("access_token")
+
+        print(f"Token -----> {token if token else 'Empty token!'}\n")
+
+        if not token:
+            return None
+
+        try:
+            user_id = jwt.decode(
+                jwt=bytes(token, encoding="utf-8"),
+                key=settings.secret_pepper,
+                algorithms=[settings.jwt_algorithm],
+            ).get("user_id")
+
+            print(f"User id -----> {user_id if user_id else 'Empty user id!'}\n")
+
+            user = find_user_by_id(id=user_id)
+
+            print(f"Found user -----> {user.id if user else 'No user was found!'}")
+        except Exception as e:
+            raise e
+
+        if not user:
+            return None
+
+        return user
+    except HTTPException as exception:
+        raise exception
+    finally:
+        print("-" * 40, "END Getting User", "-" * 40, "\n\n")
 
 
 def check_cookie(request: Request) -> dict:
@@ -193,3 +126,39 @@ def clear_cookie(response: Response) -> dict:
 
 def get_latest_chat(user: User) -> Chat | None:
     return get_user_last_chat(user)
+
+
+def refresh_cookie(request: Request, response: Response) -> None:
+    print("+" * 40, "START Refreshing cookie", "+" * 40)
+    try:
+        token: str | None = request.cookies.get("access_token")
+
+        print(f"Token -----> {token if token else 'Empty token!'}\n")
+
+        if token is None:
+            return
+
+        try:
+            jwt_token = jwt.decode(
+                        jwt=bytes(token, encoding="utf-8"),
+                        key=settings.secret_pepper,
+                        algorithms=[settings.jwt_algorithm],
+                    )
+            exp_datetime = datetime.fromtimestamp(jwt_token.get("exp"), tz=timezone.utc)
+            print(f"Expires -----> {exp_datetime if exp_datetime else 'No expiration date!'}\n")
+        except jwt.ExpiredSignatureError:
+            raise HTTPException(status_code=401, detail="jwt signature has expired")
+        except jwt.PyJWTError as e:
+            raise HTTPException(status_code=500, detail=e)
+
+        diff = exp_datetime - datetime.now(timezone.utc)
+        print(f"Difference -----> {diff if diff else 'No difference in date!'}\n")
+
+        if diff.total_seconds()  < 0.2 * settings.max_cookie_lifetime.total_seconds():
+            print("<----- Refreshing ----->")
+            user = extract_user_from_context(request)
+            authorize_user(response, user)
+    except HTTPException as exception:
+        raise exception
+    finally:
+        print("+" * 40, "END Refreshing cookie", "+" * 40, "\n\n")

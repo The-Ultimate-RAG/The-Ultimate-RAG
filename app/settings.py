@@ -252,4 +252,4 @@ if __name__ == "__main__":
 #
 # max_cookie_lifetime = 3000  # in seconds
 #
-url_user_not_required = ["login", "", "viewer", "message_with_docs", "new_user"]
+

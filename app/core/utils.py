@@ -60,7 +60,7 @@ Validates chat viewing permission by comparing user's chats and requested one
 """
 
 
-def protect_chat(user: User, chat_id: int) -> bool:
+def protect_chat(user: User, chat_id: str) -> bool:
     return verify_ownership_rights(user, chat_id)
 
 
@@ -69,7 +69,7 @@ async def save_documents(
     files: list[UploadFile],
     RAG: RagSystem,
     user: User,
-    chat_id: int,
+    chat_id: str,
 ) -> None:
     storage = os.path.join(
         BASE_DIR,

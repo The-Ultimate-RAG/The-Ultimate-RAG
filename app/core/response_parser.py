@@ -13,7 +13,7 @@ def create_url(match: re.Match) -> str:
     start: str = match.group(4)
 
     if not path_is_valid(path):
-        return ""
+        return "###NOT VALID PATH###"
 
     return f'<a href="/viewer?path={path}&page={page}&lines={lines}&start={start}">[Source]</a>'
 
