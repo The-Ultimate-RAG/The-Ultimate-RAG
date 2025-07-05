@@ -1,6 +1,6 @@
 ---
 name: User Story
-description: Template for capturing user stories with GIVEN/WHEN/THEN acceptance criteria.
+about: Template for capturing user stories with GIVEN/WHEN/THEN acceptance criteria.
 title: "USER STORY: [Brief Description]"
 labels: ["feature"]
 assignees: ""
