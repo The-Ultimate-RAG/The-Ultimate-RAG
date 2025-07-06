@@ -31,7 +31,7 @@ jobs:
           PYTHONPATH: ${{ github.workspace }}
         working-directory: ./
         run: |
-          coverage run -m pytest app/tests/unit/test.py
+          coverage run --source=app -m pytest app/tests/unit/test.py
           coverage xml
           coverage html
       - name: Upload coverage report
