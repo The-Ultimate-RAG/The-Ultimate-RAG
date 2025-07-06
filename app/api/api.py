@@ -32,7 +32,6 @@ from app.backend.controllers.chats import (
     update_title,
 )
 from app.backend.controllers.messages import register_message
-from app.backend.login_admin import login_as_admin
 from app.backend.schemas import SUser
 from app.backend.models.users import User
 
@@ -295,14 +294,8 @@ class LoginData(BaseModel):
     password: str
 
 
-# TODO: Use normal authentification (without admin@mail.ru: admin)
-# TODO: same for html login file (change type=text to email)
 @api.post("/login")
 def login_post(response: Response, user_data: LoginData):
-    # Special case for admin login
-    if user_data.email == "admin" and user_data.password == "admin":
-        return login_as_admin(response)
-
     try:
         # Validate the user data against the SUser schema for regular users
         # This enforces email format and password complexity for non-admins
