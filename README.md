@@ -70,6 +70,35 @@ and then run:
    docker-compose down
 ```
 
+## Usage
+
+You can try currently deployed version of the system [here](https://huggingface.co/spaces/The-Ultimate-RAG-HF/The-Ultimate-RAG). **Note**: you should use the following instructions:
+- Access the cite, you should see the *main* page with the name of the system
+- Press the button "+ Add new chat", wait until the *login* page is loaded
+- Find button "Register" (for now it is highly recommended to follow the instructions *strictly*) and press it
+- You should be redirected to *sing up* page, here you should enter your credentials (you can use Test1@test1.com in all field for testing)
+- Click **ONLY ONCE** on the button "Sign Up", and wait (for now it takes around 10 seconds to load *chat* page)
+- Now you will be able to communicate with the system
+- You can try to ask any thing and attach files. Enter a query and press the *enter* button (near the input area)
+
+## Architecture
+
+### Static view
+
+The following **diagram** depicts the current state of our codebase organization.
+![Diagram description](./docs/architecture/static-view/static-view.png)
+
+We have decided to adapt this architecture to enhance the *maintainability* of the product for the following reasons:
+- [x] A **modular** system, which is reflected by the use of subsystems in our code increases the **reusability** of the components.
+- [x] Individual subsystems can be easily **analyzed** in conjunction with monolith products.
+- [x] This approach ensures the ease and speed of **testing**.
+- [x] Additionally, each part can be **easily modified** without affecting the rest of the codebase.
+
+### Dynamic view
+
+The following **diagram** depicts the one non-trivial case of the system use: user queries the system and attach file. This diagram can halp in understating the pipeline of file processing and response generation:
+![Diagram description](./docs/architecture/dynamic-view/dynamic-view.jpeg)
+
 ## Development
 
 ### Kanban board
@@ -185,6 +214,27 @@ flowchart LR
 ### Secrets management
 Contact [DevOps lead](https://github.com/Andrchest) for more information.
 All the secrets are stored in `.env` file. Its content will be provided after request to DevOps lead.
+
+## Quality assurance
+
+### Quality attribute scenarios
+You can find scenarios in the [docs/quality-assurance/quality-attribute-scenarios.md](./docs/quality-assurance/quality-attribute-scenarios.md)
+
+### Automated tests
+We've implemented a comprehensive automated testing suite using the following tools:
+- 🐍 [pytest](https://docs.pytest.org/) - Primary test runner and framework
+- ⚡ [httpx](https://www.python-httpx.org/) - Async HTTP client for API testing
+
+| Test Type          | Location                      | Description                                                                 | Tools Used          |
+|--------------------|-------------------------------|-----------------------------------------------------------------------------|---------------------|
+| Unit Tests         | `app/tests/unit/`             | Tests for individual components and utility functions                       | pytest              |
+| Integration Tests  | `app/tests/integration/`      | Tests for component interactions and, API and RAG systems integrations      | pytest + httpx      |
+| Performance Tests  | `app/tests/performance/`      | *Will be added soon.* Will collect the statistical information of time, speed, and correctness evaluations  | pytest + httpx      |
+
+
+### User acceptance tests
+See [acceptance test](./docs/quality-assurance/user-acceptance-tests.md) for the formal definition of system readiness.
+
 
 ## License
 
