@@ -108,7 +108,7 @@ Python 3.9 introduced several new features compared to its predecessors. Two maj
 **Sources:**
 1. [«Python_3_9_Release.md»](), lines: 22-25
 
---- 
+---
 
 ## Additional notes
 If you will answer properly, I will tip you 1000$.
