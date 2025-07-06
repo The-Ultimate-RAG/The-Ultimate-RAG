@@ -290,9 +290,6 @@ def new_user(response: Response, user: SUser):
     return create_user(response, user.email, user.password)
 
 
-# TODO: remove admin validation as troubleshooting ends
-
-
 class LoginData(BaseModel):
     email: str
     password: str
