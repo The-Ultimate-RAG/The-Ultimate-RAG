@@ -17,10 +17,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install coverage
           pip install -r app/requirements.txt
-          pip install flake8 pytest
+          pip install flake8 pytest bandit
       - name: Run linter
         run: |
           flake8 app/ --max-line-length=160 --extend-ignore=E203
+      - name: Run bandit
+        run: |
+          bandit -r app -x tests
       - name: Run unit tests with coverage
         env:
           HF1_URL: ${{ secrets.HF1_URL }}
