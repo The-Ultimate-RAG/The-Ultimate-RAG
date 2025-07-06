@@ -29,6 +29,7 @@ jobs:
           SECRET_PEPPER: ${{ secrets.SECRET_PEPPER }}
           JWT_ALGORITHM: ${{ secrets.JWT_ALGORITHM }}
           PYTHONPATH: ${{ github.workspace }}
+        working-directory: ./
         run: |
           coverage run -m pytest app/tests/unit/test.py
           coverage xml
