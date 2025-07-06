@@ -22,8 +22,16 @@ jobs:
         run: |
           flake8 app/ --max-line-length=160 --extend-ignore=E203
       - name: Run unit tests with coverage
+        env:
+          HF1_URL: ${{ secrets.HF1_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SECRET_PEPPER: ${{ secrets.SECRET_PEPPER }}
+          JWT_ALGORITHM: ${{ secrets.JWT_ALGORITHM }}
+          PYTHONPATH: ${{ github.workspace }}
+        working-directory: ./
         run: |
-          coverage run -m pytest app/tests/unit/test.py
+          coverage run --source=app -m pytest app/tests/unit/test.py
           coverage xml
           coverage html
       - name: Upload coverage report
