@@ -96,11 +96,13 @@ def create_user(response: Response, email: str, password: str) -> dict:
     access_string: str = create_access_string()
     access_string_hashed: str = hash_access_string(string=access_string)
 
-    add_new_user(
+    id = add_new_user(
         email=email,
         password_hash=password_hashed,
         access_string_hash=access_string_hashed,
     )
+
+    print(id)
 
     access_token: str = create_access_token(access_string=access_string)
     response.set_cookie(
@@ -111,7 +113,7 @@ def create_user(response: Response, email: str, password: str) -> dict:
         httponly=True,
     )
 
-    return {"status": "ok"}
+    return {"status": "ok", "id": id if id is not None else 0}
 
 
 """

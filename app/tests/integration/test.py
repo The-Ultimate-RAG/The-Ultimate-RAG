@@ -12,7 +12,6 @@ BASE_URL = os.environ.get('HF1_URL')
 
 
 # --- Fixtures for Setup ---
-
 @pytest.fixture
 def artificial_user():
     """Fixture to create and log in an artificial user, returning user data."""
@@ -25,6 +24,8 @@ def artificial_user():
         response = client.post(url=BASE_URL + "/new_user", json=payload, timeout=30.0)
         if response.status_code != 200:
             raise RuntimeError(f"Failed to create artificial user: {response.status_code} - {response.text}")
+
+        id = response.json().get("id", -1)
 
         # Log in to get access token
         headers = {"Content-Type": "application/json", "Accept": "application/json"}
@@ -41,7 +42,7 @@ def artificial_user():
         if not access_token:
             raise RuntimeError("No access token received from login")
 
-        return {"email": email, "password": password, "access_token": access_token}
+        return {"id": id, "email": email, "password": password, "access_token": access_token}
 
 
 @pytest.fixture
@@ -138,3 +139,7 @@ def test_validate_message_registration(chat_data):
 
         after_sending = get_messages_by_chat_id(chat_data["chat_id"]).count()
         assert after_sending - initial == 1, "Message was not registered"
+
+
+# if __name__ == '__main__':
+#     print(artificial_user()["id"])

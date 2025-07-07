@@ -17,16 +17,17 @@ class User(Base):
     chats = relationship("Chat", back_populates="user")
 
 
-def add_new_user(email: str, password_hash: str, access_string_hash: str) -> None:
-    with Session(autoflush=False, bind=engine) as db:
-        db.add(
-            User(
-                email=email,
-                password_hash=password_hash,
-                access_string_hash=access_string_hash,
-            )
+def add_new_user(email: str, password_hash: str, access_string_hash: str) -> int | None:
+    with Session(autoflush=False, bind=engine, expire_on_commit=False) as db:
+        user = User(
+            email=email,
+            password_hash=password_hash,
+            access_string_hash=access_string_hash,
         )
+        db.add(user)
         db.commit()
+        db.refresh(user)
+        return user.id
 
 
 def find_user_by_id(id: int) -> User | None:
