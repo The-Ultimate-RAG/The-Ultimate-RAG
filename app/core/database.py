@@ -100,13 +100,14 @@ class VectorDatabase:
 
         return filters
 
-    """
-    According to tests, re-ranker needs ~7-10 chunks to generate the most accurate hit
+    def combine_chunks_without_duplications(self, dst: list[Chunk], origin: list[Chunk]) -> list[Chunk]:
+        for chunk in origin:
+            if chunk not in dst:
+                dst.append(chunk)
+        return dst
 
-    TODO: implement hybrid search
-    """
 
-    def search(self, collection_name: str, query: str, top_k: int = 5) -> set[Chunk]:
+    def search(self, collection_name: str, query: str, top_k: int = 5) -> list[Chunk]:
         query_embedded: np.ndarray = self.embedder.encode(query)
 
         if isinstance(query_embedded, list):
@@ -115,7 +116,7 @@ class VectorDatabase:
         keywords = self.construct_keywords_list(query)
 
         dense_result: list[ScoredPoint] = self.client.query_points(
-            collection_name=collection_name, query=query_embedded, limit=int(top_k * 0.7)
+            collection_name=collection_name, query=query_embedded, limit=top_k
         ).points
 
         sparse_result: list[ScoredPoint] = self.client.query_points(
@@ -123,11 +124,9 @@ class VectorDatabase:
             query_filter=Filter(should=keywords)
         ).points
 
-        combined = [*dense_result, *sparse_result]
+        combined = self.combine_chunks_without_duplications(dense_result, sparse_result)
 
-        print(len(combined))
-
-        return set([
+        return [
             Chunk(
                 id=UUID(point.payload.get("metadata", {}).get("id", "")),
                 filename=point.payload.get("metadata", {}).get("filename", ""),
@@ -138,7 +137,7 @@ class VectorDatabase:
                 text=point.payload.get("text", ""),
             )
             for point in combined
-        ])
+        ]
 
     def _initialize_qdrant_client(self, max_retries=5, delay=2) -> QdrantClient:
         for attempt in range(max_retries):

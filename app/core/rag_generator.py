@@ -29,7 +29,7 @@ class RagSystem:
     def get_general_prompt(self, user_prompt: str, collection_name: str) -> str:
         enhanced_prompt = self.enhance_prompt(user_prompt.strip())
 
-        relevant_chunks = list(self.db.search(collection_name, query=enhanced_prompt, top_k=30))
+        relevant_chunks = self.db.search(collection_name, query=enhanced_prompt, top_k=30)
         if relevant_chunks is not None and len(relevant_chunks) > 0:
             ranks = self.reranker.rank(query=enhanced_prompt, chunks=relevant_chunks)
             relevant_chunks = [relevant_chunks[rank["corpus_id"]] for rank in ranks]
@@ -153,7 +153,7 @@ class RagSystem:
             yield self.extract_text(chunk)
 
     """
-    Produces the list of the most relevant chunkВs
+    Produces the list of the most relevant chunks
     """
 
     def get_relevant_chunks(self, collection_name: str, query):
