@@ -10,7 +10,11 @@ short_description: the ultimate rag
 
 # The-Ultimate-RAG
 
+
+
 ## Overview
+
+![logo](logo.svg)
 
 [S25] The Ultimate RAG is an Innopolis University software project that generates cited responses from a local database.
 
