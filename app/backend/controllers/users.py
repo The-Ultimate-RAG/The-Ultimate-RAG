@@ -96,7 +96,7 @@ def create_user(response: Response, email: str, password: str) -> dict:
     access_string: str = create_access_string()
     access_string_hashed: str = hash_access_string(string=access_string)
 
-    id= add_new_user(
+    id = add_new_user(
         email=email,
         password_hash=password_hashed,
         access_string_hash=access_string_hashed,

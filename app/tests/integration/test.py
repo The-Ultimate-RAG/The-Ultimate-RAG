@@ -10,8 +10,8 @@ from app.settings import BASE_DIR
 
 BASE_URL = os.environ.get('HF1_URL')
 
-# --- Fixtures for Setup ---
 
+# --- Fixtures for Setup ---
 @pytest.fixture
 def artificial_user():
     """Fixture to create and log in an artificial user, returning user data."""
