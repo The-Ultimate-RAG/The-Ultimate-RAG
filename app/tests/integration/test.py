@@ -8,12 +8,11 @@ import pytest
 from app.backend.models.messages import get_messages_by_chat_id
 from app.settings import BASE_DIR
 
-# BASE_URL = os.environ.get('HF1_URL')
-BASE_URL = "http://127.0.0.1:5050"
+BASE_URL = os.environ.get('HF1_URL')
 
 # --- Fixtures for Setup ---
 
-# @pytest.fixture
+@pytest.fixture
 def artificial_user():
     """Fixture to create and log in an artificial user, returning user data."""
     email = f"Test{uuid4()}@test.com"
@@ -142,5 +141,5 @@ def test_validate_message_registration(chat_data):
         assert after_sending - initial == 1, "Message was not registered"
 
 
-if __name__ == '__main__':
-    print(artificial_user()["id"])
+# if __name__ == '__main__':
+#     print(artificial_user()["id"])
