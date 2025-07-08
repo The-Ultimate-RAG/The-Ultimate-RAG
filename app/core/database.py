@@ -36,7 +36,10 @@ class VectorDatabase:
     ) -> None:
         points: list[PointStruct] = []
 
+        print("Start getting text embeddings")
+        start = time.time()
         vectors = self.embedder.encode([chunk.get_raw_text() for chunk in chunks])
+        print(f"Embeddings - {time.time() - start}")
 
         for vector, chunk in zip(vectors, chunks):
             if self.accept_vector(collection_name, vector):

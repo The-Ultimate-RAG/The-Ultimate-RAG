@@ -35,7 +35,7 @@ class Chunk:
 
     def get_metadata(self) -> dict:
         return {
-            "id": self.id,
+            "id": str(self.id),
             "filename": self.filename,
             "page_number": self.page_number,
             "start_index": self.start_index,

@@ -7,3 +7,4 @@ __pycache__
 /app/env_vars.py
 /chats_storage
 /.env
+exp.*

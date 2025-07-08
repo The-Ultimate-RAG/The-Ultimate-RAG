@@ -22,7 +22,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 class QdrantSettings(BaseModel):
     host: str = Field("localhost", validation_alias="LOCAL_HOST")
-    port: int = Field(6333, validation_alias="LOCAL_PORT")
+    port: int = Field(6334, validation_alias="LOCAL_PORT")
+    prefer_grpc: bool = Field(True, validation_alias="gRPC")
 
 
 class ModelsSettings(BaseModel):

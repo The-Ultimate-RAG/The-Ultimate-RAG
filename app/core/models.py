@@ -1,5 +1,5 @@
 import os
-
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dotenv import load_dotenv
 from sentence_transformers import (
     SentenceTransformer,
@@ -160,29 +160,40 @@ class GeminiEmbed:
         self.client = genai.Client(api_key=settings.api_key)
         self.model = model
         self.settings = GeminiEmbeddingSettings()
+        self.max_workers = 5
+
+    def _embed_batch(self, batch: list[str], idx: int) -> dict:
+        response = self.client.models.embed_content(
+            model=self.model,
+            contents=batch,
+            config=types.EmbedContentConfig(
+                **settings.gemini_embedding.model_dump()
+            ),
+        ).embeddings
+        return {"idx": idx, "embeddings": response}
 
     def encode(self, text: str | list[str]) -> list[Tensor]:
 
         if isinstance(text, str):
             text = [text]
 
-        output: list[Tensor] = []
+        groups: list[list[float]] = []
         max_batch_size = 100  # can not be changed due to google restrictions
 
-        for i in range(0, len(text), max_batch_size):
-            batch = text[i : i + max_batch_size]
-            response = self.client.models.embed_content(
-                model=self.model,
-                contents=batch,
-                config=types.EmbedContentConfig(
-                    **settings.gemini_embedding.model_dump()
-                ),
-            ).embeddings
+        batches: list[list[str]] = [text[i : i + max_batch_size] for i in range(0, len(text), max_batch_size)]
 
-            for i, emb in enumerate(response):
-                output.append(emb.values)
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            futures = [executor.submit(self._embed_batch, batch, idx) for idx, batch in enumerate(batches)]
+            for future in as_completed(futures):
+                groups.append(future.result())
 
-        return output
+        groups.sort(key=lambda x: x["idx"])
+
+        result: list[float] = []
+        for group in groups:
+            for vec in group["embeddings"]:
+                result.append(vec.values)
+        return result
 
     def get_vector_dimensionality(self) -> int | None:
         return getattr(self.settings, "output_dimensionality")
