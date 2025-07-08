@@ -239,6 +239,21 @@ def test(request: Request, user: User = Depends(get_current_user)):
     }
 
 
+@api.post("/chats/id={chat_id}/history")
+def show_chat_history(request: Request, chat_id: int):
+    chat = get_chat_with_messages(chat_id)
+    user = get_current_user(request)
+
+    update_title(chat["chat_id"])
+
+    if not protect_chat(user, chat_id):
+        raise HTTPException(401, "Yod do not have rights to use this chat!")
+
+    context = chat
+
+    return context
+
+
 @api.get("/chats/id={chat_id}")
 def show_chat(request: Request, chat_id: int):
     current_template = "pages/chat.html"
