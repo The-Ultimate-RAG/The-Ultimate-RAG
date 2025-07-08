@@ -1,6 +1,5 @@
 import os
 from uuid import uuid4
-import asyncio
 import re
 import httpx
 import pytest
@@ -11,6 +10,7 @@ from app.backend.models.messages import Message, get_messages_by_chat_id  # noqa
 from app.settings import BASE_DIR
 
 BASE_URL = os.environ.get('HF1_URL')
+
 
 # --- Async Fixtures for Setup ---
 @pytest_asyncio.fixture
@@ -45,6 +45,7 @@ async def artificial_user():
 
         return {"id": id, "email": email, "password": password, "access_token": access_token}
 
+
 @pytest_asyncio.fixture
 async def chat_data(artificial_user):
     """Fixture to create a chat for the artificial user, returning chat data."""
@@ -73,6 +74,7 @@ async def chat_data(artificial_user):
         print(res)
         return res
 
+
 # --- Async Test Functions ---
 @pytest.mark.asyncio
 async def test_create_artificial_user(artificial_user):
@@ -81,11 +83,13 @@ async def test_create_artificial_user(artificial_user):
     assert artificial_user["password"] == "Goida123!"
     assert artificial_user["access_token"] is not None
 
+
 @pytest.mark.asyncio
 async def test_validate_chat_creation(chat_data):
     """Test that a chat can be created successfully."""
     assert chat_data["chat_id"] > 0
     assert "access_token" in chat_data["cookie"]
+
 
 @pytest.mark.asyncio
 async def test_validate_message_sending(chat_data):
@@ -98,6 +102,7 @@ async def test_validate_message_sending(chat_data):
             timeout=180,
         )
         assert response.status_code == 200, f"Failed to send message: {response.status_code} - {response.text}"
+
 
 @pytest.mark.asyncio
 async def test_validate_docs_uploading(chat_data):
@@ -124,6 +129,7 @@ async def test_validate_docs_uploading(chat_data):
             )
         assert response.status_code == 200, f"Failed to upload docs: {response.status_code} - {response.text}"
 
+
 @pytest.mark.asyncio
 async def test_validate_message_registration(chat_data):
     """Test that a sent message is registered in the chat."""
@@ -140,6 +146,7 @@ async def test_validate_message_registration(chat_data):
 
         after_sending = get_messages_by_chat_id(chat_data["chat_id"]).count()
         assert after_sending - initial == 1, "Message was not registered"
+
 
 @pytest.mark.asyncio
 async def test_document_creation(chat_data):
@@ -170,6 +177,7 @@ async def test_document_creation(chat_data):
 
     after_request = len(os.listdir(path_to_storage))
     assert after_request - before_request == 2
+
 
 @pytest.mark.asyncio
 async def test_document_content(chat_data):
@@ -210,6 +218,7 @@ async def test_document_content(chat_data):
 
     assert posted_content == stored_content
 
+
 @pytest.mark.asyncio
 async def test_document_uploading_speed(chat_data):
     """Test that document uploading meets timeout requirements."""
@@ -237,6 +246,7 @@ async def test_document_uploading_speed(chat_data):
             except httpx.TimeoutException:
                 raise RuntimeError("The loading speed of large documents is too slow")
 
+
 @pytest.mark.asyncio
 async def test_xss_protection(chat_data):
     """Test that messages are protected from XSS attacks."""
@@ -260,6 +270,7 @@ async def test_xss_protection(chat_data):
         for message in response_json.get("history", [None]):
             if message and "script" in message.get("content", ""):
                 raise RuntimeError("Messages are not protected from XSS attacks")
+
 
 @pytest.mark.asyncio
 async def test_source_citation(chat_data):
