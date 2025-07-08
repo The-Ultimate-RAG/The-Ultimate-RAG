@@ -15,7 +15,7 @@ class RagSystem:
             else Embedder(model=settings.models.embedder_model)
         )
         self.reranker = Reranker(model=settings.models.reranker_model)
-        self.processor = DocumentProcessor(self.embedder)
+        self.processor = DocumentProcessor()
         self.db = VectorDatabase(embedder=self.embedder)
         self.llm = GeminiLLM() if settings.use_gemini else LocalLLM()
         self.wrapper = Wrapper()
