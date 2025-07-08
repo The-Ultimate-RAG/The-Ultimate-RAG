@@ -109,7 +109,6 @@ class VectorDatabase:
                 dst.append(chunk)
         return dst
 
-
     def search(self, collection_name: str, query: str, top_k: int = 5) -> list[Chunk]:
         query_embedded: np.ndarray = self.embedder.encode(query)
 

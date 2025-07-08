@@ -114,7 +114,7 @@ async def send_message(
     request: Request,
     files: list[UploadFile] = File(None),
     prompt: str = Form(...),
-    chat_id: str =Form(None),
+    chat_id: str = Form(None),
 ) -> StreamingResponse:
     status = 200
     try:

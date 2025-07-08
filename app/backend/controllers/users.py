@@ -22,7 +22,7 @@ def extract_user_from_context(request: Request) -> User | None:
 
 
 def create_access_token(user_id: str, expires_delta: timedelta = settings.max_cookie_lifetime) -> str:
-    token_payload = {"user_id": user_id,}
+    token_payload = {"user_id": user_id}
     token_payload.update({"exp": datetime.now() + expires_delta})
 
     try:
@@ -154,7 +154,7 @@ def refresh_cookie(request: Request, response: Response) -> None:
         diff = exp_datetime - datetime.now(timezone.utc)
         print(f"Difference -----> {diff if diff else 'No difference in date!'}\n")
 
-        if diff.total_seconds()  < 0.2 * settings.max_cookie_lifetime.total_seconds():
+        if diff.total_seconds() < 0.2 * settings.max_cookie_lifetime.total_seconds():
             print("<----- Refreshing ----->")
             user = extract_user_from_context(request)
             authorize_user(response, user)

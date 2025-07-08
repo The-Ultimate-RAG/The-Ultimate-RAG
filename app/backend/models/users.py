@@ -30,8 +30,7 @@ def find_user_by_id(id: str) -> User | None:
         return db.query(User).where(User.id == id).first()
 
 
-def update_user(
-    user: User, language: str = None, theme: str = None) -> None:
+def update_user(user: User, language: str = None, theme: str = None) -> None:
     with Session(autoflush=False, bind=engine) as db:
         user = db.merge(user)
         if language:

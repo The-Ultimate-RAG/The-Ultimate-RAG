@@ -18,4 +18,3 @@ class LanguageOptions(str, Enum):
     AR = "ar"
     EN = "en"
     RU = "ru"
-

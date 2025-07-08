@@ -7,7 +7,6 @@ from langchain_community.document_loaders import (
 )
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
-from app.core.models import Embedder
 from app.core.chunks import Chunk
 import nltk  # used for proper tokenizer workflow
 from uuid import (
@@ -15,6 +14,7 @@ from uuid import (
 )  # for generating unique id as hex (uuid4 is used as it generates ids form pseudo random numbers unlike uuid1 and others)
 import numpy as np
 from app.settings import logging, settings
+from concurrent.futures import ProcessPoolExecutor, as_completed
 
 
 # TODO: replace PDFloader since it is completely unusable OR try to fix it
@@ -31,12 +31,10 @@ class DocumentProcessor:
     text_splitter -> text splitting strategy
     """
 
-    def __init__(self, embedder: Embedder):
-        self.chunks: list[Chunk] = []
+    def __init__(self):
         self.chunks_unsaved: list[Chunk] = []
-        self.processed: list[Document] = []
         self.unprocessed: list[Document] = []
-        self.embedder = embedder
+        self.max_workers = 4
         self.text_splitter = RecursiveCharacterTextSplitter(
             **settings.text_splitter.model_dump()
         )
@@ -152,67 +150,51 @@ class DocumentProcessor:
 
         return extracted_documents
 
-    """
-    Generates chunks with recursive splitter from the list of unprocessed files, add files to the list of processed, and clears unprocessed
+    def split_into_groups(self, original_list: list[any], split_by: int = 15) -> list[list[any]]:
+        output = []
+        for i in range(0, len(original_list), split_by):
+            new_group = original_list[i: i + split_by]
+            output.append(new_group)
+        return output
 
-    TODO: try to split text with other llm (not really needed, but we should at least try it)
-    """
+    def _chunkinize(self, document: Document, text: list[str], lines: list[str]) -> list[Chunk]:
+        output: list[Chunk] = []
+        for chunk in text:
+            start_l, end_l = self.get_start_end_lines(
+                splitted_text=lines,
+                start_char=chunk.metadata.get("start_index", 0),
+                end_char=chunk.metadata.get("start_index", 0)
+                + len(chunk.page_content),
+            )
 
-    def generate_chunks(self, query: str = "", embedding: bool = False):
-        most_relevant = []
+            new_chunk = Chunk(
+                id=uuid4(),
+                filename=document.metadata.get("source", ""),
+                page_number=document.metadata.get("page", 0),
+                start_index=chunk.metadata.get("start_index", 0),
+                start_line=start_l,
+                end_line=end_l,
+                text=chunk.page_content,
+            )
+            output.append(new_chunk)
+        return output
 
-        if embedding:
-            query_embedded = self.embedder.encode(query)
-
+    def generate_chunks(self):
+        intermediate = []
         for document in self.unprocessed:
-            self.processed.append(document)
-
             text: list[str] = self.text_splitter.split_documents([document])
             lines: list[str] = document.page_content.split("\n")
+            groups = self.split_into_groups(original_list=text, split_by=50)
+            with ProcessPoolExecutor(max_workers=self.max_workers) as executor:
+                futures = [executor.submit(self._chunkinize, document, group, lines) for group in groups]
+                for feature in as_completed(futures):
+                    intermediate.append(feature.result())
 
-            for chunk in text:
-                start_l, end_l = self.get_start_end_lines(
-                    splitted_text=lines,
-                    start_char=chunk.metadata.get("start_index", 0),
-                    end_char=chunk.metadata.get("start_index", 0)
-                    + len(chunk.page_content),
-                )
+        for group in intermediate:
+            for chunk in group:
+                self.chunks_unsaved.append(chunk)
 
-                newChunk = Chunk(
-                    id=uuid4(),
-                    filename=document.metadata.get("source", ""),
-                    page_number=document.metadata.get("page", 0),
-                    start_index=chunk.metadata.get("start_index", 0),
-                    start_line=start_l,
-                    end_line=end_l,
-                    text=chunk.page_content,
-                )
-
-                if embedding:
-                    chunk_embedded = self.embedder.encode(newChunk.text)
-                    similarity = self.cosine_similarity(query_embedded, chunk_embedded)
-                    self.update_most_relevant_chunk(
-                        [similarity, newChunk], most_relevant
-                    )
-
-                self.chunks.append(newChunk)
-                self.chunks_unsaved.append(newChunk)
-
-            self.unprocessed = []
-        return most_relevant
-
-    """
-    Determines the line, were the chunk starts and ends (1-based indexing)
-
-    Some magic stuff here. To be honest, i understood it after 7th attempt
-
-    TODO: invent more efficient way
-
-    splitted_text -> original text splitted by \n
-    start_char -> index of symbol, were current chunk starts
-    end_char ->  index of symbol, were current chunk ends
-    debug_mode -> flag, which enables printing useful info about the process
-    """
+        self.unprocessed = []
 
     def get_start_end_lines(
         self,
@@ -263,22 +245,13 @@ class DocumentProcessor:
     current session, but chunks_unsaved are used to avoid dublications while saving to db.
     """
 
+    def get_and_save_unsaved_chunks(self) -> list[Chunk]:
+        chunks_copy: list[Chunk] = self.chunks_unsaved.copy()
+        self.clear_unsaved_chunks()
+        return chunks_copy
+
     def clear_unsaved_chunks(self):
         self.chunks_unsaved = []
 
     def get_all_chunks(self) -> list[Chunk]:
-        return self.chunks
-
-    """
-    If we want to save chunks to db, we need to clear the temp storage to avoid dublications
-    """
-
-    def get_and_save_unsaved_chunks(self) -> list[Chunk]:
-        chunks_copy: list[Chunk] = self.chunks.copy()
-        self.clear_unsaved_chunks()
-        return chunks_copy
-
-
-if __name__ == "__main__":
-    document = DocumentProcessor()
-    print(document.__getattribute__())
+        return self.chunks_unsaved
