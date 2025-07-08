@@ -80,7 +80,7 @@ jobs:
         working-directory: ./
         run: |
           echo "PYTHONPATH: $PYTHONPATH"
-          python -m pytest app/tests/integration/test.py -v --cov=app --cov-report=xml --cov-report=html
+          python -m pytest app/tests/integration/tests_draft.py -v --cov=app --cov-report=xml --cov-report=html
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:
