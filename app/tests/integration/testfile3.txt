@@ -1,1 +1,1 @@
-The day is good. [Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=15/chat_id=14/documents/c2bef8be-f5fc-4ad0-a212-5795f0aa80b9.txt, Page: 0, Lines: 1-1, Start: 0]
+null

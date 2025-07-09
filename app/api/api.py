@@ -105,10 +105,10 @@ async def require_user(request: Request, call_next):
     stripped_path = request.url.path.strip("/")
 
     if (
-        stripped_path in url_user_not_required
-        or stripped_path.startswith("pdfs")
-        or "static/styles.css" in stripped_path
-        or "favicon.ico" in stripped_path
+            stripped_path in url_user_not_required
+            or stripped_path.startswith("pdfs")
+            or "static/styles.css" in stripped_path
+            or "favicon.ico" in stripped_path
     ):
         return await call_next(request)
 
@@ -121,6 +121,11 @@ async def require_user(request: Request, call_next):
 
 
 # <--------------------------------- Common routes --------------------------------->
+@api.get("/health")
+async def health_check():
+    return {"status": "ok"}
+
+
 @api.get("/")
 def root(request: Request):
     current_template = "pages/main.html"
@@ -131,11 +136,11 @@ def root(request: Request):
 
 @api.post("/message_with_docs")
 async def send_message(
-    request: Request,
-    files: list[UploadFile] = File(None),
-    prompt: str = Form(...),
-    chat_id=Form(None),
-    user: User = Depends(get_current_user),
+        request: Request,
+        files: list[UploadFile] = File(None),
+        prompt: str = Form(...),
+        chat_id=Form(None),
+        user: User = Depends(get_current_user),
 ) -> StreamingResponse:
     # response = ""
     status = 200
@@ -177,11 +182,11 @@ async def replace_message(request: Request):
 
 @api.get("/viewer")
 def show_document(
-    request: Request,
-    path: str,
-    page: Optional[int] = 1,
-    lines: Optional[str] = "1-1",
-    start: Optional[int] = 0,
+        request: Request,
+        path: str,
+        page: Optional[int] = 1,
+        lines: Optional[str] = "1-1",
+        start: Optional[int] = 0,
 ):
     if not path_is_valid(path):
         return HTTPException(status_code=404, detail="Document not found")
@@ -328,9 +333,9 @@ def login_post(response: Response, user_data: LoginData):
 
 @api.post("/new_chat")
 def create_chat(
-    request: Request,
-    title: Optional[str] = "new chat",
-    user: User = Depends(get_current_user),
+        request: Request,
+        title: Optional[str] = "new chat",
+        user: User = Depends(get_current_user),
 ):
     new_chat = create_new_chat(title, user)
     url = new_chat.get("url")

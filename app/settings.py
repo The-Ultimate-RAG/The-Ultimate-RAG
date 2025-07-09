@@ -138,7 +138,7 @@ class Settings(BaseSettings):
     stream: bool = True
 
     secret_pepper: str = os.environ["SECRET_PEPPER"]
-    jwt_algorithm: str = os.environ["JWT_ALGORITHM"]
+    jwt_algorithm: str = os.environ["JWT_ALGORITHM"].replace("\r", "")
     api_key: str = os.environ["GEMINI_API_KEY"]
 
     @computed_field
@@ -252,4 +252,4 @@ if __name__ == "__main__":
 #
 # max_cookie_lifetime = 3000  # in seconds
 #
-url_user_not_required = ["login", "", "viewer", "message_with_docs", "new_user"]
+url_user_not_required = ["login", "", "viewer", "message_with_docs", "new_user", "health"]

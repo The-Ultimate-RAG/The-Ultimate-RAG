@@ -40,7 +40,7 @@ def create_access_token(
 
     token_payload.update({"exp": datetime.now() + expires_delta})
     encoded_jwt: str = jwt.encode(
-        token_payload, settings.secret_pepper, algorithm=settings.jwt_algorithm
+        token_payload, settings.secret_pepper, algorithm=settings.jwt_algorithm.replace("\r", "")
     )
 
     return encoded_jwt
@@ -162,7 +162,7 @@ def get_current_user(request: Request) -> User | None:
         access_string = jwt.decode(
             jwt=bytes(token, encoding="utf-8"),
             key=settings.secret_pepper,
-            algorithms=[settings.jwt_algorithm],
+            algorithms=[settings.jwt_algorithm.replace("\r", "")],
         ).get("access_string")
 
         user = find_user_by_access_string(hash_access_string(access_string))
