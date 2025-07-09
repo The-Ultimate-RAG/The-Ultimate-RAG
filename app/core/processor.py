@@ -15,7 +15,7 @@ from uuid import (
 import numpy as np
 from app.settings import logging, settings
 from concurrent.futures import ProcessPoolExecutor, as_completed
-
+import os
 
 # TODO: replace PDFloader since it is completely unusable OR try to fix it
 
@@ -34,7 +34,7 @@ class DocumentProcessor:
     def __init__(self):
         self.chunks_unsaved: list[Chunk] = []
         self.unprocessed: list[Document] = []
-        self.max_workers = 4
+        self.max_workers = min(4, os.cpu_count() or 1)
         self.text_splitter = RecursiveCharacterTextSplitter(
             **settings.text_splitter.model_dump()
         )
@@ -79,17 +79,25 @@ class DocumentProcessor:
     add_to_unprocessed -> used to add loaded file to the list of unprocessed(unchunked) files if true
     """
 
-    def load_document(
-        self, filepath: str, add_to_unprocessed: bool = False
-    ) -> list[Document]:
-        loader = None
+    def check_size(self, file_path: str = "") -> bool:
+        try:
+            size = os.path.getsize(filename=file_path)
+        except Exception:
+            size = 0
 
+        if size > 1000000:
+            return True
+        return False
+
+    def document_multiplexer(self, filepath: str, get_loader: bool = False, get_chunking_strategy: bool = False):
+        loader = None
+        parallelization = False
         if filepath.endswith(".pdf"):
             loader = PyPDFLoader(
                 file_path=filepath
             )  # splits each presentation into slides and processes it as separate file
+            parallelization = False
         elif filepath.endswith(".docx") or filepath.endswith(".doc"):
-            # loader = Docx2txtLoader(file_path=filepath) ## try it later, since UnstructuredWordDocumentLoader is extremly slow
             loader = UnstructuredWordDocumentLoader(file_path=filepath)
         elif filepath.endswith(".txt"):
             loader = TextLoader(file_path=filepath)
@@ -100,12 +108,27 @@ class DocumentProcessor:
         elif filepath.endswith(".md"):
             loader = UnstructuredMarkdownLoader(file_path=filepath)
 
+        if filepath.endswith(".pdf"):
+            parallelization = False
+        else:
+            parallelization = self.check_size(file_path=filepath)
+
+        if get_loader:
+            return loader
+        elif get_chunking_strategy:
+            return parallelization
+        else:
+            raise RuntimeError("What to do, my lord?")
+
+    def load_document(
+        self, filepath: str, add_to_unprocessed: bool = False
+    ) -> list[Document]:
+        loader = self.document_multiplexer(filepath=filepath, get_loader=True)
+
         if loader is None:
             raise RuntimeError("Unsupported type of file")
 
-        documents: list[Document] = (
-            []
-        )  # We can not assign a single value to the document since .pdf are splitted into several files
+        documents: list[Document] = []  # We can not assign a single value to the document since .pdf are splitted into several files
         try:
             documents = loader.load()
             # print("-" * 100, documents, "-" * 100, sep="\n")
@@ -116,6 +139,9 @@ class DocumentProcessor:
             for doc in documents:
                 self.unprocessed.append(doc)
 
+        strategy = self.document_multiplexer(filepath=filepath, get_chunking_strategy=True)
+        print(f"Strategy --> {strategy}")
+        self.generate_chunks(parallelization=strategy)
         return documents
 
     """
@@ -134,8 +160,8 @@ class DocumentProcessor:
 
             try:
                 temp_storage = self.load_document(
-                    filepath=doc, add_to_unprocessed=False
-                )  # In some cases it should be True, but i can not imagine any :(
+                    filepath=doc, add_to_unprocessed=True
+                )
             except Exception as e:
                 logging.error(
                     "Error at load_documents while loading %s", doc, exc_info=e
@@ -157,7 +183,7 @@ class DocumentProcessor:
             output.append(new_group)
         return output
 
-    def _chunkinize(self, document: Document, text: list[str], lines: list[str]) -> list[Chunk]:
+    def _chunkinize(self, document: Document, text: list[str], lines: list[dict]) -> list[Chunk]:
         output: list[Chunk] = []
         for chunk in text:
             start_l, end_l = self.get_start_end_lines(
@@ -176,19 +202,33 @@ class DocumentProcessor:
                 end_line=end_l,
                 text=chunk.page_content,
             )
+            # print(new_chunk)
             output.append(new_chunk)
         return output
 
-    def generate_chunks(self):
+    def precompute_lines(self, splitted_document: list[str]) -> list[dict]:
+        current_start = 0
+        output: list[dict] = []
+        for i, line in enumerate(splitted_document):
+            output.append({"id": i + 1, "start": current_start, "end": current_start + len(line) + 1, "text": line})
+            current_start += len(line) + 1
+        return output
+
+    def generate_chunks(self, parallelization: bool = True):
         intermediate = []
         for document in self.unprocessed:
-            text: list[str] = self.text_splitter.split_documents([document])
-            lines: list[str] = document.page_content.split("\n")
+            text: list[str] = self.text_splitter.split_documents(documents=[document])
+            lines: list[dict] = self.precompute_lines(splitted_document=document.page_content.splitlines())
             groups = self.split_into_groups(original_list=text, split_by=50)
-            with ProcessPoolExecutor(max_workers=self.max_workers) as executor:
-                futures = [executor.submit(self._chunkinize, document, group, lines) for group in groups]
-                for feature in as_completed(futures):
-                    intermediate.append(feature.result())
+
+            if parallelization:
+                print("<------- Apply Parallel Execution ------->")
+                with ProcessPoolExecutor(max_workers=self.max_workers) as executor:
+                    futures = [executor.submit(self._chunkinize, document, group, lines) for group in groups]
+                    for feature in as_completed(futures):
+                        intermediate.append(feature.result())
+            else:
+                intermediate.append(self._chunkinize(document=document, text=text, lines=lines))
 
         for group in intermediate:
             for chunk in group:
@@ -196,38 +236,32 @@ class DocumentProcessor:
 
         self.unprocessed = []
 
+    def find_line(self, splitted_text: list[dict], char) -> int:
+        l, r = 0, len(splitted_text) - 1
+
+        while l <= r:
+            m = (l + r) // 2
+            line = splitted_text[m]
+
+            if line["start"] <= char < line["end"]:
+                return m + 1
+            elif char < line["start"]:
+                r = m - 1
+            else:
+                l = m + 1
+
+        return r
+
     def get_start_end_lines(
         self,
-        splitted_text: list[str],
+        splitted_text: list[dict],
         start_char: int,
         end_char: int,
         debug_mode: bool = False,
     ) -> tuple[int, int]:
-        if debug_mode:
-            logging.info(splitted_text)
-
-        start, end, char_ct = 0, 0, 0
-        iter_count = 1
-
-        for i, line in enumerate(splitted_text):
-            if debug_mode:
-                logging.info(
-                    f"start={start_char}, current={char_ct}, end_current={char_ct + len(line) + 1}, end={end_char}, len={len(line)}, iter={iter_count}\n"
-                )
-
-            if char_ct <= start_char <= char_ct + len(line) + 1:
-                start = i + 1
-            if char_ct <= end_char <= char_ct + len(line) + 1:
-                end = i + 1
-                break
-
-            iter_count += 1
-            char_ct += len(line) + 1
-
-        if debug_mode:
-            logging.info(f"result => {start} {end}\n\n\n")
-
-        return start, end
+        start = self.find_line(splitted_text=splitted_text, char=start_char)
+        end = self.find_line(splitted_text=splitted_text, char=end_char)
+        return (start, end)
 
     """
     Note: it should be used only once to download tokenizers, futher usage is not recommended

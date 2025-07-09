@@ -68,10 +68,10 @@ class APISettings(BaseModel):
 
 
 class GeminiSettings(BaseModel):
-    temperature: float = 0.0
-    top_p: float = 0.95
+    temperature: float = 0.6
+    top_p: float = 0.8
     top_k: int = 20
-    candidate_count: int = 1
+    candidate_count: int = None
     seed: int = 5
     max_output_tokens: int = 1001
     stop_sequences: List[str] = Field(default_factory=lambda: ["STOP!"])

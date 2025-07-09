@@ -8,3 +8,4 @@ __pycache__
 /chats_storage
 /.env
 exp.*
+response.txt

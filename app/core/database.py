@@ -66,10 +66,18 @@ class VectorDatabase:
     Measures a cosine of angle between tow vectors
     """
 
-    def cosine_similarity(self, vec1, vec2):
+    def cosine_similarity(self, vec1: list[float], vec2: list[float] | list[list[float]]) -> float:
+        if len(vec2) == 0:
+            return 0
+
         vec1_np = np.array(vec1)
         vec2_np = np.array(vec2)
-        return vec1_np @ vec2_np / (np.linalg.norm(vec1_np) * np.linalg.norm(vec2_np))
+
+        if vec2_np.ndim == 2:
+            vec2_np = vec2_np.T
+
+        similarities = np.array(vec1_np @ vec2_np / (np.linalg.norm(vec1_np) * np.linalg.norm(vec2_np, axis=0)))
+        return np.max(similarities)
 
     """
     Defines weather the vector should be stored in the db by searching for the most
@@ -103,11 +111,20 @@ class VectorDatabase:
 
         return filters
 
-    def combine_chunks_without_duplications(self, dst: list[Chunk], origin: list[Chunk]) -> list[Chunk]:
-        for chunk in origin:
-            if chunk not in dst:
-                dst.append(chunk)
-        return dst
+    def combine_points_without_duplications(self, first: list[ScoredPoint], second: list[ScoredPoint] = None) -> list[ScoredPoint]:
+        combined = []
+        similarity_vectors = []
+
+        to_combine = [first]
+        if second is not None:
+            to_combine.append(second)
+
+        for group in to_combine:
+            for point in group:
+                if 1 - self.cosine_similarity(point.vector, similarity_vectors) > min(settings.max_delta, 0.2):
+                    combined.append(point)
+                    similarity_vectors.append(point.vector)
+        return combined
 
     def search(self, collection_name: str, query: str, top_k: int = 5) -> list[Chunk]:
         query_embedded: np.ndarray = self.embedder.encode(query)
@@ -117,16 +134,14 @@ class VectorDatabase:
 
         keywords = self.construct_keywords_list(query)
 
-        dense_result: list[ScoredPoint] = self.client.query_points(
-            collection_name=collection_name, query=query_embedded, limit=top_k
+        mixed_result: list[ScoredPoint] = self.client.query_points(
+            collection_name=collection_name, query=query_embedded, limit=top_k + int(top_k * 0.3),
+            query_filter=Filter(should=keywords), with_vectors=True
         ).points
 
-        sparse_result: list[ScoredPoint] = self.client.query_points(
-            collection_name=collection_name, query=query_embedded, limit=int(top_k * 0.3),
-            query_filter=Filter(should=keywords)
-        ).points
-
-        combined = self.combine_chunks_without_duplications(dense_result, sparse_result)
+        print(f"Len of original array -> {len(mixed_result)}")
+        combined = self.combine_points_without_duplications(mixed_result)
+        print(f"Len of combined array -> {len(combined)}")
 
         return [
             Chunk(

@@ -278,3 +278,7 @@ Python 3.9 introduced several new features compared to its predecessors. Two maj
 
 ---
 
+Try not to limit yourself in context of the output chunks. Tell as much USEFUL information as POSSIBLE.
+DO NOT change the LINES in CITATIONS.
+You MUST NOT provide you thoughts and **INTERNAL WORKFLOW** in the answer. Just give COMPREHENSIVE and RICH answer to the users question.
+DO NOT provide your STEP-BACK PROMPTING prompting and CHAIN-OF-THOUGHT REASONING in the ANSWER. Keep them for you own reasoning, but NOT show it to the user.

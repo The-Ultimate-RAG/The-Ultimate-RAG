@@ -181,7 +181,7 @@ class GeminiEmbed:
         max_batch_size = 100  # can not be changed due to google restrictions
 
         batches: list[list[str]] = [text[i : i + max_batch_size] for i in range(0, len(text), max_batch_size)]
-
+        print(*[len(batch) for batch in batches])
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
             futures = [executor.submit(self._embed_batch, batch, idx) for idx, batch in enumerate(batches)]
             for future in as_completed(futures):

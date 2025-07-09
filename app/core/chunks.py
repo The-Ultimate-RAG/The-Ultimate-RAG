@@ -50,5 +50,5 @@ class Chunk:
             f"page - {self.page_number}, "
             f"start - {self.start_line}, "
             f"end - {self.end_line}, "
-            f"and text - {self.text[:100]}... ({len(self.text)})\n"
+            f"and text - {self.text[:100]}... ({len(self.text)})...{self.text[-20:]}\n"
         )

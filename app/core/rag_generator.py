@@ -39,7 +39,7 @@ class RagSystem:
         sources = ""
         prompt = ""
 
-        for chunk in relevant_chunks[: min(5, len(relevant_chunks))]:
+        for chunk in relevant_chunks[: min(10, len(relevant_chunks))]:
             citation = (
                 f"[Source: {chunk.filename}, "
                 f"Page: {chunk.page_number}, "
@@ -101,12 +101,12 @@ class RagSystem:
 
             print("Start loading the documents")
             start = time.time()
-            self.processor.load_documents(documents=docs, add_to_unprocessed=True)
+            self.processor.load_documents(documents=docs, add_to_unprocessed=False)
             loading_time = time.time() - start
 
             print("Start loading chunk generation")
             start = time.time()
-            self.processor.generate_chunks()
+            # self.processor.generate_chunks()
             chunk_generating_time = time.time() - start
 
             print("Start saving to db")

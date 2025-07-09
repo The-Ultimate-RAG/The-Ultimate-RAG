@@ -143,6 +143,8 @@ async def send_message(
 @api.post("/replace_message")
 async def replace_message(request: Request):
     data = await request.json()
+    with open(os.path.join(BASE_DIR, "response.txt"), "w") as f:
+        f.write(data.get("message", ""))
     updated_message = add_links(data.get("message", ""))
     register_message(
         content=updated_message, sender="assistant", chat_id=data.get("chat_id")
