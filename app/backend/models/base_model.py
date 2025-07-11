@@ -1,9 +1,9 @@
 from sqlalchemy import Column, DateTime
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.sql import func
+from sqlalchemy.ext.asyncio import AsyncAttrs
 
-
-class Base(DeclarativeBase):
+class Base(AsyncAttrs, DeclarativeBase):
     '''
     Base model for all others \\
     Defines base for table creation

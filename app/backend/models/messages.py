@@ -1,6 +1,6 @@
-from sqlalchemy import Column, ForeignKey, String, Text
-from sqlalchemy.orm import Session, relationship
-
+from sqlalchemy import Column, ForeignKey, String, Text, select
+from sqlalchemy.orm import relationship
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.backend.controllers.base_controller import engine
 from app.backend.models.base_model import Base
 
@@ -14,13 +14,16 @@ class Message(Base):
     chat = relationship("Chat", back_populates="messages")
 
 
-def add_new_message(id: str, chat_id: str, sender: str, content: str):
-    with Session(autoflush=False, bind=engine) as db:
+async def add_new_message(id: str, chat_id: str, sender: str, content: str):
+    async with AsyncSession(engine) as db:
         new_message = Message(id=id, content=content, sender=sender, chat_id=chat_id)
         db.add(new_message)
-        db.commit()
+        await db.commit()
 
 
-def get_messages_by_chat_id(id: str) -> list[Message]:
-    with Session(autoflush=False, bind=engine) as db:
-        return db.query(Message).filter(Message.chat_id == id)
+async def get_messages_by_chat_id(id: str) -> list[Message]:
+    async with AsyncSession(engine) as db:
+        result = await db.execute(
+            select(Message).where(Message.chat_id == id)
+        )
+        return result.scalars().all()

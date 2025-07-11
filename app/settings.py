@@ -13,7 +13,7 @@ import torch
 from dotenv import load_dotenv
 from pathlib import Path
 from pydantic import BaseModel, Field, computed_field
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 load_dotenv()
 
@@ -98,16 +98,17 @@ class GeminiWrapperSettings(BaseModel):
 
 class PostgresSettings(BaseModel):
     url: str = os.environ["DATABASE_URL"]
-    echo: bool = False
-
+    echo: bool = True
+    pool_size: int = 5
+    max_overflow: int = 10
 
 class Settings(BaseSettings):
-    # model_config = SettingsConfigDict(
-    #     env_file=".env",
-    #     env_file_encoding="utf-8",
-    #     env_nested_delimiter="_",
-    #     extra="ignore"
-    # )
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        env_nested_delimiter="_",
+        extra="ignore"
+    )
 
     qdrant: QdrantSettings = Field(default_factory=QdrantSettings)
     local_llm: LocalLLMSettings = Field(default_factory=LocalLLMSettings)

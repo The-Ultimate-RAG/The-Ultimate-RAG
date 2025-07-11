@@ -27,13 +27,13 @@ class Chunk:
         self.end_line: int = end_line
         self.text: str = text
 
-    def get_raw_text(self) -> str:
+    async def get_raw_text(self) -> str:
         return self.text
 
-    def get_splitted_text(self) -> list[str]:
+    async def get_splitted_text(self) -> list[str]:
         return self.text.split(" ")
 
-    def get_metadata(self) -> dict:
+    async def get_metadata(self) -> dict:
         return {
             "id": str(self.id),
             "filename": self.filename,
@@ -43,8 +43,7 @@ class Chunk:
             "end_line": self.end_line,
         }
 
-    # TODO: remove kostyly
-    def __str__(self):
+    async def __str__(self):
         return (
             f"Chunk from {self.filename.split('/')[-1]}, "
             f"page - {self.page_number}, "

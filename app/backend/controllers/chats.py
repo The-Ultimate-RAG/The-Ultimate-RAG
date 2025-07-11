@@ -1,3 +1,4 @@
+import asyncio
 from app.backend.models.messages import get_messages_by_chat_id, Message
 from app.backend.models.users import User, get_user_chats
 from app.backend.controllers.utils import get_group_title
@@ -13,13 +14,13 @@ from datetime import datetime, timedelta
 from fastapi import HTTPException
 from uuid import uuid4
 import os
+import aiofiles.os
 
-
-def create_new_chat(title: str | None, user: User) -> dict:
+async def create_new_chat(title: str | None, user: User) -> dict:
     print("+" * 40, "START Creating Chat", "+" * 40)
     try:
         chat_id = str(uuid4())
-        add_new_chat(id=chat_id, title=title, user=user)
+        await add_new_chat(id=chat_id, title=title, user=user)
         try:
             path_to_chat = os.path.join(
                 BASE_DIR,
@@ -28,7 +29,8 @@ def create_new_chat(title: str | None, user: User) -> dict:
                 f"chat_id={chat_id}",
                 "documents",
             )
-            os.makedirs(path_to_chat, exist_ok=True)
+
+            await aiofiles.os.makedirs(path_to_chat, exist_ok=True)
         except Exception:
             raise HTTPException(500, "error while creating chat folders")
 
@@ -39,36 +41,37 @@ def create_new_chat(title: str | None, user: User) -> dict:
         print("+" * 40, "END Creating Chat", "+" * 40, "\n\n")
 
 
-def dump_messages_dict(messages: list[Message], dst: dict) -> None:
+async def dump_messages_dict(messages: list[Message], dst: dict) -> None:
     history = []
+    loop = asyncio.get_running_loop()
 
-    print("!" * 40, "START Dumping History", "!" * 40)
+    def process_message(message):
+        return {"role": message.sender, "content": message.content}
+
     for message in messages:
-        history.append({"role": message.sender, "content": message.content})
-        print(f"Role ----> {message.sender}, Content ----> {message.content}\n")
-    print("!" * 40, "END Dumping History", "!" * 40, "\n\n")
+        history.append(await loop.run_in_executor(None, process_message, message))
 
     dst.update({"history": history})
 
 
-def get_chat_with_messages(id: str) -> dict:
+async def get_chat_with_messages(id: str) -> dict:
     response = {"chat_id": id}
 
-    chat = get_chat_by_id(id=id)
+    chat = await get_chat_by_id(id=id)
     if chat is None:
         raise HTTPException(418, f"Invalid chat id. Chat with id={id} does not exists!")
 
-    messages = get_messages_by_chat_id(id=id)
-    dump_messages_dict(messages, response)
+    messages = await get_messages_by_chat_id(id=id)
+    await dump_messages_dict(messages, response)
 
     return response
 
 
-def create_dict_from_chat(chat) -> dict:
+async def create_dict_from_chat(chat) -> dict:
     return {"id": chat.id, "title": chat.title}
 
 
-def list_user_chats(user_id: str) -> list[dict]:
+async def list_user_chats(user_id: str) -> list[dict]:
     current_date = datetime.now()
 
     today = []
@@ -78,8 +81,10 @@ def list_user_chats(user_id: str) -> list[dict]:
 
     groups = [today, last_week, last_month, later]
 
-    chats = get_chats_by_user_id(user_id)
-    for chat in chats:
+    chats = await get_chats_by_user_id(user_id)
+    loop = asyncio.get_event_loop()
+
+    def categorize_chat(chat):
         if current_date - timedelta(days=1) <= chat.created_at:
             today.append(chat)
         elif current_date - timedelta(weeks=1) <= chat.created_at:
@@ -89,20 +94,21 @@ def list_user_chats(user_id: str) -> list[dict]:
         else:
             later.append(chat)
 
+    await asyncio.gather(*[loop.run_in_executor(None, categorize_chat, chat) for chat in chats])
+
     result = []
 
     for id, group in enumerate(groups):
         if len(group):
             result.append(
-                {"title": get_group_title(id=id), "chats": [create_dict_from_chat(chat) for chat in group]}
+                {"title": await get_group_title(id=id), "chats": [await create_dict_from_chat(chat) for chat in group]}
             )
 
     return result
 
 
-def verify_ownership_rights(user: User, chat_id: str) -> bool:
-    return chat_id in [chat.id for chat in get_user_chats(user)]
+async def verify_ownership_rights(user: User, chat_id: str) -> bool:
+    return chat_id in [chat.id for chat in await get_user_chats(user.id)]
 
-
-def update_title(chat_id: str) -> bool:
-    return refresh_title(chat_id)
+async def update_title(chat_id: str) -> bool:
+    return await refresh_title(chat_id)

@@ -1,3 +1,5 @@
+import asyncio
+import aiofiles
 from fastapi.templating import Jinja2Templates
 from fastapi import Request, UploadFile
 
@@ -23,13 +25,8 @@ def initialize_rag() -> RagSystem:
 
 
 # <----------------------- Tools ----------------------->
-"""
-Updates response context and adds context of navbar (role, instance(or none)) and footer (none)
-"""
-
-
-def extend_context(context: dict, selected: int = None):
-    user = get_current_user(context.get("request"))
+async def extend_context(context: dict, selected: int = None):
+    user = await get_current_user(context.get("request"))
     navbar = {
         "navbar": False,
         "navbar_path": "components/navbar.html",
@@ -43,7 +40,7 @@ def extend_context(context: dict, selected: int = None):
         "sidebar_path": "components/sidebar.html",
         "sidebar_context": {
             "selected": selected if selected is not None else None,
-            "chat_groups": list_user_chats(user.id) if user else [],
+            "chat_groups": await list_user_chats(user.id) if user else [],
         },
     }
     footer = {"footer": False, "footer_context": None}
@@ -60,8 +57,8 @@ Validates chat viewing permission by comparing user's chats and requested one
 """
 
 
-def protect_chat(user: User, chat_id: str) -> bool:
-    return verify_ownership_rights(user, chat_id)
+async def protect_chat(user: User, chat_id: str) -> bool:
+    return await verify_ownership_rights(user, chat_id)
 
 
 async def save_documents(
@@ -83,7 +80,7 @@ async def save_documents(
     if files is None or len(files) == 0:
         return
 
-    os.makedirs(os.path.join(storage, "pdfs"), exist_ok=True)
+    await aiofiles.os.makedirs(os.path.join(storage, "pdfs"), exist_ok=True)
 
     for file in files:
         content = await file.read()
@@ -95,66 +92,70 @@ async def save_documents(
                 storage, str(uuid4()) + "." + file.filename.split(".")[-1]
             )
 
-        with open(saved_file, "wb") as f:
-            f.write(content)
+        async with aiofiles.open(saved_file, "wb") as f:
+            await f.write(content)
 
         docs.append(saved_file)
 
     if len(files) > 0:
-        RAG.upload_documents(collection_name, docs)
+        await RAG.upload_documents(collection_name, docs)
 
 
-def get_pdf_path(path: str) -> str:
+async def get_pdf_path(path: str) -> str:
     parts = path.split("chats_storage")
     if len(parts) < 2:
         return ""
     return "chats_storage" + "".join(parts[1:])
 
 
-def construct_collection_name(user: User, chat_id: int) -> str:
+async def construct_collection_name(user: User, chat_id: int) -> str:
     return f"user_id_{user.id}_chat_id_{chat_id}"
 
 
-def create_collection(user: User, chat_id: int, RAG: RagSystem) -> None:
+async def create_collection(user: User, chat_id: int, RAG: RagSystem) -> None:
     if RAG is None:
         raise RuntimeError("RAG was not initialized")
 
-    RAG.create_new_collection(construct_collection_name(user, chat_id))
-    print(rag.get_collections_names())
+    await RAG.create_new_collection(await construct_collection_name(user, chat_id))
+    print(await rag.get_collections_names())
 
 
-def lines_to_markdown(lines: list[str]) -> list[str]:
-    return [markdown.markdown(line) for line in lines]
+async def lines_to_markdown(lines: list[str]) -> list[str]:
+    loop = asyncio.get_running_loop()
+    return await asyncio.gather(*[
+        loop.run_in_executor(None, markdown.markdown, line)
+        for line in lines
+    ])
 
 
 # <----------------------- Handlers ----------------------->
-def PDFHandler(
+async def PDFHandler(
     request: Request, path: str, page: int, templates
 ) -> Jinja2Templates.TemplateResponse:
     print(path)
-    url_path = get_pdf_path(path=path)
+    url_path = await get_pdf_path(path=path)
     print(url_path)
 
     current_template = "pages/show_pdf.html"
     return templates.TemplateResponse(
         current_template,
-        extend_context(
+        await extend_context(
             {
                 "request": request,
                 "page": str(page or 1),
                 "url_path": url_path,
-                "user": get_current_user(request),
+                "user": await get_current_user(request),
             }
         ),
     )
 
 
-def TextHandler(
+async def TextHandler(
     request: Request, path: str, lines: str, templates
 ) -> Jinja2Templates.TemplateResponse:
     file_content = ""
-    with open(path, "r") as f:
-        file_content = f.read()
+    async with aiofiles.open(path, "r") as f:
+        file_content = await f.read()
 
     start_line, end_line = map(int, lines.split("-"))
 
@@ -178,23 +179,14 @@ def TextHandler(
 
     return templates.TemplateResponse(
         current_template,
-        extend_context(
+        await extend_context(
             {
                 "request": request,
-                "text_before_citation": lines_to_markdown(text_before_citation),
-                "text_after_citation": lines_to_markdown(text_after_citation),
-                "citation": lines_to_markdown(citation),
+                "text_before_citation": await lines_to_markdown(text_before_citation),
+                "text_after_citation": await lines_to_markdown(text_after_citation),
+                "citation": await lines_to_markdown(citation),
                 "anchor_added": anchor_added,
-                "user": get_current_user(request),
+                "user": await get_current_user(request),
             }
         ),
     )
-
-
-"""
-Optional handler
-"""
-
-
-def DocHandler():
-    pass

@@ -12,22 +12,27 @@ from datetime import datetime, timedelta, timezone
 
 from uuid import uuid4
 import jwt
+import asyncio
 
-
-def extract_user_from_context(request: Request) -> User | None:
+async def extract_user_from_context(request: Request) -> User | None:
     if hasattr(request.state, "current_user"):
         return request.state.current_user
     print("*" * 40, "No attribute 'current_user`", "*" * 40, "\n")
     return None
 
 
-def create_access_token(user_id: str, expires_delta: timedelta = settings.max_cookie_lifetime) -> str:
+async def create_access_token(user_id: str, expires_delta: timedelta = settings.max_cookie_lifetime) -> str:
     token_payload = {"user_id": user_id}
     token_payload.update({"exp": datetime.now() + expires_delta})
+    loop = asyncio.get_event_loop()
 
     try:
-        encoded_jwt: str = jwt.encode(
-            token_payload, settings.secret_pepper, algorithm=settings.jwt_algorithm
+        encoded_jwt: str = await loop.run_in_executor(
+            None,
+            jwt.encode,
+            token_payload,
+            settings.secret_pepper,
+            settings.jwt_algorithm
         )
     except Exception:
         raise HTTPException(status_code=500, detail="json encoding error")
@@ -39,24 +44,24 @@ def create_access_token(user_id: str, expires_delta: timedelta = settings.max_co
     return encoded_jwt
 
 
-def create_user() -> User | None:
+async def create_user() -> User | None:
     new_user_id = str(uuid4())
     try:
-        user = add_new_user(id=new_user_id)
+        user = await add_new_user(id=new_user_id)
     except Exception as e:
         raise HTTPException(status_code=418, detail=e)
 
     print("$" * 40, "New User was created", "$" * 40)
-    print("Created user - {user.id}")
+    print(f"Created user - {user.id}")
     print("$" * 100, "\n\n")
 
     return user
 
 
-def authorize_user(response: Response, user: User) -> dict:
+async def authorize_user(response: Response, user: User) -> dict:
     print("%" * 40, "START Authorizing User", "%" * 40)
     try:
-        access_token: str = create_access_token(user_id=user.id)
+        access_token: str = await create_access_token(user_id=user.id)
         expires = datetime.now(timezone.utc) + settings.max_cookie_lifetime
 
         response.set_cookie(
@@ -75,8 +80,9 @@ def authorize_user(response: Response, user: User) -> dict:
         print("%" * 40, "END Authorizing User", "%" * 40)
 
 
-def get_current_user(request: Request) -> User | None:
+async def get_current_user(request: Request) -> User | None:
     print("-" * 40, "START Getting User", "-" * 40)
+    loop = asyncio.get_event_loop()
     try:
         user = None
         token: str | None = request.cookies.get("access_token")
@@ -87,15 +93,18 @@ def get_current_user(request: Request) -> User | None:
             return None
 
         try:
-            user_id = jwt.decode(
-                jwt=bytes(token, encoding="utf-8"),
-                key=settings.secret_pepper,
-                algorithms=[settings.jwt_algorithm],
-            ).get("user_id")
+            token_data = await loop.run_in_executor(
+                None,
+                jwt.decode,
+                bytes(token, encoding="utf-8"),
+                settings.secret_pepper,
+                [settings.jwt_algorithm],
+            )
+            user_id = token_data.get("user_id")
 
             print(f"User id -----> {user_id if user_id else 'Empty user id!'}\n")
 
-            user = find_user_by_id(id=user_id)
+            user = await find_user_by_id(id=user_id)
 
             print(f"Found user -----> {user.id if user else 'No user was found!'}")
         except Exception as e:
@@ -111,7 +120,7 @@ def get_current_user(request: Request) -> User | None:
         print("-" * 40, "END Getting User", "-" * 40, "\n\n")
 
 
-def check_cookie(request: Request) -> dict:
+async def check_cookie(request: Request) -> dict:
     result = {"token": "No token is present"}
     token = request.cookies.get("access_token")
     if token:
@@ -119,18 +128,20 @@ def check_cookie(request: Request) -> dict:
     return result
 
 
-def clear_cookie(response: Response) -> dict:
+async def clear_cookie(response: Response) -> dict:
     response.set_cookie(key="access_token", value="", httponly=True)
     return {"status": "ok"}
 
 
-def get_latest_chat(user: User) -> Chat | None:
-    return get_user_last_chat(user)
+async def get_latest_chat(user: User) -> Chat | None:
+    return await get_user_last_chat(user)
 
 
-def refresh_cookie(request: Request, response: Response) -> None:
+async def refresh_cookie(request: Request, response: Response) -> None:
+    loop = asyncio.get_event_loop()
     print("+" * 40, "START Refreshing cookie", "+" * 40)
     try:
+
         token: str | None = request.cookies.get("access_token")
 
         print(f"Token -----> {token if token else 'Empty token!'}\n")
@@ -139,11 +150,13 @@ def refresh_cookie(request: Request, response: Response) -> None:
             return
 
         try:
-            jwt_token = jwt.decode(
-                        jwt=bytes(token, encoding="utf-8"),
-                        key=settings.secret_pepper,
-                        algorithms=[settings.jwt_algorithm],
-                    )
+            jwt_token = await loop.run_in_executor(
+                None,
+                jwt.decode,
+                bytes(token, encoding="utf-8"),
+                settings.secret_pepper,
+                [settings.jwt_algorithm],
+            )
             exp_datetime = datetime.fromtimestamp(jwt_token.get("exp"), tz=timezone.utc)
             print(f"Expires -----> {exp_datetime if exp_datetime else 'No expiration date!'}\n")
         except jwt.ExpiredSignatureError:
@@ -156,8 +169,8 @@ def refresh_cookie(request: Request, response: Response) -> None:
 
         if diff.total_seconds() < 0.2 * settings.max_cookie_lifetime.total_seconds():
             print("<----- Refreshing ----->")
-            user = extract_user_from_context(request)
-            authorize_user(response, user)
+            user = await extract_user_from_context(request)
+            await authorize_user(response, user)
     except HTTPException as exception:
         raise exception
     finally:

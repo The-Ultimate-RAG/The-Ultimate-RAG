@@ -17,12 +17,12 @@
                 </svg>
                 Previous
             </button>
-            
+
             <div class="page-input-container">
                 <input type="number" id="pageNum" value="{{ page }}" class="page-input" style="padding-right: 30px;">
                 <span class="page-input-label">of {{ total_pages }}</span>
             </div>
-            
+
             <button id="next" class="pagination-button">
                 Next
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
@@ -31,7 +31,7 @@
             </button>
         </div>
     </div>
-    
+
     <div id="pdf-container">
         <canvas id="pdf-canvas"></canvas>
     </div>
@@ -40,31 +40,31 @@
 {% block body_scripts %}
     <script>
         pdfjsLib = window['pdfjs-dist/build/pdf'];
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
             'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';
-        
+
         let pdfDoc = null;
         let currentPage = {{ page }};
         const urlPath = "{{ url_path }}";
-        
+
         pdfjsLib.getDocument(urlPath).promise.then(function(pdf) {
             pdfDoc = pdf;
             document.getElementById('pageNum').max = pdf.numPages;
             document.querySelector('.page-input-label').textContent = `of ${pdf.numPages}`;
             renderPage(currentPage);
         });
-        
+
         function renderPage(num) {
             pdfDoc.getPage(num).then(function(page) {
                 const scale = 1.5;
                 const viewport = page.getViewport({ scale });
                 const canvas = document.getElementById('pdf-canvas');
                 const ctx = canvas.getContext('2d');
-                
+
                 // Set canvas dimensions
                 canvas.height = viewport.height;
                 canvas.width = viewport.width;
-                
+
                 // Render PDF page
                 page.render({
                     canvasContext: ctx,
@@ -72,7 +72,7 @@
                 });
             });
         }
-        
+
         // Navigation controls
         document.getElementById('prev').addEventListener('click', function() {
             if (currentPage <= 1) return;
@@ -80,14 +80,14 @@
             document.getElementById('pageNum').value = currentPage;
             renderPage(currentPage);
         });
-        
+
         document.getElementById('next').addEventListener('click', function() {
             if (currentPage >= pdfDoc.numPages) return;
             currentPage++;
             document.getElementById('pageNum').value = currentPage;
             renderPage(currentPage);
         });
-        
+
         document.getElementById('pageNum').addEventListener('change', function() {
             const newPage = Math.min(Math.max(1, parseInt(this.value)), pdfDoc.numPages);
             currentPage = newPage;

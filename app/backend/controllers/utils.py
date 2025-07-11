@@ -1,4 +1,4 @@
-def get_group_title(id: int) -> str:
+async def get_group_title(id: int) -> str:
     result = "LATER"
 
     if id == 0:

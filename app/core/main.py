@@ -2,16 +2,16 @@ from app.settings import settings, BASE_DIR
 import uvicorn
 import os
 from app.backend.models.db_service import automigrate
-
-
-def initialize_system() -> bool:
+import asyncio
+import aiofiles.os
+async def initialize_system() -> bool:
     path = BASE_DIR
     chats_storage_path = os.path.join(path, "chats_storage")
     database_path = os.path.join(path, "database")
 
     try:
-        os.makedirs(database_path, exist_ok=True)
-        os.makedirs(chats_storage_path, exist_ok=True)
+        await aiofiles.os.makedirs(database_path, exist_ok=True)
+        await aiofiles.os.makedirs(chats_storage_path, exist_ok=True)
     except Exception:
         raise RuntimeError("Not all required directories were initialized")
 
@@ -22,12 +22,14 @@ def initialize_system() -> bool:
         raise RuntimeError("Not all package were downloaded")
 
 
-def main():
-    automigrate()  # Note: it will drop all existing dbs and create a new ones
-    initialize_system()
-    uvicorn.run(**settings.api.model_dump())
+async def main():
+    await automigrate()  # Note: it will drop all existing dbs and create a new ones
+    await initialize_system()
+
+    config = uvicorn.Config(**settings.api.model_dump())
+    server = uvicorn.Server(config)
+    await server.serve()
 
 
 if __name__ == "__main__":
-    # ATTENTION: run from base dir ---> python -m app.main
-    main()
+    asyncio.run(main())
