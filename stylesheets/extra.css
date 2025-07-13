@@ -3,63 +3,61 @@
 
 /* Light mode palette */
 [data-md-color-scheme="default"] {
-  --md-primary-fg-color:        #14B8A6; /* Your primary green */
-  --md-primary-fg-color--light: #10A090;
-  --md-primary-fg-color--dark:  #0C887A;
+    --md-primary-fg-color: #14B8A6; /* Your primary green */
+    --md-primary-fg-color--light: #10A090;
+    --md-primary-fg-color--dark: #0C887A;
 
-  --md-default-fg-color:          #1F2937; /* Darker text for high contrast */
-  --md-default-fg-color--light:   #6B7280; /* Secondary text */
-  --md-default-bg-color:          #FFFFFF; /* Pure white background */
-  --md-default-bg-color--light:   #F8F6F1;
+    --md-default-fg-color: #1F2937; /* Darker text for high contrast */
+    --md-default-fg-color--light: #6B7280; /* Secondary text */
+    --md-default-bg-color: #FFFFFF; /* Pure white background */
+    --md-default-bg-color--light: #F8F6F1;
 
-  --md-typeset-a-color: #10A090; /* Link color */
-  --md-code-bg-color: #F8F6F1;   /* Code block background */
-  --md-code-fg-color: #454D5B;   /* Code block text */
+    --md-typeset-a-color: #10A090; /* Link color */
+    --md-code-bg-color: #F8F6F1; /* Code block background */
+    --md-code-fg-color: #454D5B; /* Code block text */
 }
 
 /* Dark mode palette */
 [data-md-color-scheme="slate"] {
-  --md-primary-fg-color:        #34D399; /* Your primary bright green */
-  --md-primary-fg-color--light: #6EE7B7;
-  --md-primary-fg-color--dark:  #34D399;
+    --md-primary-fg-color: #34D399; /* Your primary bright green */
+    --md-primary-fg-color--light: #6EE7B7;
+    --md-primary-fg-color--dark: #34D399;
 
-  --md-default-fg-color:        #E5E7EB; /* Light grey text for readability */
-  --md-default-fg-color--light: #A9B0BF; /* Secondary text */
-  --md-default-bg-color:        #111827; /* Very dark background */
-  --md-default-bg-color--light: #1F2937;
-  --md-default-bg-color--lighter: #44444C;
+    --md-default-fg-color: #E5E7EB; /* Light grey text for readability */
+    --md-default-fg-color--light: #A9B0BF; /* Secondary text */
+    --md-default-bg-color: #111827; /* Very dark background */
+    --md-default-bg-color--light: #1F2937;
+    --md-default-bg-color--lighter: #44444C;
 
 
-  --md-typeset-a-color: #6EE7B7;  /* Bright link color for visibility */
-  --md-code-bg-color: #1F2937;    /* Darker code block background */
-  --md-code-fg-color: #E5E7EB;    /* Light code block text */
+    --md-typeset-a-color: #6EE7B7; /* Bright link color for visibility */
+    --md-code-bg-color: #1F2937; /* Darker code block background */
+    --md-code-fg-color: #E5E7EB; /* Light code block text */
 }
 
 .mdx-hero {
-  background-image:
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.95), var(--md-default-bg-color)),
+    background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.95), var(--md-default-bg-color)),
     url('data:image/svg+xml;utf8,<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-48 0c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zM11 68c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7z" fill="%2314B8A6" fill-opacity="0.1" fill-rule="evenodd"/></svg>');
-  background-size: cover, 100px;
+    background-size: cover, 100px;
 }
 
 [data-md-color-scheme="slate"] .mdx-hero {
-  background-image:
-    linear-gradient(to bottom, rgba(17, 24, 39, 0.95), var(--md-default-bg-color)),
+    background-image: linear-gradient(to bottom, rgba(17, 24, 39, 0.95), var(--md-default-bg-color)),
     url('data:image/svg+xml;utf8,<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-48 0c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zM11 68c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7z" fill="%2334D399" fill-opacity="0.1" fill-rule="evenodd"/></svg>');
 }
 
 .md-button {
-  transition: all 0.3s ease-in-out;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 /* stylesheets/extra.css */
 
 .md-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-  /* Use a theme variable for the background color */
-  background-color: var(--md-primary-fg-color--light);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    /* Use a theme variable for the background color */
+    background-color: var(--md-primary-fg-color--light);
 }
 
 /* stylesheets/extra.css */
@@ -67,29 +65,33 @@
 
 /* Custom styling for grid cards */
 .md-typeset .grid.cards > ul > li {
-  border: 1px solid var(--md-default-bg-color--light);
-  border-radius: 8px;
-  transition: all 0.2s ease-in-out;
+    border: 1px solid var(--md-default-bg-color--light);
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+    animation: fadeIn-up 0.5s ease-out forwards;
+    opacity: 0; /* Start as invisible */
 }
 
+
 .md-typeset .grid.cards > ul > li:hover {
-  border-color: var(--md-primary-fg-color);
-  transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    border-color: var(--md-primary-fg-color);
+    background-color: var(--md-default-bg-color--light);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
 /* Style the card icons */
 .md-typeset .grid.cards .md-icon {
-  color: var(--md-primary-fg-color);
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
-  display: block;
+    color: var(--md-primary-fg-color);
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    display: block;
 }
 
 
 /* Enable advanced font features for Inter */
 .md-typeset {
-  font-feature-settings: "calt" on, "liga" on;
+    font-feature-settings: "calt" on, "liga" on;
 }
 
 /* Add a subtle bottom border to h2 headings to break up long pages */
@@ -103,14 +105,73 @@
 .md-typeset h3 {
     margin-top: 2em;
     font-weight: 600; /* Inter has a semibold weight */
+    color: var(--md-default-fg-color--light);
 }
 
 /* Animation for the hero section */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .mdx-hero__content {
-  animation: fadeIn 0.8s ease-in-out forwards;
+    animation: fadeIn 0.8s ease-in-out forwards;
+}
+
+/* In extra.css */
+.md-typeset blockquote {
+    border-left: 4px solid var(--md-primary-fg-color);
+    background-color: var(--md-default-bg-color--light);
+    padding: 1em 1.5em;
+    margin-left: 0;
+    border-radius: 4px;
+}
+
+.md-typeset blockquote p {
+    margin-bottom: 0;
+}
+
+
+/* In extra.css */
+/* Animation for elements */
+@keyframes fadeIn-up {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* Stagger the animation for each card */
+.md-typeset .grid.cards > ul > li:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.md-typeset .grid.cards > ul > li:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.md-typeset .grid.cards > ul > li:nth-child(4) {
+    animation-delay: 0.3s;
+}
+
+/* In extra.css */
+:root {
+  /* Define a fluid font size for the h1 heading */
+  --md-h1-font-size: clamp(2rem, 1.5rem + 2.5vw, 3.2rem);
+}
+
+.md-typeset h1 {
+  font-size: var(--md-h1-font-size);
+  line-height: 1.2;
 }
