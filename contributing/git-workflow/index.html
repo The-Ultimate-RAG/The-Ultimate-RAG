@@ -393,7 +393,9 @@
   
 
 
-<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
     <a href="../.." title="The Ultimate RAG Docs" class="md-nav__button md-logo" aria-label="The Ultimate RAG Docs" data-md-component="logo">
       
@@ -1161,99 +1163,6 @@
               </div>
             
             
-              
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#rules" class="md-nav__link">
-    <span class="md-ellipsis">
-      Rules
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Rules">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-issues" class="md-nav__link">
-    <span class="md-ellipsis">
-      1. Issues
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2-branching" class="md-nav__link">
-    <span class="md-ellipsis">
-      2. Branching
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-commit-messages" class="md-nav__link">
-    <span class="md-ellipsis">
-      3. Commit Messages
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#4-pull-requests-prs-and-reviews" class="md-nav__link">
-    <span class="md-ellipsis">
-      4. Pull Requests (PRs) and Reviews
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#5-resolving-issues" class="md-nav__link">
-    <span class="md-ellipsis">
-      5. Resolving Issues
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#basic-workflow-example" class="md-nav__link">
-    <span class="md-ellipsis">
-      Basic workflow example
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-                  </div>
-                </div>
-              </div>
-            
           
           
             <div class="md-content" data-md-component="content">
@@ -1299,9 +1208,10 @@
 <li>Template: <code>&lt;type&gt;(&lt;scope&gt;): &lt;description&gt;</code>.</li>
 <li>Examples:</li>
 </ul>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>feat(auth): add login button
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>fix(api): resolve null pointer in user endpoint
-</span></code></pre></div>
+<div class="language-text highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Text Only</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1">1</a></span>
+<span class="normal"><a href="#__codelineno-0-2">2</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1"></a>feat(auth): add login button
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2"></a>fix(api): resolve null pointer in user endpoint
+</span></code></pre></div></td></tr></table></div>
 <h5 id="4-pull-requests-prs-and-reviews"><strong>4. Pull Requests (PRs) and Reviews</strong></h5>
 <ul>
 <li>Use the <a href="/.github/PULL_REQUEST_TEMPLATE/standart.md">PR Template</a>.</li>
@@ -1460,7 +1370,7 @@
     
     
       
-      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.top", "navigation.footer", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.indexes", "search.highlight", "search.suggest", "search.share", "content.code.copy", "content.tabs.link", "toc.follow", "content.code.annotate", "navigation.instant", "content.hero"], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.top", "navigation.footer", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.indexes", "navigation.instant.prefetch", "search.highlight", "search.suggest", "search.share", "content.code.copy", "content.tabs.link", "toc.follow", "content.code.annotate", "navigation.instant", "content.hero", "content.tooltips", "toc.integrate", "navigation.tracking", "header.autohide"], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
       <script src="../../assets/javascripts/bundle.56ea9cef.min.js"></script>

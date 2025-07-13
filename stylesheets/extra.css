@@ -124,18 +124,6 @@
     animation: fadeIn 0.8s ease-in-out forwards;
 }
 
-/* In extra.css */
-.md-typeset blockquote {
-    border-left: 4px solid var(--md-primary-fg-color);
-    background-color: var(--md-default-bg-color--light);
-    padding: 1em 1.5em;
-    margin-left: 0;
-    border-radius: 4px;
-}
-
-.md-typeset blockquote p {
-    margin-bottom: 0;
-}
 
 
 /* In extra.css */
@@ -174,4 +162,5 @@
 .md-typeset h1 {
   font-size: var(--md-h1-font-size);
   line-height: 1.2;
+    margin-bottom: 0.5em;
 }
