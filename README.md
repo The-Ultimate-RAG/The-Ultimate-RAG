@@ -67,6 +67,7 @@ response, citing the specific sources from your documents.
 
 <p align="right">(<a href="#readme-top">🔝 back to top</a>)</p>
 
+
 ## <a id="getting-started"></a>🚀 Getting Started
 
 Follow these instructions to get a copy of the project up and running on your local machine.

@@ -17,7 +17,7 @@ We have decided to adapt this architecture to enhance the *maintainability* of t
 
 The following **diagram** depicts the one non-trivial case of the system use: user queries the system and attach file.
 This diagram can halp in understating the pipeline of file processing and response generation:
-![Diagram description](./dynamic-view/dynamic-view.svg)
+![Diagram description](./dynamic-view/dynamic-view.png)
 
 ### Deployment view
 
