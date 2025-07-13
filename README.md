@@ -60,13 +60,37 @@ response, citing the specific sources from your documents.
 
 ### 📊 Project context diagram
 
-
 <div style="text-align: center;">
   <img src="docs/images/project-context-diagram.png" alt="Project Context Diagram"/>
 </div>
 
-<p align="right">(<a href="#readme-top">🔝 back to top</a>)</p>
+### 🗺️ Feature Roadmap
 
+<div style="margin-left: auto; margin-right: auto; width: fit-content;">
+
+| Status     | Feature                                                                 | Notes |
+|------------|-------------------------------------------------------------------------|-------|
+| To Do      | Deploy final product                                                    |       |
+| To Do      | Implement updated UI                                                    |       |
+| To Do      | Improve connection between user queries and predeclared prompts         |       |
+| Completed  | Accelerate file processing                                              |       |
+| Completed  | Reduce response time                                                    |       |
+| Completed  | Enhance response quality and accuracy                                   |       |
+| Completed  | Enhance UI/UX                                                           |       |
+| Completed  | Enhance security (secret management)                                    |       |
+| Completed  | Introduce CI/CD pipeline                                                |       |
+| Completed  | Implement unit and integration tests                                    |       |
+| Completed  | Implement response streaming                                            | Streaming responses during generation |
+| Completed  | Add JSON, CSV, and MD file support                                      |       |
+| Completed  | Add chat separation functionality                                      |       |
+| Completed  | Add multilingual support                                                |       |
+| Completed  | Add TXT, DOC, DOCX, and PDF support                                    |       |
+| Completed  | Implement API with simple frontend                                      |       |
+| Completed  | Establish ready-to-use RAG skeleton                                     | Core functionality: file attachment, cited responses with sources |
+
+</div>
+
+<p align="right">(<a href="#readme-top">🔝 back to top</a>)</p>
 
 ## <a id="getting-started"></a>🚀 Getting Started
 
