@@ -1,67 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-         <loc>https://the-ultimate-rag.github.io/</loc>
+         <loc>https://the-ultimate-rag.github.io/The-Ultimate-RAG/</loc>
          <lastmod>2025-07-13</lastmod>
     </url>
     <url>
-         <loc>https://the-ultimate-rag.github.io/architecture/architecture/</loc>
+         <loc>https://the-ultimate-rag.github.io/The-Ultimate-RAG/architecture/architecture/</loc>
          <lastmod>2025-07-13</lastmod>
     </url>
     <url>
-         <loc>https://the-ultimate-rag.github.io/architecture/deployment-view/deployment/</loc>
+         <loc>https://the-ultimate-rag.github.io/The-Ultimate-RAG/architecture/deployment-view/deployment/</loc>
          <lastmod>2025-07-13</lastmod>
     </url>
     <url>
-         <loc>https://the-ultimate-rag.github.io/automation/continuous-delivery/</loc>
+         <loc>https://the-ultimate-rag.github.io/The-Ultimate-RAG/automation/continuous-delivery/</loc>
          <lastmod>2025-07-13</lastmod>
     </url>
     <url>
-         <loc>https://the-ultimate-rag.github.io/automation/continuous-integration/</loc>
+         <loc>https://the-ultimate-rag.github.io/The-Ultimate-RAG/automation/continuous-integration/</loc>
          <lastmod>2025-07-13</lastmod>
     </url>
     <url>
-         <loc>https://the-ultimate-rag.github.io/quality-assurance/automated-tests/</loc>
+         <loc>https://the-ultimate-rag.github.io/The-Ultimate-RAG/contributing/</loc>
          <lastmod>2025-07-13</lastmod>
     </url>
     <url>
-         <loc>https://the-ultimate-rag.github.io/quality-assurance/quality-attribute-scenarios/</loc>
+         <loc>https://the-ultimate-rag.github.io/The-Ultimate-RAG/contributing/git-workflow/</loc>
          <lastmod>2025-07-13</lastmod>
     </url>
     <url>
-         <loc>https://the-ultimate-rag.github.io/quality-assurance/user-acceptance-tests/</loc>
+         <loc>https://the-ultimate-rag.github.io/The-Ultimate-RAG/contributing/kanban-board/</loc>
          <lastmod>2025-07-13</lastmod>
     </url>
     <url>
-         <loc>https://the-ultimate-rag.github.io/site/contributing/</loc>
+         <loc>https://the-ultimate-rag.github.io/The-Ultimate-RAG/contributing/secrets-management/</loc>
          <lastmod>2025-07-13</lastmod>
     </url>
     <url>
-         <loc>https://the-ultimate-rag.github.io/site/installation/</loc>
+         <loc>https://the-ultimate-rag.github.io/The-Ultimate-RAG/installation/installation-process/</loc>
          <lastmod>2025-07-13</lastmod>
     </url>
     <url>
-         <loc>https://the-ultimate-rag.github.io/site/usage/</loc>
+         <loc>https://the-ultimate-rag.github.io/The-Ultimate-RAG/installation/prerequisites/</loc>
          <lastmod>2025-07-13</lastmod>
     </url>
     <url>
-         <loc>https://the-ultimate-rag.github.io/site/contributing/git-workflow/</loc>
+         <loc>https://the-ultimate-rag.github.io/The-Ultimate-RAG/quality-assurance/automated-tests/</loc>
          <lastmod>2025-07-13</lastmod>
     </url>
     <url>
-         <loc>https://the-ultimate-rag.github.io/site/contributing/kanban-board/</loc>
+         <loc>https://the-ultimate-rag.github.io/The-Ultimate-RAG/quality-assurance/quality-attribute-scenarios/</loc>
          <lastmod>2025-07-13</lastmod>
     </url>
     <url>
-         <loc>https://the-ultimate-rag.github.io/site/contributing/secrets-management/</loc>
+         <loc>https://the-ultimate-rag.github.io/The-Ultimate-RAG/quality-assurance/user-acceptance-tests/</loc>
          <lastmod>2025-07-13</lastmod>
     </url>
     <url>
-         <loc>https://the-ultimate-rag.github.io/site/installation/installation/</loc>
+         <loc>https://the-ultimate-rag.github.io/The-Ultimate-RAG/usage/troubleshooting/</loc>
          <lastmod>2025-07-13</lastmod>
     </url>
     <url>
-         <loc>https://the-ultimate-rag.github.io/site/installation/prerequisites/</loc>
+         <loc>https://the-ultimate-rag.github.io/The-Ultimate-RAG/usage/user-guide/</loc>
          <lastmod>2025-07-13</lastmod>
     </url>
 </urlset>
