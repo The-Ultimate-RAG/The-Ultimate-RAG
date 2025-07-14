@@ -1,19 +1,16 @@
 """
 This file consolidates parameters for logging, database connections, model paths, API settings, and security.
 """
-
-# Standard Library Imports
-import os
-import logging
-from datetime import timedelta
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import BaseModel, Field, computed_field
 from typing import Callable, List, Optional
-
-# Third-Party Library Imports
-import torch
+from datetime import timedelta
 from dotenv import load_dotenv
 from pathlib import Path
-from pydantic import BaseModel, Field, computed_field
-from pydantic_settings import BaseSettings, SettingsConfigDict
+import logging
+import torch
+import os
+
 
 load_dotenv()
 
@@ -98,7 +95,7 @@ class GeminiWrapperSettings(BaseModel):
 
 class PostgresSettings(BaseModel):
     url: str = os.environ["DATABASE_URL"]
-    echo: bool = True
+    echo: bool = False
     pool_size: int = 5
     max_overflow: int = 10
 
@@ -125,7 +122,6 @@ class Settings(BaseSettings):
     )
     postgres: PostgresSettings = Field(default_factory=PostgresSettings)
 
-    use_gemini: bool = True
     max_delta: float = (
         0.15  # defines what is the minimum boundary for vectors to be considered similar
     )
@@ -155,102 +151,30 @@ class Settings(BaseSettings):
 settings = Settings()
 
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format="%(levelname)s: %(message)s",
     handlers=[logging.StreamHandler()],
 )
 
-if __name__ == "__main__":
-
-    def bold_text(text: str):
+def bold_text(text: str):
         return "\033[1m" + text + "\033[0m"
 
-    print(bold_text("--- Successfully loaded settings ---"))
-    print(f"{bold_text("Base Directory:")} {settings.base_dir}")
-    print(f"{bold_text("Running on device:")} {settings.device}")
-    print(f"{bold_text("Qdrant Host:")} {settings.qdrant.host}")
-    print(f"{bold_text("LLM GPU Layers:")} {settings.local_llm.gpu_layers}")
+if __name__ == "__main__":
+    logging.warning(bold_text("Successfully loaded settings"))
+    logging.info(f"{bold_text("Base Directory:")} {settings.base_dir}")
+    logging.info(f"{bold_text("Running on device:")} {settings.device}")
+    logging.info(f"{bold_text("Qdrant Host:")} {settings.qdrant.host}")
+    logging.info(f"{bold_text("LLM GPU Layers:")} {settings.local_llm.gpu_layers}")
 
     # model_dump() is useful for debugging or passing to other libraries.
     # It safely excludes secret values.
-    print(bold_text("\n--- Full settings model dump (secrets masked) ---"))
-    print(settings.model_dump())
+    logging.info(bold_text("\n--- Full settings model dump (secrets masked) ---"))
+    logging.info(settings.model_dump())
 
-    print(bold_text("\n--- Secret fields (from .env file) ---"))
-    print(f"{bold_text("Postgres URL:")} {settings.postgres.url}")
-    print(f"{bold_text("JWT Algorithm:")} {settings.jwt_algorithm}")
-    print(f"{bold_text("Secret Pepper:")} {settings.secret_pepper}")
+    logging.info(bold_text("\n--- Secret fields (from .env file) ---"))
+    logging.info(f"{bold_text("Postgres URL:")} {settings.postgres.url}")
+    logging.info(f"{bold_text("JWT Algorithm:")} {settings.jwt_algorithm}")
+    logging.info(f"{bold_text("Secret Pepper:")} {settings.secret_pepper}")
     # Corrected line to access the API key
-    print(f"{bold_text("Gemini API Key:")} {settings.api_key}")
+    logging.info(f"{bold_text("Gemini API Key:")} {settings.api_key}")
 
-# # Qdrant vector database connection.
-# qdrant_client_config = {
-#     "host": os.getenv("QDRANT_HOST", "localhost"),
-#     "port": os.getenv("QDRANT_PORT", "6333"),
-# }
-#
-# # Automatically detects CUDA or uses CPU.
-# device = "cuda" if torch.cuda.is_available() else 'cpu'
-#
-# embedder_model = "all-MiniLM-L6-v2"
-#
-# reranker_model = "cross-encoder/ms-marco-MiniLM-L6-v2"
-#
-# local_llm_config = {
-#     "model_path_or_repo_id": "TheBloke/Mistral-7B-v0.1-GGUF",
-#     "model_file": "mistral-7b-v0.1.Q5_K_S.gguf",
-#     "model_type": "mistral",
-#     "gpu_layers": 20 if torch.cuda.is_available() else 0,
-#     "threads": 8,
-#     "context_length": 4096,  # The maximum context window is 4096 tokens
-#     "mlock": True,  # Locks the model into RAM to prevent swapping
-# }
-#
-# local_generation_config = {
-#     "last_n_tokens": 128,  # The most recent of tokens that will be penalized (if it was repeated)
-#     "temperature": 0.3,  # Controls the randomness of output. Higher value - higher randomness
-#     "repetition_penalty": 1.2,
-# }
-#
-# text_splitter_config = {
-#     "chunk_size": 1000,  # The maximum size of chunk
-#     "chunk_overlap": 100,
-#     "length_function": len,  # Function to measure chunk length
-#     "is_separator_regex": False,
-#     "add_start_index": True,
-# }
-#
-# # "127.0.0.1"
-# api_config = {
-#     "app": "app.api:api",
-#     "host": "127.0.0.1",
-#     "port": 5050,
-#     "reload": True,  # The server will reload on system changes
-# }
-#
-# gemini_generation_config = {
-#     "temperature": 0,  # deterministic, predictable output
-#     "top_p": 0.95,
-#     "top_k": 20,
-#     "candidate_count": 1,
-#     "seed": 5,
-#     "max_output_tokens": 1001,
-#     "stop_sequences": ['STOP!'],
-#     "presence_penalty": 0.0,
-#     "frequency_penalty": 0.0,
-# }
-#
-# use_gemini: bool = True
-#
-# max_delta = 0.15  # defines what is the minimum boundary for vectors to be considered similar
-#
-# postgres_client_config = {
-#     "url": os.getenv("POSTGRESQL_DATABASE_URL"),
-#     "echo": False,
-# }
-#
-# jwt_algorithm = "HS256"
-# VERY_SECRET_PEPPER = os.getenv("SECRET_PEPPER")
-#
-# max_cookie_lifetime = 3000  # in seconds
-#

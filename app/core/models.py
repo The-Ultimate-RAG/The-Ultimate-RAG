@@ -10,6 +10,7 @@ from google import genai
 from google.genai import types
 from app.core.chunks import Chunk
 from app.settings import settings, BASE_DIR, GeminiEmbeddingSettings
+import aiofiles.os
 
 load_dotenv()
 
@@ -36,9 +37,9 @@ class GeminiLLM:
         logging: bool = True,
         use_default_config: bool = False,
     ) -> str:
-        path_to_prompt = os.path.join(BASE_DIR, "prompt.txt")
-        with open(path_to_prompt, "w", encoding="utf-8", errors="replace") as f:
-            f.write(prompt)
+        path_to_prompt = os.path.join(BASE_DIR, "models_io", "prompt.txt")
+        async with aiofiles.open(path_to_prompt, "w", encoding="utf-8", errors="replace") as f:
+            await f.write(prompt)
 
         response = self.client.models.generate_content(
             model=self.model,
@@ -59,9 +60,9 @@ class GeminiLLM:
         logging: bool = True,
         use_default_config: bool = False,
     ):
-        path_to_prompt = os.path.join(BASE_DIR, "prompt.txt")
-        with open(path_to_prompt, "w", encoding="utf-8", errors="replace") as f:
-            f.write(prompt)
+        path_to_prompt = os.path.join(BASE_DIR, "models_io", "prompt.txt")
+        async with aiofiles.open(path_to_prompt, "w", encoding="utf-8", errors="replace") as f:
+            await f.write(prompt)
 
         response = self.client.models.generate_content_stream(
             model=self.model,

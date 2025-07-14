@@ -1,30 +1,31 @@
-import asyncio
-import aiofiles
-from fastapi.templating import Jinja2Templates
-from fastapi import Request, UploadFile
-
 from app.backend.controllers.chats import list_user_chats, verify_ownership_rights
 from app.backend.controllers.users import get_current_user
-from app.backend.models.users import User
+from app.settings import BASE_DIR, logging, bold_text
 from app.core.rag_generator import RagSystem
-from app.settings import BASE_DIR
+from app.backend.models.users import User
 
+from fastapi.templating import Jinja2Templates
+from fastapi import Request, UploadFile
 from uuid import uuid4
+import aiofiles
 import markdown
+import asyncio
 import os
+
 
 rag = None
 
-
-# <----------------------- System ----------------------->
 def initialize_rag() -> RagSystem:
-    global rag
-    if rag is None:
-        rag = RagSystem()
-    return rag
+    logging.warning("Start " + bold_text("RAG") + " initialization")
+    try:
+        global rag
+        if rag is None:
+            rag = RagSystem()
+        return rag
+    finally:
+        logging.warning("End " + bold_text("RAG") + " initialization")
 
 
-# <----------------------- Tools ----------------------->
 async def extend_context(context: dict, selected: int = None):
     user = await get_current_user(context.get("request"))
     navbar = {
@@ -50,11 +51,6 @@ async def extend_context(context: dict, selected: int = None):
     context.update(**sidebar)
 
     return context
-
-
-"""
-Validates chat viewing permission by comparing user's chats and requested one
-"""
 
 
 async def protect_chat(user: User, chat_id: str) -> bool:

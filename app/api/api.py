@@ -1,7 +1,6 @@
 from app.backend.controllers.messages import register_message
 from app.core.document_validator import path_is_valid
 from app.core.response_parser import add_links
-from app.backend.models.users import User
 from app.settings import BASE_DIR
 from app.backend.controllers.chats import (
     get_chat_with_messages,
@@ -145,7 +144,7 @@ async def send_message(
 @api.post("/replace_message")
 async def replace_message(request: Request):
     data = await request.json()
-    async with aiofiles.open(os.path.join(BASE_DIR, "response.txt"), "w") as f:
+    async with aiofiles.open(os.path.join(BASE_DIR, "models_io", "response.txt"), "w") as f:
         await f.write(data.get("message", ""))
     updated_message = await add_links(data.get("message", ""))
     await register_message(

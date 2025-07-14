@@ -7,13 +7,13 @@ Replaces the matched regular exp with link via html <a></a>
 """
 
 
-async def create_url(match: re.Match) -> str:
+def create_url(match: re.Match) -> str:
     path: str = match.group(1)
     page: str = match.group(2)
     lines: str = match.group(3)
     start: str = match.group(4)
 
-    if not await path_is_valid(path):
+    if not path_is_valid(path):
         return "###NOT VALID PATH###"
 
     return f'<a href="/viewer?path={path}&page={page}&lines={lines}&start={start}">[Source]</a>'
