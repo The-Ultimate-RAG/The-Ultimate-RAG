@@ -2,13 +2,17 @@
 This file consolidates parameters for logging, database connections, model paths, API settings, and security.
 """
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from aiologger.handlers.streams import AsyncStreamHandler
 from pydantic import BaseModel, Field, computed_field
+from aiologger.formatters.base import Formatter
 from typing import Callable, List, Optional
 from datetime import timedelta
 from dotenv import load_dotenv
+from aiologger import Logger
 from pathlib import Path
-import logging
+import asyncio
 import torch
+import sys
 import os
 
 
@@ -147,34 +151,46 @@ class Settings(BaseSettings):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+    debug: bool = True
+
+
+logger = Logger.with_default_handlers(name='app-logger')
+
+
+async def setup_logger(logger: Logger) -> None:
+    for handler in logger.handlers:
+        await handler.close()
+    logger.handlers.clear()
+
+    formatter = Formatter(fmt="%(levelname)s: %(message)s")
+    stream_handler = AsyncStreamHandler(stream=sys.stdout)
+    stream_handler.formatter = formatter
+    logger.add_handler(stream_handler)
+
 
 settings = Settings()
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(levelname)s: %(message)s",
-    handlers=[logging.StreamHandler()],
-)
 
-def bold_text(text: str):
-        return "\033[1m" + text + "\033[0m"
+async def main():
+    await setup_logger()
+
+    await logger.warning("Successfully loaded settings")
+    await logger.info(f"Base Directory: {settings.base_dir}")
+    await logger.info(f"Running on device: {settings.device}")
+    await logger.info(f"Qdrant Host: {settings.qdrant.host}")
+    await logger.info(f"LLM GPU Layers: {settings.local_llm.gpu_layers}")
+
+    await logger.info("\n--- Full settings model dump (secrets masked) ---")
+    await logger.info(settings.model_dump())
+
+    await logger.info("\n--- Secret fields (from .env file) ---")
+    await logger.info(f"Postgres URL: {settings.postgres.url}")
+    await logger.info(f"JWT Algorithm: {settings.jwt_algorithm}")
+    await logger.info(f"Secret Pepper: {settings.secret_pepper}")
+    await logger.info(f"Gemini API Key: {settings.api_key}")
+
+    await logger.shutdown()
 
 if __name__ == "__main__":
-    logging.warning(bold_text("Successfully loaded settings"))
-    logging.info(f"{bold_text("Base Directory:")} {settings.base_dir}")
-    logging.info(f"{bold_text("Running on device:")} {settings.device}")
-    logging.info(f"{bold_text("Qdrant Host:")} {settings.qdrant.host}")
-    logging.info(f"{bold_text("LLM GPU Layers:")} {settings.local_llm.gpu_layers}")
-
-    # model_dump() is useful for debugging or passing to other libraries.
-    # It safely excludes secret values.
-    logging.info(bold_text("\n--- Full settings model dump (secrets masked) ---"))
-    logging.info(settings.model_dump())
-
-    logging.info(bold_text("\n--- Secret fields (from .env file) ---"))
-    logging.info(f"{bold_text("Postgres URL:")} {settings.postgres.url}")
-    logging.info(f"{bold_text("JWT Algorithm:")} {settings.jwt_algorithm}")
-    logging.info(f"{bold_text("Secret Pepper:")} {settings.secret_pepper}")
-    # Corrected line to access the API key
-    logging.info(f"{bold_text("Gemini API Key:")} {settings.api_key}")
+    asyncio.run(main())
 

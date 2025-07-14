@@ -1,23 +1,14 @@
-from langchain_community.document_loaders import (
-    PyPDFLoader,
-    UnstructuredWordDocumentLoader,
-    TextLoader,
-    CSVLoader,
-    UnstructuredMarkdownLoader,
-)
+from langchain_community.document_loaders import PyPDFLoader, UnstructuredWordDocumentLoader, TextLoader, CSVLoader, UnstructuredMarkdownLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_core.documents import Document
-from app.core.chunks import Chunk
-import nltk  # used for proper tokenizer workflow
-from uuid import (
-    uuid4,
-)  # for generating unique id as hex (uuid4 is used as it generates ids form pseudo random numbers unlike uuid1 and others)
-from app.settings import logging, settings
 from concurrent.futures import ProcessPoolExecutor
-import os
-import asyncio
+from langchain_core.documents import Document
+from app.settings import logger, settings
+from app.core.chunks import Chunk
 from datetime import datetime
-
+from uuid import uuid4
+import asyncio
+import nltk
+import os
 
 
 def find_line_sync(splitted_text: list[dict], char) -> int:
@@ -36,12 +27,7 @@ def find_line_sync(splitted_text: list[dict], char) -> int:
 
     return right
 
-def get_start_end_lines_sync(
-    splitted_text: list[dict],
-    start_char: int,
-    end_char: int,
-    debug_mode: bool = False,
-) -> tuple[int, int]:
+def get_start_end_lines_sync(splitted_text: list[dict], start_char: int, end_char: int ) -> tuple[int, int]:
     start = find_line_sync(splitted_text=splitted_text, char=start_char)
     end = find_line_sync(splitted_text=splitted_text, char=end_char)
     return (start, end)
@@ -120,10 +106,10 @@ class DocumentProcessor:
         else:
             raise RuntimeError("What to do, my lord?")
 
-    async def load_document(
-        self, filepath: str, add_to_unprocessed: bool = False
-    ) -> None:
-        print(f"Document {os.path.basename(filepath)} is loaded, time - {datetime.now()}")
+    async def load_document(self, filepath: str, add_to_unprocessed: bool = False) -> None:
+        if settings.debug:
+            await logger.info(f"Document {os.path.basename(filepath)} is loaded, time - {datetime.now()}")
+
         loader = await self.document_multiplexer(filepath=filepath, get_loader=True)
         loop = asyncio.get_event_loop()
 
@@ -133,7 +119,6 @@ class DocumentProcessor:
         documents: list[Document] = []
         try:
             documents = await loop.run_in_executor(None, loader.load)
-            # print("-" * 100, documents, "-" * 100, sep="\n")
         except Exception:
             raise RuntimeError("File is corrupted")
 
@@ -147,9 +132,7 @@ class DocumentProcessor:
             try:
                 await self.load_document(filepath=doc, add_to_unprocessed=True)
             except Exception as e:
-                logging.error(
-                    "Error at load_documents while loading %s", doc, exc_info=e
-                )
+                await logger.error(f"Error at load_documents while loading {e}")
 
 
     async def split_into_groups(self, original_list: list[any], split_by: int = 15) -> list[list[any]]:
@@ -178,7 +161,7 @@ class DocumentProcessor:
                 end_line=end_l,
                 text=chunk.page_content,
             )
-            # print(new_chunk)
+
             output.append(new_chunk)
         return output
 
@@ -202,15 +185,19 @@ class DocumentProcessor:
             try:
                 document, filepath = entity["document"], entity["path"]
                 parallelization = await self.document_multiplexer(filepath=filepath, get_chunking_strategy=True)
-                print(f"Strategy --> {"P" if parallelization else "S"}")
-                text = await loop.run_in_executor(
-                    None, self.text_splitter.split_documents, [document]
-                )
+
+                if settings.debug:
+                    await logger.info(f"Strategy --> {"P" if parallelization else "S"}")
+
+                text = await loop.run_in_executor(None, self.text_splitter.split_documents, [document])
+
                 lines: list[dict] = await self.precompute_lines(splitted_document=document.page_content.splitlines())
 
                 if parallelization:
-                    print("<------- Apply Parallel Execution ------->")
-                    print(f"Document - {os.path.basename(filepath)}")
+                    if settings.debug:
+                        await logger.info("<------- Apply Parallel Execution ------->")
+                        await logger.info(f"Document - {os.path.basename(filepath)}")
+
                     groups = await self.split_into_groups(original_list=text, split_by=50)
                     tasks = [
                         loop.run_in_executor(
@@ -222,10 +209,13 @@ class DocumentProcessor:
                         )
                         for group in groups
                     ]
+
                     results = await asyncio.gather(*tasks)
                     for chunks in results:
                         intermediate.extend(chunks)
-                    print("<---------------- Done ----------------->")
+
+                    if settings.debug:
+                        await logger.info("<---------------- Done ----------------->")
                 else:
                     chunks = await loop.run_in_executor(None, _chunkinize_sync, document, text, lines)
                     intermediate.extend(chunks)
@@ -238,15 +228,9 @@ class DocumentProcessor:
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(None, find_line_sync, splitted_text, char)
 
-    async def get_start_end_lines(
-        self,
-        splitted_text: list[dict],
-        start_char: int,
-        end_char: int,
-        debug_mode: bool = False,
-    ) -> tuple[int, int]:
+    async def get_start_end_lines(self, splitted_text: list[dict], start_char: int, end_char: int,) -> tuple[int, int]:
         loop = asyncio.get_running_loop()
-        return await loop.run_in_executor(None, get_start_end_lines_sync, splitted_text, start_char, end_char, debug_mode)
+        return await loop.run_in_executor(None, get_start_end_lines_sync, splitted_text, start_char, end_char)
 
     async def update_nltk(self) -> None:
         nltk.download("punkt")

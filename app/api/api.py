@@ -1,7 +1,7 @@
 from app.backend.controllers.messages import register_message
 from app.core.document_validator import path_is_valid
 from app.core.response_parser import add_links
-from app.settings import BASE_DIR
+from app.settings import BASE_DIR, settings, logger
 from app.backend.controllers.chats import (
     get_chat_with_messages,
     create_new_chat,
@@ -33,7 +33,6 @@ from fastapi import (
     HTTPException,
     UploadFile,
     Request,
-    Depends,
     FastAPI,
     Form,
     File,
@@ -48,7 +47,6 @@ from fastapi.responses import (
 from typing import Optional
 import aiofiles
 import os
-
 
 # <------------------------------------- API ------------------------------------->
 api = FastAPI()
@@ -72,9 +70,11 @@ templates = Jinja2Templates(
 # <--------------------------------- Middleware --------------------------------->
 @api.middleware("http")
 async def require_user(request: Request, call_next):
-    print("&" * 40, "START MIDDLEWARE", "&" * 40)
+    if settings.debug:
+        await logger.info("START MIDDLEWARE")
     try:
-        print(f"Path ----> {request.url.path}, Method ----> {request.method}, Port ----> {request.url.port}\n")
+        if settings.debug:
+            await logger.info(f"Path ----> {request.url.path}, Method ----> {request.method}, Port ----> {request.url.port}")
 
         stripped_path = request.url.path.strip("/")
 
@@ -84,15 +84,19 @@ async def require_user(request: Request, call_next):
             or "favicon.ico" in stripped_path
         ):
             return await call_next(request)
-        print("<>" * 100)
+
         user = await get_current_user(request)
-        print("<><><><><><><>User<><><><><><><>", user)
+
+        if settings.debug:
+            await logger.info(f"User: {user}")
+
         authorized = True
         if user is None:
             authorized = False
             user = await create_user()
 
-        print(f"User in Context ----> {user.id}\n")
+        if settings.debug:
+            await logger.info(f"User in Context ----> {user.id}")
 
         request.state.current_user = user
         response = await call_next(request)
@@ -106,23 +110,23 @@ async def require_user(request: Request, call_next):
     except Exception as exception:
         raise exception
     finally:
-        print("&" * 40, "END MIDDLEWARE", "&" * 40, "\n\n")
+        if settings.debug:
+            await logger.info("END MIDDLEWARE")
 
 
 # <--------------------------------- Common routes --------------------------------->
 @api.post("/message_with_docs")
-async def send_message(
-    request: Request,
-    files: list[UploadFile] = File(None),
-    prompt: str = Form(...),
-    chat_id: str = Form(None),
-) -> StreamingResponse:
+async def send_message(request: Request, files: list[UploadFile] = File(None), prompt: str = Form(...), chat_id: str = Form(None)) -> StreamingResponse:
     status = 200
     try:
         user = await extract_user_from_context(request)
-        print("-" * 100, "User ---->", user, "-" * 100, "\n\n")
+        if settings.debug:
+            await logger.info(f" User ----> {user}")
+
         collection_name = await construct_collection_name(user, chat_id)
-        print(f"Received message -------> {prompt}")
+        if settings.debug:
+            await logger.info(f"Received message -------> {prompt}")
+
         await register_message(content=prompt, sender="user", chat_id=chat_id)
 
         await save_documents(
@@ -138,7 +142,7 @@ async def send_message(
         )
     except Exception as e:
         status = 500
-        print(e)
+        await logger.error(f"Error in send_message: {str(e)}")
 
 
 @api.post("/replace_message")
@@ -154,13 +158,7 @@ async def replace_message(request: Request):
 
 
 @api.get("/viewer")
-async def show_document(
-    request: Request,
-    path: str,
-    page: Optional[int] = 1,
-    lines: Optional[str] = "1-1",
-    start: Optional[int] = 0,
-):
+async def show_document(request: Request, path: str, page: Optional[int] = 1, lines: Optional[str] = "1-1", start: Optional[int] = 0):
     if not await path_is_valid(path):
         return HTTPException(status_code=404, detail="Document not found")
 
@@ -203,7 +201,7 @@ async def show_chat(request: Request, chat_id: str):
     await update_title(chat["chat_id"])
 
     if not await protect_chat(user, chat_id):
-        raise HTTPException(401, "Yod do not have rights to use this chat!")
+        raise HTTPException(401, "You do not have rights to use this chat!")
 
     context = await extend_context({"request": request, "user": user}, selected=chat_id)
     context.update(chat)
@@ -218,7 +216,9 @@ async def last_user_chat(request: Request):
     url = None
 
     if chat is None:
-        print("new_chat")
+        if settings.debug:
+            await logger.info("Creating new chat")
+
         new_chat = await create_new_chat("new chat", user)
         url = new_chat.get("url")
         try:
@@ -234,10 +234,7 @@ async def last_user_chat(request: Request):
 
 # <--------------------------------- Post --------------------------------->
 @api.post("/new_chat")
-async def create_chat(
-    request: Request,
-    title: Optional[str] = "new chat",
-):
+async def create_chat(request: Request, title: Optional[str] = "new chat"):
     user = await extract_user_from_context(request)
     new_chat = await create_new_chat(title, user)
     url = new_chat.get("url")

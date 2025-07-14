@@ -1,8 +1,8 @@
 from app.backend.controllers.base_controller import engine
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.backend.models.base_model import Base
 from app.backend.models.chats import Chat
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import relationship, joinedload
+from sqlalchemy.orm import relationship
 from sqlalchemy import Column, String
 from sqlalchemy.future import select
 

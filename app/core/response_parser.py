@@ -1,10 +1,6 @@
 from app.core.document_validator import path_is_valid
-import re
 import asyncio
-
-"""
-Replaces the matched regular exp with link via html <a></a>
-"""
+import re
 
 
 def create_url(match: re.Match) -> str:
@@ -17,11 +13,6 @@ def create_url(match: re.Match) -> str:
         return "###NOT VALID PATH###"
 
     return f'<a href="/viewer?path={path}&page={page}&lines={lines}&start={start}">[Source]</a>'
-
-
-"""
-Replaces all occurrences of citation pattern with links
-"""
 
 
 async def add_links(response: str) -> str:

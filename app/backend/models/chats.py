@@ -1,9 +1,10 @@
-from app.backend.models.base_model import Base
-from sqlalchemy import String, Column, ForeignKey
-from sqlalchemy.orm import relationship, selectinload
-from sqlalchemy.ext.asyncio import AsyncSession
 from app.backend.controllers.base_controller import engine
+from sqlalchemy.orm import relationship, selectinload
+from sqlalchemy import String, Column, ForeignKey
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.backend.models.base_model import Base
 from sqlalchemy.future import select
+
 
 class Chat(Base):
     __tablename__ = "chats"

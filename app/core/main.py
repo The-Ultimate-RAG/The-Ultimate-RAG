@@ -1,9 +1,11 @@
-from app.settings import settings, BASE_DIR
-import uvicorn
-import os
+from app.settings import settings, BASE_DIR, logger, setup_logger
 from app.backend.models.db_service import automigrate
-import asyncio
 import aiofiles.os
+import uvicorn
+import asyncio
+import os
+
+
 async def initialize_system() -> bool:
     path = BASE_DIR
     chats_storage_path = os.path.join(path, "chats_storage")
@@ -23,6 +25,9 @@ async def initialize_system() -> bool:
 
 
 async def main():
+    await setup_logger(logger)
+    await logger.info("App started!")
+
     await automigrate()  # Note: it will drop all existing dbs and create a new ones
     await initialize_system()
 

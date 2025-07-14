@@ -1,14 +1,13 @@
 from app.backend.controllers.chats import list_user_chats, verify_ownership_rights
+from app.settings import BASE_DIR, logger, settings
 from app.backend.controllers.users import get_current_user
-from app.settings import BASE_DIR, logging, bold_text
+from fastapi.templating import Jinja2Templates
 from app.core.rag_generator import RagSystem
 from app.backend.models.users import User
-
-from fastapi.templating import Jinja2Templates
 from fastapi import Request, UploadFile
 from uuid import uuid4
-import aiofiles
 import markdown
+import aiofiles
 import asyncio
 import os
 
@@ -16,14 +15,14 @@ import os
 rag = None
 
 def initialize_rag() -> RagSystem:
-    logging.warning("Start " + bold_text("RAG") + " initialization")
+    print("Start RAG initialization")
     try:
         global rag
         if rag is None:
             rag = RagSystem()
         return rag
     finally:
-        logging.warning("End " + bold_text("RAG") + " initialization")
+        print("End RAG initialization")
 
 
 async def extend_context(context: dict, selected: int = None):
@@ -78,6 +77,9 @@ async def save_documents(
 
     await aiofiles.os.makedirs(os.path.join(storage, "pdfs"), exist_ok=True)
 
+    if settings.debug:
+        await logger.info(f"Documents for saving: {len(files)}")
+
     for file in files:
         content = await file.read()
 
@@ -113,7 +115,10 @@ async def create_collection(user: User, chat_id: int, RAG: RagSystem) -> None:
         raise RuntimeError("RAG was not initialized")
 
     await RAG.create_new_collection(await construct_collection_name(user, chat_id))
-    print(await rag.get_collections_names())
+
+    if settings.debug:
+        for collection in await rag.get_collections_names():
+            await logger.info(collection)
 
 
 async def lines_to_markdown(lines: list[str]) -> list[str]:
@@ -128,9 +133,11 @@ async def lines_to_markdown(lines: list[str]) -> list[str]:
 async def PDFHandler(
     request: Request, path: str, page: int, templates
 ) -> Jinja2Templates.TemplateResponse:
-    print(path)
+
     url_path = await get_pdf_path(path=path)
-    print(url_path)
+
+    if settings.debug:
+        await logger.info(f"PDF path - {path}, url-path - {url_path}")
 
     current_template = "pages/show_pdf.html"
     return templates.TemplateResponse(

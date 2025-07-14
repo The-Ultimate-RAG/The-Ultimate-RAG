@@ -1,27 +1,15 @@
-from qdrant_client import AsyncQdrantClient  # main component to provide the access to db
-from qdrant_client.http.models import (
-    ScoredPoint,
-    Filter,
-    FieldCondition,
-    MatchText
-)
+from qdrant_client.models import VectorParams, Distance, PointStruct, TextIndexParams, TokenizerType
+from qdrant_client.http.models import ScoredPoint, Filter, FieldCondition, MatchText
+from qdrant_client import AsyncQdrantClient
+from app.settings import logger, settings
 from app.core.models import GeminiEmbed
-from qdrant_client.models import (
-    VectorParams,
-    Distance,
-    PointStruct,
-    TextIndexParams,
-    TokenizerType
-)  # VectorParams -> config of vectors that will be used as primary keys
-from app.core.processor import DocumentProcessor
-from app.core.chunks import Chunk  # PointStruct -> instance that will be stored in db
-import numpy as np
-from uuid import UUID
-from app.settings import settings
-import time
+from app.core.chunks import Chunk
 from fastapi import HTTPException
-import re
+from uuid import UUID
+import numpy as np
 import asyncio
+import time
+import re
 
 
 class VectorDatabase:
@@ -30,15 +18,17 @@ class VectorDatabase:
         self.client: AsyncQdrantClient = self._initialize_qdrant_client()
         self.embedder: GeminiEmbed = embedder  # embedder is used to convert a user's query
 
-    async def store(
-        self, collection_name: str, chunks: list[Chunk], batch_size: int = 1000
-    ) -> None:
+    async def store(self, collection_name: str, chunks: list[Chunk], batch_size: int = 1000) -> None:
         points: list[PointStruct] = []
 
-        print("Start getting text embeddings")
+        if settings.debug:
+            await logger.info("Start getting text embeddings")
+
         start = time.time()
         vectors = await self.embedder.encode([await chunk.get_raw_text() for chunk in chunks])
-        print(f"Embeddings - {time.time() - start}")
+
+        if settings.debug:
+            await logger.info(f"Embeddings - {time.time() - start}")
 
         for vector, chunk in zip(vectors, chunks):
             ok = await self.accept_vector(collection_name, vector)
@@ -143,10 +133,11 @@ class VectorDatabase:
         )
 
         mixed_result: list[ScoredPoint] = search.points
-
-        print(f"Len of original array -> {len(mixed_result)}")
         combined = await self.combine_points_without_duplications(mixed_result)
-        print(f"Len of combined array -> {len(combined)}")
+
+        if settings.debug:
+            await logger.info(f"Len of original array -> {len(mixed_result)}")
+            await logger.info(f"Len of combined array -> {len(combined)}")
 
         return [
             Chunk(
@@ -224,10 +215,6 @@ class VectorDatabase:
         except Exception as e:
             print(e)
             raise HTTPException(500, e)
-
-    # def __del__(self):
-    #     if hasattr(self, "client"):
-    #         await self.client.close()
 
     async def get_collections(self) -> list[str]:
         try:

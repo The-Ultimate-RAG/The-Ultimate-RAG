@@ -1,8 +1,8 @@
 from sqlalchemy import Column, ForeignKey, String, Text, select
-from sqlalchemy.orm import relationship
-from sqlalchemy.ext.asyncio import AsyncSession
 from app.backend.controllers.base_controller import engine
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.backend.models.base_model import Base
+from sqlalchemy.orm import relationship
 
 
 class Message(Base):

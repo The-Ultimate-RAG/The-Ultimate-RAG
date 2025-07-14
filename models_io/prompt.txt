@@ -297,7 +297,7 @@ In the following subsections, you will be introduced to the most basic type of l
 regression with multiple features).
 270 Predicting Continuous Target Variables with Regression Analysis
 Simple linear regression
-Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=7a49ea99-2c24-4158-a3d1-cd59e1dd1245/chat_id=fd35f281-87ad-4b82-85f0-8db3ff60aae9/documents/03f256a1-098e-4c87-819b-ad4fe76ad94d.txt, Page: 0, Lines: 8670-8681, Start: 534463]
+Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=fbf64921-b1ce-402a-8072-d84ae2a98323/chat_id=fdcf8e66-81ce-4ef7-8d1f-5e34b9448500/documents/ec50503b-7f2f-491a-921f-80a5e71dc268.txt, Page: 0, Lines: 8670-8681, Start: 534463]
 
 Original text:
 simpler or more complex models, removing outliers, or including additional variables.
@@ -310,7 +310,7 @@ robust regression technique (RANSAC) as an approach for dealing with outliers. T
 performance of regression models, we computed the mean sum of squared errors and the related R2
 metric. Furthermore, we also discussed a useful graphical approach for diagnosing the problems of
 regression models: the residual plot.
-Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=7a49ea99-2c24-4158-a3d1-cd59e1dd1245/chat_id=fd35f281-87ad-4b82-85f0-8db3ff60aae9/documents/03f256a1-098e-4c87-819b-ad4fe76ad94d.txt, Page: 0, Lines: 9657-9666, Start: 591800]
+Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=fbf64921-b1ce-402a-8072-d84ae2a98323/chat_id=fdcf8e66-81ce-4ef7-8d1f-5e34b9448500/documents/ec50503b-7f2f-491a-921f-80a5e71dc268.txt, Page: 0, Lines: 9657-9666, Start: 591800]
 
 Original text:
 relationship between the time spent studying for the test and the final scores, we could use it as training data to learn a model that uses the study time to predict the test scores of future students who are
@@ -325,7 +325,7 @@ the variance of height in a population does not increase over time.
 He observed that the height of parents is not passed on to their children, but instead, their
 children’s height regresses toward the population mean.
 6 Giving Computers the Ability to Learn from Data
-Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=7a49ea99-2c24-4158-a3d1-cd59e1dd1245/chat_id=fd35f281-87ad-4b82-85f0-8db3ff60aae9/documents/03f256a1-098e-4c87-819b-ad4fe76ad94d.txt, Page: 0, Lines: 857-868, Start: 63136]
+Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=fbf64921-b1ce-402a-8072-d84ae2a98323/chat_id=fdcf8e66-81ce-4ef7-8d1f-5e34b9448500/documents/ec50503b-7f2f-491a-921f-80a5e71dc268.txt, Page: 0, Lines: 857-868, Start: 63136]
 
 Original text:
 Implementing an ordinary least squares linear
@@ -341,7 +341,7 @@ Solving regression for regression parameters with gradient
 descent
 Consider our implementation of the Adaptive Linear Neuron (Adaline) from Chapter 2, Training Simple
 Machine Learning Algorithms for Classification. You will remember that the artificial neuron uses a linear
-Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=7a49ea99-2c24-4158-a3d1-cd59e1dd1245/chat_id=fd35f281-87ad-4b82-85f0-8db3ff60aae9/documents/03f256a1-098e-4c87-819b-ad4fe76ad94d.txt, Page: 0, Lines: 8895-8907, Start: 548248]
+Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=fbf64921-b1ce-402a-8072-d84ae2a98323/chat_id=fdcf8e66-81ce-4ef7-8d1f-5e34b9448500/documents/ec50503b-7f2f-491a-921f-80a5e71dc268.txt, Page: 0, Lines: 8895-8907, Start: 548248]
 
 Original text:
 features, x and y (numerator), divided by the product of their standard deviations (denominator):
@@ -362,7 +362,7 @@ the scope of this book (for more information on this topic, please refer to Intr
 to Linear Regression Analysis by Douglas C. Montgomery, Elizabeth A. Peck, and G. Geoffrey
 Vining, Wiley, pages: 318-319, 2012).
 Chapter 9 277
-Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=7a49ea99-2c24-4158-a3d1-cd59e1dd1245/chat_id=fd35f281-87ad-4b82-85f0-8db3ff60aae9/documents/03f256a1-098e-4c87-819b-ad4fe76ad94d.txt, Page: 0, Lines: 8824-8841, Start: 545212]
+Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=fbf64921-b1ce-402a-8072-d84ae2a98323/chat_id=fdcf8e66-81ce-4ef7-8d1f-5e34b9448500/documents/ec50503b-7f2f-491a-921f-80a5e71dc268.txt, Page: 0, Lines: 8824-8841, Start: 545212]
 
 Original text:
 Logistic regression and conditional probabilities
@@ -376,7 +376,7 @@ as 𝑝𝑝
 , where p stands for the probability of the positive event. The term “positive event” does not
 necessarily mean “good,” but refers to the event that we want to predict, for example, the probability
 that a patient has a certain disease given certain symptoms; we can think of the positive event as
-Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=7a49ea99-2c24-4158-a3d1-cd59e1dd1245/chat_id=fd35f281-87ad-4b82-85f0-8db3ff60aae9/documents/03f256a1-098e-4c87-819b-ad4fe76ad94d.txt, Page: 0, Lines: 2505-2515, Start: 159532]
+Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=fbf64921-b1ce-402a-8072-d84ae2a98323/chat_id=fdcf8e66-81ce-4ef7-8d1f-5e34b9448500/documents/ec50503b-7f2f-491a-921f-80a5e71dc268.txt, Page: 0, Lines: 2505-2515, Start: 159532]
 
 Original text:
 Turning a linear regression model into a curve –
@@ -391,7 +391,7 @@ terms to an existing dataset conveniently and fit a polynomial regression model.
 Adding polynomial terms using scikit-learn
 We will now learn how to use the PolynomialFeatures transformer class from scikit-learn to add a
 quadratic term (d = 2) to a simple regression problem with one explanatory variable. Then, we will
-Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=7a49ea99-2c24-4158-a3d1-cd59e1dd1245/chat_id=fd35f281-87ad-4b82-85f0-8db3ff60aae9/documents/03f256a1-098e-4c87-819b-ad4fe76ad94d.txt, Page: 0, Lines: 9380-9391, Start: 575475]
+Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=fbf64921-b1ce-402a-8072-d84ae2a98323/chat_id=fdcf8e66-81ce-4ef7-8d1f-5e34b9448500/documents/ec50503b-7f2f-491a-921f-80a5e71dc268.txt, Page: 0, Lines: 9380-9391, Start: 575475]
 
 Original text:
 the best-fitting straight line through the training examples, as shown in Figure 9.1:
@@ -410,7 +410,7 @@ explanatory variables; this process is called multiple linear regression:
 Figure 9.2 shows how the two-dimensional, fitted hyperplane of a multiple linear regression model
 with two features could look:
 Figure 9.2: A two-feature linear regression model
-Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=7a49ea99-2c24-4158-a3d1-cd59e1dd1245/chat_id=fd35f281-87ad-4b82-85f0-8db3ff60aae9/documents/03f256a1-098e-4c87-819b-ad4fe76ad94d.txt, Page: 0, Lines: 8690-8705, Start: 536196]
+Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=fbf64921-b1ce-402a-8072-d84ae2a98323/chat_id=fdcf8e66-81ce-4ef7-8d1f-5e34b9448500/documents/ec50503b-7f2f-491a-921f-80a5e71dc268.txt, Page: 0, Lines: 8690-8705, Start: 536196]
 
 Original text:
 Join our book’s Discord space
@@ -428,7 +428,7 @@ attractive for addressing many questions in science. They also have applications
 understanding relationships between variables, evaluating trends, or making forecasts. One example
 is predicting the sales of a company in future months.
 In this chapter, we will discuss the main concepts of regression models and cover the following topics:
-Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=7a49ea99-2c24-4158-a3d1-cd59e1dd1245/chat_id=fd35f281-87ad-4b82-85f0-8db3ff60aae9/documents/03f256a1-098e-4c87-819b-ad4fe76ad94d.txt, Page: 0, Lines: 8655-8669, Start: 533475]
+Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=fbf64921-b1ce-402a-8072-d84ae2a98323/chat_id=fdcf8e66-81ce-4ef7-8d1f-5e34b9448500/documents/ec50503b-7f2f-491a-921f-80a5e71dc268.txt, Page: 0, Lines: 8655-8669, Start: 533475]
 
 Original text:
 xiv Table of Contents
@@ -443,6 +443,6 @@ Using regularized methods for regression .......................................
 Turning a linear regression model into a curve – polynomial regression ................................. 294
 Adding polynomial terms using scikit-learn • 294
 Modeling nonlinear relationships in the Ames Housing dataset • 297
-Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=7a49ea99-2c24-4158-a3d1-cd59e1dd1245/chat_id=fd35f281-87ad-4b82-85f0-8db3ff60aae9/documents/03f256a1-098e-4c87-819b-ad4fe76ad94d.txt, Page: 0, Lines: 310-321, Start: 21603]
+Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=fbf64921-b1ce-402a-8072-d84ae2a98323/chat_id=fdcf8e66-81ce-4ef7-8d1f-5e34b9448500/documents/ec50503b-7f2f-491a-921f-80a5e71dc268.txt, Page: 0, Lines: 310-321, Start: 21603]
 
 

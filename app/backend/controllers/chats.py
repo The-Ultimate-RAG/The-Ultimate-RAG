@@ -1,23 +1,20 @@
-import asyncio
+from app.backend.models.chats import get_chats_by_user_id, get_chat_by_id, refresh_title, add_new_chat
 from app.backend.models.messages import get_messages_by_chat_id, Message
 from app.backend.models.users import User, get_user_chats
 from app.backend.controllers.utils import get_group_title
-from app.settings import BASE_DIR
-from app.backend.models.chats import (
-    get_chats_by_user_id,
-    get_chat_by_id,
-    refresh_title,
-    add_new_chat,
-)
-
+from app.settings import settings, logger
 from datetime import datetime, timedelta
+from app.settings import BASE_DIR
 from fastapi import HTTPException
 from uuid import uuid4
-import os
 import aiofiles.os
+import asyncio
+import os
+
 
 async def create_new_chat(title: str | None, user: User) -> dict:
-    print("+" * 40, "START Creating Chat", "+" * 40)
+    if settings.debug:
+        await logger.info("START Creating Chat")
     try:
         chat_id = str(uuid4())
         await add_new_chat(id=chat_id, title=title, user=user)
@@ -38,7 +35,8 @@ async def create_new_chat(title: str | None, user: User) -> dict:
     except Exception as exception:
         raise exception
     finally:
-        print("+" * 40, "END Creating Chat", "+" * 40, "\n\n")
+        if settings.debug:
+            await logger.info("END Creating Chat")
 
 
 async def dump_messages_dict(messages: list[Message], dst: dict) -> None:

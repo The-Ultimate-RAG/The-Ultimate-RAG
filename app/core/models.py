@@ -30,13 +30,7 @@ class GeminiLLM:
         self.client = genai.Client(api_key=settings.api_key)
         self.model = model
 
-    async def get_response(
-        self,
-        prompt: str,
-        stream: bool = True,
-        logging: bool = True,
-        use_default_config: bool = False,
-    ) -> str:
+    async def get_response(self, prompt: str, stream: bool = True, use_default_config: bool = False) -> str:
         path_to_prompt = os.path.join(BASE_DIR, "models_io", "prompt.txt")
         async with aiofiles.open(path_to_prompt, "w", encoding="utf-8", errors="replace") as f:
             await f.write(prompt)
@@ -53,13 +47,7 @@ class GeminiLLM:
 
         return response.text
 
-    async def get_streaming_response(
-        self,
-        prompt: str,
-        stream: bool = True,
-        logging: bool = True,
-        use_default_config: bool = False,
-    ):
+    async def get_streaming_response(self, prompt: str, use_default_config: bool = False):
         path_to_prompt = os.path.join(BASE_DIR, "models_io", "prompt.txt")
         async with aiofiles.open(path_to_prompt, "w", encoding="utf-8", errors="replace") as f:
             await f.write(prompt)
@@ -107,7 +95,6 @@ class GeminiEmbed:
             text[i : i + max_batch_size]
             for i in range(0, len(text), max_batch_size)
         ]
-        print(*[len(batch) for batch in batches])
 
         loop = asyncio.get_running_loop()
 

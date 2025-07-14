@@ -1,12 +1,12 @@
-from typing import Any, AsyncGenerator
-
-import aiofiles
 from app.core.models import Reranker, GeminiLLM, GeminiEmbed, Wrapper
+from app.settings import settings, BASE_DIR, logger
 from app.core.processor import DocumentProcessor
 from app.core.database import VectorDatabase
-import os
-from app.settings import settings, BASE_DIR
+from typing import Any, AsyncGenerator
+import aiofiles
 import asyncio
+import os
+
 
 class RagSystem:
     def __init__(self):
@@ -52,7 +52,7 @@ class RagSystem:
             "**CONTEXT DOCUMENTS**:\n"
             f"{sources}\n"
         )
-        print(prompt)
+
         return prompt
 
     async def enhance_prompt(self, original_prompt: str) -> str:
@@ -62,24 +62,12 @@ class RagSystem:
             enhanced_prompt = (await f.read()).replace("[USERS_PROMPT]", original_prompt)
         return await self.wrapper.wrap(enhanced_prompt)
 
-    async def upload_documents(
-        self,
-        collection_name: str,
-        documents: list[str],
-        split_by: int = 3,
-        debug_mode: bool = True,
-    ) -> None:
+    async def upload_documents(self, collection_name: str, documents: list[str], split_by: int = 3) -> None:
         loop = asyncio.get_event_loop()
         for i in range(0, len(documents), split_by):
 
-            if debug_mode:
-                print(
-                    "<"
-                    + "-" * 10
-                    + "New document group is taken into processing"
-                    + "-" * 10
-                    + ">"
-                )
+            if settings.debug:
+                await logger.info("New document group is taken into processing")
 
             docs = documents[i : i + split_by]
 
@@ -87,24 +75,30 @@ class RagSystem:
             chunk_generating_time = 0
             db_saving_time = 0
 
-            print("Start loading the documents")
+            if settings.debug:
+                await logger.info("Start loading the documents")
+
             start = loop.time()
             await self.processor.load_documents(documents=docs)
             loading_time = loop.time() - start
 
-            print("Start loading chunk generation")
+            if settings.debug:
+                await logger.info("Start loading chunk generation")
+
             start = loop.time()
             await self.processor.generate_chunks()
             chunk_generating_time = loop.time() - start
 
-            print("Start saving to db")
+            if settings.debug:
+                await logger.info("Start saving to db")
+
             start = loop.time()
             chunks = await self.processor.get_and_save_unsaved_chunks()
             await self.db.store(collection_name, chunks)
             db_saving_time = loop.time() - start
 
-            if debug_mode:
-                print(
+            if settings.debug:
+                await logger.info(
                     f"loading time = {loading_time}, chunk generation time = {chunk_generating_time}, saving time = {db_saving_time}\n"
                 )
 
@@ -125,15 +119,13 @@ class RagSystem:
 
         return self.llm.get_response(prompt=general_prompt)
 
-    async def generate_response_stream(
-        self, collection_name: str, user_prompt: str, stream: bool = True
-    ) -> AsyncGenerator[Any, Any]:
+    async def generate_response_stream(self, collection_name: str, user_prompt: str, stream: bool = True) -> AsyncGenerator[Any, Any]:
         general_prompt = await self.get_general_prompt(
             user_prompt=user_prompt, collection_name=collection_name
         )
 
         async for chunk in self.llm.get_streaming_response(
-            prompt=general_prompt, stream=True
+            prompt=general_prompt
         ):
             yield await self.extract_text(chunk)
 

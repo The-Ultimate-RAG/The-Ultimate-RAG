@@ -1,7 +1,9 @@
 from app.backend.models.messages import add_new_message
+from app.settings import settings, logger
 from uuid import uuid4
-import re
 import asyncio
+import re
+
 
 async def remove_html_tags(content: str) -> str:
     loop = asyncio.get_event_loop()
@@ -15,14 +17,18 @@ async def remove_html_tags(content: str) -> str:
         return de_taggeed.replace("REPLACE_WITH_RICKROLL", replace_with)
     return await loop.run_in_executor(None, strip_tags)
 
+
 async def register_message(content: str, sender: str, chat_id: str) -> None:
-    print("-" * 40, "START Registering Message", "-" * 40)
+    if settings.debug:
+        await logger.info("START Registering Message")
     try:
         id = str(uuid4())
         message = content if sender == "assistant" else await remove_html_tags(content)
 
-        print(f"Message -----> {message[:min(30, len(message))]}")
+        if settings.debug:
+            await logger.info(f"Message -----> {message[:min(30, len(message))]}")
 
         return await add_new_message(id=id, chat_id=chat_id, sender=sender, content=message)
     finally:
-        print("-" * 40, "END Registering Message", "-" * 40, "\n\n")
+        if settings.debug:
+            await logger.info("END Registering Message")
