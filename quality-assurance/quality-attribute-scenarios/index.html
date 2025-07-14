@@ -359,17 +359,20 @@
   
   
   
-    <li class="md-tabs__item">
-      <a href="../../architecture/architecture/" class="md-tabs__link">
-        
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../architecture/static-view/" class="md-tabs__link">
+          
   
   
     
   
   Architecture
 
-      </a>
-    </li>
+        </a>
+      </li>
+    
   
 
       
@@ -1085,7 +1088,7 @@
   
   
   <span class="md-ellipsis">
-    Continuous integration
+    Continuous Integration
     
   </span>
   
@@ -1132,9 +1135,37 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../../architecture/architecture/" class="md-nav__link">
+    
+    
+      
         
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
@@ -1143,7 +1174,111 @@
   </span>
   
 
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Architecture
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/static-view/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Static View
+    
+  </span>
+  
+
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/dynamic-view/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Dynamic view
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/deployment-view/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Deployment view
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/tech-stack/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Tech stack
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1170,120 +1305,123 @@
 <h1 id="quality-attribute-scenarios">Quality Attribute Scenarios</h1>
 <h2 id="performance-efficiency">Performance Efficiency</h2>
 <h3 id="time-behavior">Time behavior</h3>
-<p><strong>Importance to Customer:</strong>
-The customer wants the system to work fast, as slow response times would negatively impact user experience and productivity. For a RAG system, quick retrieval and generation are critical for usability.</p>
-<p><strong>Quality Attribute Scenarios:</strong></p>
-<ol>
-<li><strong>Scenario:</strong> System response time for queries</li>
-<li><strong>Stimulus:</strong> User submits a query through the web interface <strong>without</strong> files</li>
-<li><strong>Source:</strong> End user</li>
-<li><strong>Artifact:</strong> Response generation pipeline</li>
-<li><strong>Environment:</strong> Normal operation</li>
-<li><strong>Response:</strong> System returns answer with citations within 10 seconds</li>
-<li><strong>Response Measure:</strong> 95% of queries should complete within 10 seconds</li>
-<li>
-<p><strong>Test Execution:</strong></p>
-<ul>
-<li>Use request generating tools (httpx, postman api) for multiple concurrent user simulation</li>
-<li>Measure time from query submission to full response display</li>
-<li>Test with various query lengths and complexities</li>
-</ul>
-</li>
-<li>
-<p><strong>Scenario:</strong> Document ingestion processing time</p>
-</li>
-<li><strong>Stimulus:</strong> User uploads a new document</li>
-<li><strong>Source:</strong> End user</li>
-<li><strong>Artifact:</strong> Document processing pipeline</li>
-<li><strong>Environment:</strong> Normal operation</li>
-<li><strong>Response:</strong> Document is processed and available for queries within a 50 seconds</li>
-<li><strong>Response Measure:</strong> 90% of documents under 5MB should process within 50 seconds</li>
-<li><strong>Test Execution:</strong><ul>
-<li>Upload sample documents of various sizes and types</li>
-<li>Measure time from upload request receiving to the appearance of a document in corresponding folder</li>
-<li>Validate the content of the saved document by comparing with the sample one</li>
-</ul>
-</li>
-</ol>
+<p>!!! tip Importance to Customer:
+    The customer wants the system to work fast, as slow response times would negatively impact user experience and productivity. For a RAG system, quick retrieval and generation are critical for usability.</p>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Stimulus</th>
+<th>Source</th>
+<th>Artifact</th>
+<th>Environment</th>
+<th>Response</th>
+<th>Response Measure</th>
+<th>Test Execution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>System response time for queries</strong></td>
+<td>User submits a query through the web interface <strong>without</strong> files</td>
+<td>End user</td>
+<td>Response generation pipeline</td>
+<td>Normal operation</td>
+<td>System returns answer with citations within 10 seconds</td>
+<td>95% of queries should complete within 10 seconds</td>
+<td>- Use request generating tools (httpx, postman api) for multiple concurrent user simulation<br>- Measure time from query submission to full response display<br>- Test with various query lengths and complexities</td>
+</tr>
+<tr>
+<td><strong>Document ingestion processing time</strong></td>
+<td>User uploads a new document</td>
+<td>End user</td>
+<td>Document processing pipeline</td>
+<td>Normal operation</td>
+<td>Document is processed and available for queries within 50 seconds</td>
+<td>90% of documents under 5MB should process within 50 seconds</td>
+<td>- Upload sample documents of various sizes and types<br>- Measure time from upload request receiving to the appearance of a document in corresponding folder<br>- Validate the content of the saved document by comparing with the sample one</td>
+</tr>
+</tbody>
+</table>
 <h2 id="functional-suitability">Functional Suitability</h2>
 <h3 id="functional-completeness">Functional completeness</h3>
 <p><strong>Importance to Customer:</strong>
 The customer requires comprehensive documents format support (.pdf, .txt, .doc, .docx, .json, .csv) and the ability to directly examine citation sources. This ensures users can work with their existing documents and verify information accuracy through proper source examination.</p>
-<p><strong>Quality Attribute Scenarios:</strong></p>
-<ol>
-<li><strong>Scenario:</strong> Supported documents extensions</li>
-<li><strong>Stimulus:</strong> User uploads a document</li>
-<li><strong>Source:</strong> End user</li>
-<li><strong>Artifact:</strong> Document processing pipeline</li>
-<li><strong>Environment:</strong> Normal operation</li>
-<li><strong>Response:</strong> System accepts and properly processes the document</li>
-<li><strong>Response Measure:</strong> 100% success rate for supported extensions (.pdf, .txt, .doc, .json, .csv, .docx)</li>
-<li>
-<p><strong>Test Execution:</strong></p>
-<ul>
-<li>Upload test documents of various extensions from the defined list</li>
-<li>Validate the content of the saved document by comparing with the sample one</li>
-</ul>
-</li>
-<li>
-<p><strong>Scenario:</strong> Citation source examination</p>
-</li>
-<li><strong>Stimulus:</strong> User clicks on a citation in the response</li>
-<li><strong>Source:</strong> End user</li>
-<li><strong>Artifact:</strong> Document viewer system</li>
-<li><strong>Environment:</strong> Normal operation</li>
-<li><strong>Response:</strong> System opens the source document at the exact citation location</li>
-<li><strong>Response Measure:</strong> 100% of citations should link to correct document location</li>
-<li><strong>Test Execution:</strong><ul>
-<li>For each supported file type:</li>
-<li>Upload sample document</li>
-<li>Generate queries that produce citations</li>
-<li>Click each citation link</li>
-<li>Verify:<ul>
-<li>Correct document opens</li>
-<li>View is focused on cited section</li>
-<li>Highlighting/indication of exact citation location is visible (not supported for pdfs)</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Stimulus</th>
+<th>Source</th>
+<th>Artifact</th>
+<th>Environment</th>
+<th>Response</th>
+<th>Response Measure</th>
+<th>Test Execution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Supported documents extensions</strong></td>
+<td>User uploads a document</td>
+<td>End user</td>
+<td>Document processing pipeline</td>
+<td>Normal operation</td>
+<td>System accepts and properly processes the document</td>
+<td>100% success rate for supported extensions (.pdf, .txt, .doc, .json, .csv, .docx)</td>
+<td>- Upload test documents of various extensions from the defined list<br>- Validate the content of the saved document by comparing with the sample one</td>
+</tr>
+<tr>
+<td><strong>Citation source examination</strong></td>
+<td>User clicks on a citation in the response</td>
+<td>End user</td>
+<td>Document viewer system</td>
+<td>Normal operation</td>
+<td>System opens the source document at the exact citation location</td>
+<td>100% of citations should link to correct document location</td>
+<td>- For each supported file type:<br>  - Upload sample document<br>  - Generate queries that produce citations<br>  - Click each citation link<br>  - Verify:<br>    - Correct document opens<br>    - View is focused on cited section<br>    - Highlighting/indication of exact citation location is visible (not supported for pdfs)</td>
+</tr>
+</tbody>
+</table>
 <h3 id="functional-correctness">Functional correctness</h3>
 <p><strong>Importance to Customer:</strong>
 The customer wants the system to cite only relevant information. Accurate citations are crucial for the system's credibility and usefulness in research or decision-making scenarios (especially, for <em>EAP-2</em>).</p>
-<p><strong>Quality Attribute Scenarios:</strong></p>
-<ol>
-<li><strong>Scenario:</strong> Citation relevance</li>
-<li><strong>Stimulus:</strong> User submits a query</li>
-<li><strong>Source:</strong> End user</li>
-<li><strong>Artifact:</strong> Retrieval component</li>
-<li><strong>Environment:</strong> Normal operation</li>
-<li><strong>Response:</strong> All provided citations directly support the generated response</li>
-<li><strong>Response Measure:</strong> At least 90% of citations should be judged relevant by domain experts</li>
-<li>
-<p><strong>Test Execution:</strong></p>
-<ul>
-<li>Prepare a set of test queries with known correct answers or integrate LLM</li>
-<li>Generate response for each test query and validate (use LLM or domain-experts)</li>
-<li>Calculate percentage of relevant citations</li>
-</ul>
-</li>
-<li>
-<p><strong>Scenario:</strong> Answer accuracy</p>
-</li>
-<li><strong>Stimulus:</strong> User submits a factual query</li>
-<li><strong>Source:</strong> End user</li>
-<li><strong>Artifact:</strong> LLM component</li>
-<li><strong>Environment:</strong> Normal operation</li>
-<li><strong>Response:</strong> Generated answer matches known correct information</li>
-<li><strong>Response Measure:</strong> 95% of factual queries should return correct answers</li>
-<li><strong>Test Execution:</strong><ul>
-<li>Use a validation set of questions with verified answers</li>
-<li>Compare system output to ground truth (via LLM)</li>
-<li>Calculate accuracy percentage</li>
-</ul>
-</li>
-</ol>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Stimulus</th>
+<th>Source</th>
+<th>Artifact</th>
+<th>Environment</th>
+<th>Response</th>
+<th>Response Measure</th>
+<th>Test Execution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Citation relevance</strong></td>
+<td>User submits a query</td>
+<td>End user</td>
+<td>Retrieval component</td>
+<td>Normal operation</td>
+<td>All provided citations directly support the generated response</td>
+<td>At least 90% of citations should be judged relevant by domain experts</td>
+<td>- Prepare a set of test queries with known correct answers or integrate LLM<br>- Generate response for each test query and validate (use LLM or domain-experts)<br>- Calculate percentage of relevant citations</td>
+</tr>
+<tr>
+<td><strong>Answer accuracy</strong></td>
+<td>User submits a factual query</td>
+<td>End user</td>
+<td>LLM component</td>
+<td>Normal operation</td>
+<td>Generated answer matches known correct information</td>
+<td>95% of factual queries should return correct answers</td>
+<td>- Use a validation set of questions with verified answers<br>- Compare system output to ground truth (via LLM)<br>- Calculate accuracy percentage</td>
+</tr>
+</tbody>
+</table>
 
 
 

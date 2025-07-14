@@ -77,6 +77,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#access-the-site" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -354,17 +359,20 @@
   
   
   
-    <li class="md-tabs__item">
-      <a href="../../architecture/architecture/" class="md-tabs__link">
-        
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../architecture/static-view/" class="md-tabs__link">
+          
   
   
     
   
   Architecture
 
-      </a>
-    </li>
+        </a>
+      </li>
+    
   
 
       
@@ -608,6 +616,19 @@
       
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    User guide
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -619,6 +640,77 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#access-the-site" class="md-nav__link">
+    <span class="md-ellipsis">
+      Access the Site
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#start-a-new-chat" class="md-nav__link">
+    <span class="md-ellipsis">
+      Start a New Chat
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#navigate-to-registration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Navigate to Registration
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sign-up" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sign Up
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#submit-and-wait" class="md-nav__link">
+    <span class="md-ellipsis">
+      Submit and Wait
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#start-chatting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Start Chatting!
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -989,7 +1081,7 @@
   
   
   <span class="md-ellipsis">
-    Continuous integration
+    Continuous Integration
     
   </span>
   
@@ -1036,9 +1128,37 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../../architecture/architecture/" class="md-nav__link">
+    
+    
+      
         
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
@@ -1047,7 +1167,111 @@
   </span>
   
 
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Architecture
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/static-view/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Static View
+    
+  </span>
+  
+
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/dynamic-view/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Dynamic view
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/deployment-view/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Deployment view
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/tech-stack/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Tech stack
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1074,34 +1298,26 @@
   <h1>User guide</h1>
 
 <p>You can try the currently deployed version of the system <a href="https://huggingface.co/spaces/The-Ultimate-RAG-HF/The-Ultimate-RAG">here</a>. Follow these steps to get started:</p>
-<ol>
-<li><strong>Access the Site:</strong> You should see the main page with the system's name.</li>
-<li><strong>Start a New Chat:</strong> Press the <strong>+ Add new chat</strong> button and wait for the <em>login</em> page to load.</li>
-<li><strong>Navigate to Registration:</strong> Find and click the <strong>Register</strong> button.</li>
-<li><strong>Sign Up:</strong> On the <em>sign up</em> page, enter your credentials.<ul>
-<li>
+<h3 id="access-the-site">Access the Site</h3>
+<p>You should see the main page with the system's name.</p>
+<h3 id="start-a-new-chat">Start a New Chat</h3>
+<p>Press the <code>+ Add new chat</code> button and wait for the <em>login</em> page to load.</p>
+<h3 id="navigate-to-registration">Navigate to Registration</h3>
+<p>Find and click the <strong>Register</strong> button.</p>
+<h3 id="sign-up">Sign Up</h3>
+<p>On the <em>sign up</em> page, enter your credentials.</p>
 <div class="admonition tip">
 <p class="admonition-title">For Testing</p>
-<blockquote>
 <p>You can use <code>Test1@test1.com</code> in all fields for quick testing.</p>
-</blockquote>
 </div>
-</li>
-</ul>
-</li>
-<li><strong>Submit and Wait:</strong> Click <strong>ONLY ONCE</strong> on the <strong>Sign Up</strong> button.<ul>
-<li>
+<h3 id="submit-and-wait">Submit and Wait</h3>
+<p>Click <strong>ONLY ONCE</strong> on the <strong>Sign Up</strong> button.</p>
 <div class="admonition warning">
 <p class="admonition-title">Patience is Key <img alt="🔑" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/1f511.svg" title=":key:" /></p>
-<blockquote>
 <p>The initial chat page may take around 10 seconds to load after signing up. Please wait.</p>
-</blockquote>
 </div>
-</li>
-</ul>
-</li>
-<li><strong>Start Chatting!</strong> You can now ask questions and attach files. Type your query in the input area and press <span class="keys"><kbd class="key-enter">Enter</kbd></span>.</li>
-</ol>
+<h3 id="start-chatting">Start Chatting!</h3>
+<p>You can now ask questions and attach files. Type your query in the input area and press <span class="keys"><kbd class="key-enter">Enter</kbd></span>.</p>
 
 
 

@@ -16,7 +16,7 @@
         <link rel="prev" href="../continuous-integration/">
       
       
-        <link rel="next" href="../../architecture/architecture/">
+        <link rel="next" href="../../architecture/static-view/">
       
       
       <link rel="icon" href="../../images/logo.svg">
@@ -359,17 +359,20 @@
   
   
   
-    <li class="md-tabs__item">
-      <a href="../../architecture/architecture/" class="md-tabs__link">
-        
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../architecture/static-view/" class="md-tabs__link">
+          
   
   
     
   
   Architecture
 
-      </a>
-    </li>
+        </a>
+      </li>
+    
   
 
       
@@ -986,7 +989,7 @@
   
   
   <span class="md-ellipsis">
-    Continuous integration
+    Continuous Integration
     
   </span>
   
@@ -1058,6 +1061,48 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#cd-pipeline-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      CD Pipeline Steps
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cd-pipeline-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      CD pipeline tools
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CD pipeline tools">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#deployment-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deployment Tools:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing Tools:
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1080,9 +1125,37 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../../architecture/architecture/" class="md-nav__link">
+    
+    
+      
         
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
@@ -1091,7 +1164,111 @@
   </span>
   
 
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Architecture
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/static-view/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Static View
+    
+  </span>
+  
+
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/dynamic-view/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Dynamic view
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/deployment-view/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Deployment view
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/tech-stack/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Tech stack
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1118,13 +1295,14 @@
   <h1>Continuous delivery</h1>
 
 <h3 id="continuous-deployment">Continuous Deployment</h3>
-<p>Our Continuous Deployment (CD) pipeline automatically deploys the application after a successful merge into <code>main</code>. The
-pipeline is defined in:</p>
+<p>Our Continuous Deployment (CD) pipeline automatically deploys the application after a successful merge into the <code>main</code>
+branch. This ensures that new features and fixes are quickly delivered to users following thorough testing.</p>
+<p>The pipeline is managed using <strong>GitHub Actions</strong> and is defined in:</p>
 <ul>
-<li><a href="https://github.com/The-Ultimate-RAG/The-Ultimate-RAG/blob/main/.github/workflows/sync-to-hf.yml">
-  <code>.github/workflows/sync-to-hf.yml</code></a></li>
+<li><a href="https://github.com/The-Ultimate-RAG/The-Ultimate-RAG/blob/main/.github/workflows/sync-to-hf.yml"><code>.github/workflows/sync-to-hf.yml</code></a></li>
 </ul>
-<p>The CD pipeline performs the following steps:</p>
+<h3 id="cd-pipeline-steps">CD Pipeline Steps</h3>
+<p>The CD pipeline follows a sequential, controlled process to ensure stable deployments:</p>
 <ol>
 <li>Pushes the updated code to a <strong>Hugging Face Space</strong> (test environment) using <code>git</code>, where it is automatically
    deployed.</li>
@@ -1135,17 +1313,15 @@ pipeline is defined in:</p>
    PostgreSQL database (also hosted on a separate service). Deployment takes approximately 2–3 minutes.</li>
 <li>If any tests fail, the production server remains unaffected.</li>
 </ol>
-<p>In the CD pipeline, we use the following tools:</p>
+<h3 id="cd-pipeline-tools">CD pipeline tools</h3>
+<h4 id="deployment-tools">Deployment Tools:</h4>
 <ul>
-<li><strong>Deployment Tools:</strong><ul>
 <li><strong>Docker</strong>: Builds and packages the application as a container.</li>
 <li><strong>git</strong>: Pushes the application to Hugging Face Spaces for deployment.</li>
 </ul>
-</li>
-<li><strong>Testing Tools:</strong><ul>
+<h4 id="testing-tools">Testing Tools:</h4>
+<ul>
 <li><strong>pytest</strong>: Runs integration tests on the test server.</li>
-</ul>
-</li>
 </ul>
 <p>All CD workflow runs can be viewed at:</p>
 <ul>
@@ -1188,7 +1364,7 @@ pipeline is defined in:</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../continuous-integration/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Continuous integration">
+          <a href="../continuous-integration/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Continuous Integration">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1198,20 +1374,20 @@ pipeline is defined in:</p>
                 Previous
               </span>
               <div class="md-ellipsis">
-                Continuous integration
+                Continuous Integration
               </div>
             </div>
           </a>
         
         
           
-          <a href="../../architecture/architecture/" class="md-footer__link md-footer__link--next" aria-label="Next: Architecture">
+          <a href="../../architecture/static-view/" class="md-footer__link md-footer__link--next" aria-label="Next: Static View">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Architecture
+                Static View
               </div>
             </div>
             <div class="md-footer__button md-icon">

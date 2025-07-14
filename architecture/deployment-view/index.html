@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://the-ultimate-rag.github.io/The-Ultimate-RAG/usage/troubleshooting/">
+        <link rel="canonical" href="https://the-ultimate-rag.github.io/The-Ultimate-RAG/architecture/deployment-view/">
       
       
-        <link rel="prev" href="../user-guide/">
+        <link rel="prev" href="../dynamic-view/">
       
       
-        <link rel="next" href="../../contributing/">
+        <link rel="next" href="../tech-stack/">
       
       
       <link rel="icon" href="../../images/logo.svg">
@@ -24,7 +24,7 @@
     
     
       
-        <title>Troubleshooting - The Ultimate RAG Docs</title>
+        <title>Deployment view - The Ultimate RAG Docs</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#error-port-is-already-allocated" class="md-skip">
+        <a href="#deployment-view" class="md-skip">
           Skip to content
         </a>
       
@@ -111,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Troubleshooting
+              Deployment view
             
           </span>
         </div>
@@ -268,13 +268,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="../user-guide/" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../../usage/user-guide/" class="md-tabs__link">
           
   
   
@@ -358,11 +356,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../architecture/static-view/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../static-view/" class="md-tabs__link">
           
   
   
@@ -552,10 +552,8 @@
       
   
   
-    
   
   
-  
     
     
       
@@ -567,22 +565,21 @@
     
     
       
-        
-        
-      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
             
   
   
@@ -595,7 +592,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             Usage
@@ -609,7 +606,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../user-guide/" class="md-nav__link">
+      <a href="../../usage/user-guide/" class="md-nav__link">
         
   
   
@@ -629,30 +626,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Troubleshooting
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../usage/troubleshooting/" class="md-nav__link">
         
   
   
@@ -663,51 +640,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#error-port-is-already-allocated" class="md-nav__link">
-    <span class="md-ellipsis">
-      Error: Port is already allocated
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#application-cant-connect-to-qdrant" class="md-nav__link">
-    <span class="md-ellipsis">
-      Application can't connect to Qdrant
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#error-secret_pepper-is-not-set" class="md-nav__link">
-    <span class="md-ellipsis">
-      Error: SECRET_PEPPER is not set
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1099,8 +1031,10 @@
       
   
   
+    
   
   
+  
     
     
       
@@ -1116,21 +1050,22 @@
     
     
       
+        
+        
+      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
-        
-          
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
             
   
   
@@ -1143,7 +1078,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             Architecture
@@ -1157,7 +1092,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../architecture/static-view/" class="md-nav__link">
+      <a href="../static-view/" class="md-nav__link">
         
   
   
@@ -1180,7 +1115,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../architecture/dynamic-view/" class="md-nav__link">
+      <a href="../dynamic-view/" class="md-nav__link">
         
   
   
@@ -1200,10 +1135,32 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../architecture/deployment-view/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Deployment view
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1214,6 +1171,44 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#deployment-choices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deployment Choices
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#customer-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      Customer Deployment
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1226,7 +1221,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../architecture/tech-stack/" class="md-nav__link">
+      <a href="../tech-stack/" class="md-nav__link">
         
   
   
@@ -1268,19 +1263,65 @@
   
 
 
-  <h1>Troubleshooting</h1>
+<h1 id="deployment-view">Deployment view</h1>
+<p>The deployment architecture of The Ultimate RAG is designed to ensure reliable, scalable, and isolated environments for
+testing and production.</p>
+<pre class="mermaid"><code>graph TD
+    subgraph Test Environment
+        TEST_SPACE[Hugging Face Space &lt;br&gt; Test Server] --&gt;|Connects to| TEST_DB[Test PostgreSQL Database]
+        TEST_SPACE --&gt;|Runs| APP_TEST[Docker Container: Application]
+    end
 
-<h3 id="error-port-is-already-allocated">Error: Port is already allocated</h3>
-<p>This means another service on your machine is using port <code>5050</code>, <code>6333</code>, or <code>6334</code>.</p>
-<p><strong>Solution</strong>: Stop the conflicting application or change the ports in your <code>docker run</code> command and <code>.env</code> file.</p>
-<h3 id="application-cant-connect-to-qdrant">Application can't connect to Qdrant</h3>
-<p>This usually happens if you run <code>python -m app.core.main</code> before the Qdrant Docker container has fully initialized.</p>
-<p><strong>Solution</strong>: Stop the Python app (<code>Ctrl+C</code>), wait about 30 seconds for the database to start, and then run the app
-again. You can check Docker logs to see when Qdrant is ready.</p>
-<h3 id="error-secret_pepper-is-not-set">Error: <code>SECRET_PEPPER</code> is not set</h3>
-<p>The application will not run without all environment variables being configured.</p>
-<p><strong>Solution</strong>: Ensure you have created the <code>.env</code> file in the root directory and copied all the required fields from
-the template in the installation guide.</p>
+    subgraph Production Environment
+        PROD_SPACE[Hugging Face Space &lt;br&gt; Production Server] --&gt;|Connects to| PROD_DB[Production PostgreSQL Database]
+        PROD_SPACE --&gt;|Runs| APP_PROD[Docker Container: Application]
+    end
+
+    subgraph CI/CD Pipeline
+        GITHUB[GitHub Repository] --&gt;|Push to| TEST_SPACE
+        TEST_SPACE --&gt;|Integration Tests Pass| PROD_SPACE
+    end
+
+    subgraph External Services
+        TEST_DB --&gt;|Hosted on| DB_SERVICE[Supabase]
+        PROD_DB --&gt;|Hosted on| DB_SERVICE
+    end
+
+    classDef server fill:#f9f,stroke:#333,stroke-width:2px,color:#000000;
+    classDef db fill:#bbf,stroke:#333,stroke-width:2px,color:#000000;
+    classDef pipeline fill:#bfb,stroke:#333,stroke-width:2px,color:#000000;
+    class TEST_SPACE,PROD_SPACE,APP_TEST,APP_PROD server;
+    class TEST_DB,PROD_DB db;
+    class GITHUB pipeline;</code></pre>
+<ul>
+<li><strong>Diagram Location:</strong> The deployment diagram is stored at <a href="/docs/architecture/deployment-view/deployment.md">
+  <code>docs/architecture/deployment-view/deployment.mmd</code></a>.</li>
+</ul>
+<h3 id="deployment-choices">Deployment Choices</h3>
+<ul>
+<li><strong>Hugging Face Spaces:</strong> We use Hugging Face Spaces for both test and production environments due to their ease of
+  use, free tier, and seamless integration with Git-based deployment. This allows rapid deployment and automatic scaling
+  for our Python application.</li>
+<li><strong>Docker:</strong> The application is containerized using Docker (defined in <code>docker-compose.yml</code>) to ensure consistency
+  across test and production environments, simplifying dependency management and deployment.</li>
+<li><strong>Separate PostgreSQL Service:</strong> The test and production PostgreSQL databases are hosted on an external service (not
+  Hugging Face) to provide scalability, isolation, and robust database management. This ensures that test data does not
+  interfere with production data.</li>
+<li><strong>Isolation of Environments:</strong> Separate Hugging Face Spaces and databases for test and production prevent test
+  activities from affecting the live application, ensuring stability for end users.</li>
+</ul>
+<h3 id="customer-deployment">Customer Deployment</h3>
+<p>Customers can access the application directly via the production Hugging Face Space at [URL to be provided]. No local
+deployment is required, as the application is hosted and managed on Hugging Face. To interact with the application,
+customers need:</p>
+<ul>
+<li>A web browser to access the production URL.</li>
+<li>Optional: API keys or credentials (contact the <a href="https://github.com/Andrchest">DevOps lead</a> for access details, if
+  applicable).
+  If customers prefer to deploy the application locally, they can follow the <a href="#installation">Installation</a> instructions
+  in this README, which include cloning the repository, setting up Docker, and configuring a <code>.env</code> file with a
+  PostgreSQL connection string (contact the <a href="https://github.com/Andrchest">DevOps lead</a> for details).</li>
+</ul>
 
 
 
@@ -1318,7 +1359,7 @@ the template in the installation guide.</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../user-guide/" class="md-footer__link md-footer__link--prev" aria-label="Previous: User guide">
+          <a href="../dynamic-view/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Dynamic view">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1328,20 +1369,20 @@ the template in the installation guide.</p>
                 Previous
               </span>
               <div class="md-ellipsis">
-                User guide
+                Dynamic view
               </div>
             </div>
           </a>
         
         
           
-          <a href="../../contributing/" class="md-footer__link md-footer__link--next" aria-label="Next: Contributing to The Ultimate RAG">
+          <a href="../tech-stack/" class="md-footer__link md-footer__link--next" aria-label="Next: Tech stack">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Contributing to The Ultimate RAG
+                Tech stack
               </div>
             </div>
             <div class="md-footer__button md-icon">
