@@ -32,7 +32,7 @@ def create_new_chat(title: str | None, user: User) -> dict:
         except Exception:
             raise HTTPException(500, "error while creating chat folders")
 
-        return {"url": f"/chats/id={chat_id}", "chat_id": chat_id}
+        return {"id": chat_id, "title": title}
     except Exception as exception:
         raise exception
     finally:
@@ -44,11 +44,11 @@ def dump_messages_dict(messages: list[Message], dst: dict) -> None:
 
     print("!" * 40, "START Dumping History", "!" * 40)
     for message in messages:
-        history.append({"role": message.sender, "content": message.content})
+        history.append({"id": message.id, "sender": message.sender, "content": message.content})
         print(f"Role ----> {message.sender}, Content ----> {message.content}\n")
     print("!" * 40, "END Dumping History", "!" * 40, "\n\n")
 
-    dst.update({"history": history})
+    dst.update({"messages": history})
 
 
 def get_chat_with_messages(id: str) -> dict:

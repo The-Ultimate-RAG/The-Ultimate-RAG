@@ -7,6 +7,7 @@ from app.backend.controllers.chats import (
     get_chat_with_messages,
     create_new_chat,
     update_title,
+    list_user_chats
 )
 from app.backend.controllers.users import (
     extract_user_from_context,
@@ -30,6 +31,7 @@ from app.core.utils import (
 
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import (
     HTTPException,
     UploadFile,
@@ -49,10 +51,21 @@ from fastapi.responses import (
 from typing import Optional
 import os
 
-
 # <------------------------------------- API ------------------------------------->
 api = FastAPI()
 rag = initialize_rag()
+
+origins = [
+    "http://localhost:5173",
+]
+
+api.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 api.mount(
     "/chats_storage",
@@ -79,9 +92,9 @@ async def require_user(request: Request, call_next):
         stripped_path = request.url.path.strip("/")
 
         if (
-            stripped_path.startswith("pdfs")
-            or "static/styles.css" in stripped_path
-            or "favicon.ico" in stripped_path
+                stripped_path.startswith("pdfs")
+                or "static/styles.css" in stripped_path
+                or "favicon.ico" in stripped_path
         ):
             return await call_next(request)
 
@@ -111,10 +124,10 @@ async def require_user(request: Request, call_next):
 # <--------------------------------- Common routes --------------------------------->
 @api.post("/message_with_docs")
 async def send_message(
-    request: Request,
-    files: list[UploadFile] = File(None),
-    prompt: str = Form(...),
-    chat_id: str = Form(None),
+        request: Request,
+        files: list[UploadFile] = File(None),
+        prompt: str = Form(...),
+        chat_id: str = Form(None),
 ) -> StreamingResponse:
     status = 200
     try:
@@ -147,18 +160,18 @@ async def replace_message(request: Request):
         f.write(data.get("message", ""))
     updated_message = add_links(data.get("message", ""))
     register_message(
-        content=updated_message, sender="assistant", chat_id=data.get("chat_id")
+        content=updated_message, sender="assistant", chat_id=data.get("chatId")
     )
     return JSONResponse({"updated_message": updated_message})
 
 
 @api.get("/viewer")
 def show_document(
-    request: Request,
-    path: str,
-    page: Optional[int] = 1,
-    lines: Optional[str] = "1-1",
-    start: Optional[int] = 0,
+        request: Request,
+        path: str,
+        page: Optional[int] = 1,
+        lines: Optional[str] = "1-1",
+        start: Optional[int] = 0,
 ):
     if not path_is_valid(path):
         return HTTPException(status_code=404, detail="Document not found")
@@ -177,36 +190,31 @@ def show_document(
 
 
 # <--------------------------------- Get --------------------------------->
-@api.get("/cookie_test")
-def test_cookie(request: Request):
-    return check_cookie(request)
-
-
-@api.get("/test")
-def test(request: Request, user: User = Depends(get_current_user)):
-    return {
-        "user": {
-            "id": user.id,
-        }
-    }
-
-
-@api.get("/chats/id={chat_id}")
-def show_chat(request: Request, chat_id: str):
-    current_template = "pages/chat.html"
-
-    chat = get_chat_with_messages(chat_id)
+@api.get("/list_chats")
+def list_chats_for_user(request: Request):
     user = extract_user_from_context(request)
+    chats = list_user_chats(user.id)
+    print(f"Chats for user {user.id}: {chats}")
+    return JSONResponse({"chats": chats})
 
-    update_title(chat["chat_id"])
+
+@api.get("/chats/{chat_id}")
+def show_chat(request: Request, chat_id: str):
+    user = extract_user_from_context(request)
 
     if not protect_chat(user, chat_id):
         raise HTTPException(401, "Yod do not have rights to use this chat!")
 
-    context = extend_context({"request": request, "user": user}, selected=chat_id)
-    context.update(chat)
+    chat_data = get_chat_with_messages(chat_id)
 
-    return templates.TemplateResponse(current_template, context)
+    print(f"DEBUG: Data for chat '{chat_id}' from get_chat_with_messages: {chat_data}")
+
+    if not chat_data:
+        raise HTTPException(status_code=404, detail=f"Chat with id {chat_id} not found.")
+
+    update_title(chat_data["chat_id"])
+
+    return JSONResponse(content=chat_data)
 
 
 @api.get("/")
@@ -226,32 +234,22 @@ def last_user_chat(request: Request):
             raise HTTPException(500, e)
 
     else:
-        url = f"/chats/id={chat.id}"
+        url = f"/chats/{chat.id}"
 
     return RedirectResponse(url, status_code=303)
 
 
 # <--------------------------------- Post --------------------------------->
 @api.post("/new_chat")
-def create_chat(
-    request: Request,
-    title: Optional[str] = "new chat",
-):
+def create_chat(request: Request, title: Optional[str] = "new chat"):
     user = extract_user_from_context(request)
-    new_chat = create_new_chat(title, user)
-    url = new_chat.get("url")
-    chat_id = new_chat.get("chat_id")
+    new_chat_data = create_new_chat(title, user)
+    if not new_chat_data.get("id"):
+        raise HTTPException(500, "New chat could not be created.")
 
-    if url is None or chat_id is None:
-        raise HTTPException(500, "New chat was not created")
+    create_collection(user, new_chat_data["id"], rag)
 
-    try:
-        create_collection(user, chat_id, rag)
-    except Exception as e:
-        raise HTTPException(500, e)
-
-    return RedirectResponse(url, status_code=303)
-
+    return JSONResponse(new_chat_data)
 
 if __name__ == "__main__":
     pass
