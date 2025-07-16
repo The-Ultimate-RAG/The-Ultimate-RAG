@@ -12,7 +12,7 @@ def create_url(match: re.Match) -> str:
     if not path_is_valid(path):
         return "###NOT VALID PATH###"
 
-    return f'<a href="/viewer?path={path}&page={page}&lines={lines}&start={start}">[Source]</a>'
+    return f'<a target="_blank" href="/viewer?path={path}&page={page}&lines={lines}&start={start}">[Source]</a>'
 
 
 async def add_links(response: str) -> str:

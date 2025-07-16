@@ -1,4 +1,4 @@
-from langchain_community.document_loaders import PyPDFLoader, UnstructuredWordDocumentLoader, TextLoader, CSVLoader, UnstructuredMarkdownLoader
+from langchain_community.document_loaders import UnstructuredWordDocumentLoader, TextLoader, CSVLoader, UnstructuredMarkdownLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from concurrent.futures import ProcessPoolExecutor
 from langchain_core.documents import Document
@@ -8,7 +8,25 @@ from datetime import datetime
 from uuid import uuid4
 import asyncio
 import nltk
+import fitz
 import os
+
+
+class PDFLoader:
+    def __init__(self, file_path: str):
+        self.file_path = file_path
+
+    def load(self) -> list[Document]:
+        docs = []
+        with fitz.open(self.file_path) as doc:
+            for page in doc:
+                text = page.get_text("text")
+                metadata = {
+                    "source": self.file_path,
+                    "page": page.number,
+                }
+                docs.append(Document(page_content=text, metadata=metadata))
+        return docs
 
 
 def find_line_sync(splitted_text: list[dict], char) -> int:
@@ -79,7 +97,7 @@ class DocumentProcessor:
         loader = None
         parallelization = False
         if filepath.endswith(".pdf"):
-            loader = PyPDFLoader(
+            loader = PDFLoader(
                 file_path=filepath
             )  # splits each presentation into slides and processes it as separate file
             parallelization = False
@@ -119,8 +137,8 @@ class DocumentProcessor:
         documents: list[Document] = []
         try:
             documents = await loop.run_in_executor(None, loader.load)
-        except Exception:
-            raise RuntimeError("File is corrupted")
+        except Exception as e:
+            raise RuntimeError(f"File is corrupted - {e}")
 
         if add_to_unprocessed:
             for doc in documents:

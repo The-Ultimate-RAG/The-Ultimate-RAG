@@ -65,7 +65,8 @@ class APISettings(BaseModel):
     app: str = "app.api.api:api"
     host: str = "127.0.0.1"
     port: int = 5050
-    reload: bool = True  # The server will reload on system changes
+    workers: int = 4
+    reload: bool = False  # The server will reload on system changes
 
 
 class GeminiSettings(BaseModel):

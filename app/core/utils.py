@@ -1,6 +1,6 @@
 from app.backend.controllers.chats import list_user_chats, verify_ownership_rights
-from app.settings import BASE_DIR, logger, settings
 from app.backend.controllers.users import get_current_user
+from app.settings import BASE_DIR, logger, settings
 from fastapi.templating import Jinja2Templates
 from app.core.rag_generator import RagSystem
 from app.backend.models.users import User

@@ -281,168 +281,91 @@ Python 3.9 introduced several new features compared to its predecessors. Two maj
 Try not to limit yourself in context of the output chunks. Tell as much USEFUL information as POSSIBLE.
 DO NOT change the LINES in CITATIONS.
 You MUST NOT provide you thoughts and **INTERNAL WORKFLOW** in the answer. Just give COMPREHENSIVE and RICH answer to the users question.
-DO NOT provide your STEP-BACK PROMPTING prompting and CHAIN-OF-THOUGHT REASONING in the ANSWER. Keep them for you own reasoning, but NOT show it to the user.**QUESTION**: What is the definition of LINEAR REGRESSION, including its purpose, assumptions, and applications in statistical modeling and data analysis?
+DO NOT provide your STEP-BACK PROMPTING prompting and CHAIN-OF-THOUGHT REASONING in the ANSWER. Keep them for you own reasoning, but NOT show it to the user.**QUESTION**: What is the definition of PROTOTYPING in ENGINEERING and DESIGN? Explain its purpose and different types.
 
 **CONTEXT DOCUMENTS**:
 Original text:
-• Exploring and visualizing datasets
-• Looking at different approaches to implementing linear regression models
-• Training regression models that are robust to outliers
-• Evaluating regression models and diagnosing common problems
-• Fitting regression models to nonlinear data
-Introducing linear regression
-The goal of linear regression is to model the relationship between one or multiple features and a continuous target variable. In contrast to classification—a different subcategory of supervised learning—
-regression analysis aims to predict outputs on a continuous scale rather than categorical class labels.
-In the following subsections, you will be introduced to the most basic type of linear regression, simple linear regression, and understand how to relate it to the more general, multivariate case (linear
-regression with multiple features).
-270 Predicting Continuous Target Variables with Regression Analysis
-Simple linear regression
-Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=fbf64921-b1ce-402a-8072-d84ae2a98323/chat_id=fdcf8e66-81ce-4ef7-8d1f-5e34b9448500/documents/ec50503b-7f2f-491a-921f-80a5e71dc268.txt, Page: 0, Lines: 8670-8681, Start: 534463]
+Rapid prototyping:
+means going fast 
+from design to feedback
+Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=b3ba9ce3-cc55-4e95-b1ec-3af0d6522882/chat_id=6f3c585f-743e-425f-9d99-88826d050e23/documents/pdfs/feb7e83a-cf71-4003-90aa-2d19004abdde.pdf, Page: 19, Lines: 1-3, Start: 0]
 
 Original text:
-simpler or more complex models, removing outliers, or including additional variables.
-Summary
-At the beginning of this chapter, you learned about simple linear regression analysis to model the
-relationship between a single explanatory variable and a continuous response variable. We then discussed a useful explanatory data analysis technique to look at patterns and anomalies in data, which
-is an important first step in predictive modeling tasks.
-We built our first model by implementing linear regression using a gradient-based optimization approach. You then saw how to utilize scikit-learn’s linear models for regression and also implement a
-robust regression technique (RANSAC) as an approach for dealing with outliers. To assess the predictive
-performance of regression models, we computed the mean sum of squared errors and the related R2
-metric. Furthermore, we also discussed a useful graphical approach for diagnosing the problems of
-regression models: the residual plot.
-Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=fbf64921-b1ce-402a-8072-d84ae2a98323/chat_id=fdcf8e66-81ce-4ef7-8d1f-5e34b9448500/documents/ec50503b-7f2f-491a-921f-80a5e71dc268.txt, Page: 0, Lines: 9657-9666, Start: 591800]
+Agenda
+1. Types and goals of prototyping
+2. From wireframes to remote prototype testing
+3. Rapid prototyping philosophy
+4. Validation, feedback and usability testing
+Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=b3ba9ce3-cc55-4e95-b1ec-3af0d6522882/chat_id=6f3c585f-743e-425f-9d99-88826d050e23/documents/pdfs/feb7e83a-cf71-4003-90aa-2d19004abdde.pdf, Page: 2, Lines: 1-5, Start: 0]
 
 Original text:
-relationship between the time spent studying for the test and the final scores, we could use it as training data to learn a model that uses the study time to predict the test scores of future students who are
-planning to take this test.
-Figure 1.4 illustrates the concept of linear regression. Given a feature variable, x, and a target variable,
-y, we fit a straight line to this data that minimizes the distance—most commonly the average squared
-distance—between the data points and the fitted line.
-Regression toward the mean
-The term “regression” was devised by Francis Galton in his article Regression towards
-Mediocrity in Hereditary Stature in 1886. Galton described the biological phenomenon that
-the variance of height in a population does not increase over time.
-He observed that the height of parents is not passed on to their children, but instead, their
-children’s height regresses toward the population mean.
-6 Giving Computers the Ability to Learn from Data
-Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=fbf64921-b1ce-402a-8072-d84ae2a98323/chat_id=fdcf8e66-81ce-4ef7-8d1f-5e34b9448500/documents/ec50503b-7f2f-491a-921f-80a5e71dc268.txt, Page: 0, Lines: 857-868, Start: 63136]
+Low-fidelity prototyping
+●Visualise an idea
+●Plan user flows
+●Arrive at understanding within the team
+●Communicate the design to stakeholders
+Can be done on paper or digitally
+Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=b3ba9ce3-cc55-4e95-b1ec-3af0d6522882/chat_id=6f3c585f-743e-425f-9d99-88826d050e23/documents/pdfs/feb7e83a-cf71-4003-90aa-2d19004abdde.pdf, Page: 9, Lines: 1-6, Start: 0]
 
 Original text:
-Implementing an ordinary least squares linear
-regression model
-At the beginning of this chapter, we mentioned that linear regression can be understood as obtaining
-the best-fitting straight line through the examples of our training data. However, we have neither
-defined the term best-fitting nor have we discussed the different techniques of fitting such a model.
-In the following subsections, we will fill in the missing pieces of this puzzle using the ordinary least
-squares (OLS) method (sometimes also called linear least squares) to estimate the parameters of the
-linear regression line that minimizes the sum of the squared vertical distances (residuals or errors)
-to the training examples.
-Solving regression for regression parameters with gradient
-descent
-Consider our implementation of the Adaptive Linear Neuron (Adaline) from Chapter 2, Training Simple
-Machine Learning Algorithms for Classification. You will remember that the artificial neuron uses a linear
-Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=fbf64921-b1ce-402a-8072-d84ae2a98323/chat_id=fdcf8e66-81ce-4ef7-8d1f-5e34b9448500/documents/ec50503b-7f2f-491a-921f-80a5e71dc268.txt, Page: 0, Lines: 8895-8907, Start: 548248]
+Prototyping
+Presented by Nursultan Askarbekuly
+Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=b3ba9ce3-cc55-4e95-b1ec-3af0d6522882/chat_id=6f3c585f-743e-425f-9d99-88826d050e23/documents/pdfs/feb7e83a-cf71-4003-90aa-2d19004abdde.pdf, Page: 0, Lines: 1-2, Start: 0]
 
 Original text:
-features, x and y (numerator), divided by the product of their standard deviations (denominator):
-𝑟𝑟 𝑟
-∑ [(𝑥𝑥(𝑖𝑖𝑖 − 𝜇𝜇𝑥𝑥)(𝑦𝑦(𝑖𝑖𝑖 − 𝜇𝜇𝑦𝑦)] 𝑛𝑛
-𝑖𝑖𝑖𝑖
-√∑ (𝑥𝑥(𝑖𝑖𝑖 − 𝜇𝜇𝑥𝑥) 𝑛𝑛 2 𝑖𝑖𝑖𝑖 √∑ (𝑦𝑦(𝑖𝑖𝑖 − 𝜇𝜇𝑦𝑦)
-2 𝑛𝑛
-𝑖𝑖𝑖𝑖
-= 𝜎𝜎𝑥𝑥
-𝜎𝜎𝑥𝑥𝜎𝜎𝑦𝑦
-Here, 𝜇𝜇 denotes the mean of the corresponding feature, 𝜎𝜎𝑥𝑥𝑥𝑥 is the covariance between the features x
-and y, and 𝜎𝜎𝑥𝑥 and 𝜎𝜎𝑦𝑦 are the features’ standard deviations.
-The normality assumption of linear regression
-Note that in contrast to common belief, training a linear regression model does not require that the explanatory or target variables are normally distributed. The normality
-assumption is only a requirement for certain statistics and hypothesis tests that are beyond
-the scope of this book (for more information on this topic, please refer to Introduction
-to Linear Regression Analysis by Douglas C. Montgomery, Elizabeth A. Peck, and G. Geoffrey
-Vining, Wiley, pages: 318-319, 2012).
-Chapter 9 277
-Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=fbf64921-b1ce-402a-8072-d84ae2a98323/chat_id=fdcf8e66-81ce-4ef7-8d1f-5e34b9448500/documents/ec50503b-7f2f-491a-921f-80a5e71dc268.txt, Page: 0, Lines: 8824-8841, Start: 545212]
+Native prototyping and low-code
+Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=b3ba9ce3-cc55-4e95-b1ec-3af0d6522882/chat_id=6f3c585f-743e-425f-9d99-88826d050e23/documents/pdfs/feb7e83a-cf71-4003-90aa-2d19004abdde.pdf, Page: 14, Lines: 1-1, Start: 0]
 
 Original text:
-Logistic regression and conditional probabilities
-Logistic regression is a classification model that is very easy to implement and performs very well on
-linearly separable classes. It is one of the most widely used algorithms for classification in industry.
-Similar to the perceptron and Adaline, the logistic regression model in this chapter is also a linear
-model for binary classification.
-To explain the main mechanics behind logistic regression as a probabilistic model for binary classification, let’s first introduce the odds: the odds in favor of a particular event. The odds can be written
-as 𝑝𝑝
-(1−𝑝𝑝)
-, where p stands for the probability of the positive event. The term “positive event” does not
-necessarily mean “good,” but refers to the event that we want to predict, for example, the probability
-that a patient has a certain disease given certain symptoms; we can think of the positive event as
-Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=fbf64921-b1ce-402a-8072-d84ae2a98323/chat_id=fdcf8e66-81ce-4ef7-8d1f-5e34b9448500/documents/ec50503b-7f2f-491a-921f-80a5e71dc268.txt, Page: 0, Lines: 2505-2515, Start: 159532]
+Rapid prototyping philosophy 
+Make customer interactions a habit: 
+Test everything with people
+Collect learning points:
+That which influences your design
+Optimize loop length:
+How much time from an idea to testing?
+Source: Rapid Prototyping & Product Management by Tom Chi at Mind the Product San Francisco
+Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=b3ba9ce3-cc55-4e95-b1ec-3af0d6522882/chat_id=6f3c585f-743e-425f-9d99-88826d050e23/documents/pdfs/feb7e83a-cf71-4003-90aa-2d19004abdde.pdf, Page: 20, Lines: 1-8, Start: 0]
 
 Original text:
-Turning a linear regression model into a curve –
-polynomial regression
-In the previous sections, we assumed a linear relationship between explanatory and response variables. One way to account for the violation of linearity assumption is to use a polynomial regression
-model by adding polynomial terms:
-𝑦𝑦𝑦 𝑦 𝑦𝑦𝑦1𝑥𝑥 𝑥 2𝑥𝑥2 + … + 𝑑𝑑𝑥𝑥𝑑𝑑 + 𝑏𝑏
-Here, d denotes the degree of the polynomial. Although we can use polynomial regression to model a
-nonlinear relationship, it is still considered a multiple linear regression model because of the linear
-regression coefficients, w. In the following subsections, we will see how we can add such polynomial
-terms to an existing dataset conveniently and fit a polynomial regression model.
-Adding polynomial terms using scikit-learn
-We will now learn how to use the PolynomialFeatures transformer class from scikit-learn to add a
-quadratic term (d = 2) to a simple regression problem with one explanatory variable. Then, we will
-Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=fbf64921-b1ce-402a-8072-d84ae2a98323/chat_id=fdcf8e66-81ce-4ef7-8d1f-5e34b9448500/documents/ec50503b-7f2f-491a-921f-80a5e71dc268.txt, Page: 0, Lines: 9380-9391, Start: 575475]
+A bit more visualisation and detail
+Source: Rapid Prototyping: Sketching | Google for Startups
+Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=b3ba9ce3-cc55-4e95-b1ec-3af0d6522882/chat_id=6f3c585f-743e-425f-9d99-88826d050e23/documents/pdfs/feb7e83a-cf71-4003-90aa-2d19004abdde.pdf, Page: 8, Lines: 1-2, Start: 0]
 
 Original text:
-the best-fitting straight line through the training examples, as shown in Figure 9.1:
-Figure 9.1: A simple one-feature linear regression example
-This best-fitting line is also called the regression line, and the vertical lines from the regression line
-to the training examples are the so-called offsets or residuals—the errors of our prediction.
-Chapter 9 271
-Multiple linear regression
-The previous section introduced simple linear regression, a special case of linear regression with
-one explanatory variable. Of course, we can also generalize the linear regression model to multiple
-explanatory variables; this process is called multiple linear regression:
-𝑦𝑦𝑦 𝑦 𝑦 𝑦𝑦1𝑥𝑥1 + … + 𝑚𝑚𝑥𝑥𝑚𝑚 + 𝑏𝑏 𝑏 𝑖𝑖𝑥𝑥𝑖𝑖
-𝑚𝑚
-𝑖𝑖𝑖
-+ 𝑏𝑏 𝑇𝑇𝒙𝒙
-Figure 9.2 shows how the two-dimensional, fitted hyperplane of a multiple linear regression model
-with two features could look:
-Figure 9.2: A two-feature linear regression model
-Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=fbf64921-b1ce-402a-8072-d84ae2a98323/chat_id=fdcf8e66-81ce-4ef7-8d1f-5e34b9448500/documents/ec50503b-7f2f-491a-921f-80a5e71dc268.txt, Page: 0, Lines: 8690-8705, Start: 536196]
+Native prototyping and low-code
+When:
+More interactivity and real-like user experience is required
+Get the feel for implementation, i.e. spike solution
+Keep-in-mind:
+Needs to be done fast: one-evening prototype
+Is it really necessary? (we are fascinated with the machine) 
+Should be thrown away afterwards
+Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=b3ba9ce3-cc55-4e95-b1ec-3af0d6522882/chat_id=6f3c585f-743e-425f-9d99-88826d050e23/documents/pdfs/feb7e83a-cf71-4003-90aa-2d19004abdde.pdf, Page: 15, Lines: 1-8, Start: 0]
 
 Original text:
-Join our book’s Discord space
-Join the book’s Discord workspace for a monthly Ask me Anything session with the authors:
-https://packt.link/MLwPyTorch
-9
-Predicting Continuous Target
-Variables with Regression Analysis
-Throughout the previous chapters, you learned a lot about the main concepts behind supervised
-learning and trained many different models for classification tasks to predict group memberships or
-categorical variables. In this chapter, we will dive into another subcategory of supervised learning:
-regression analysis.
-Regression models are used to predict target variables on a continuous scale, which makes them
-attractive for addressing many questions in science. They also have applications in industry, such as
-understanding relationships between variables, evaluating trends, or making forecasts. One example
-is predicting the sales of a company in future months.
-In this chapter, we will discuss the main concepts of regression models and cover the following topics:
-Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=fbf64921-b1ce-402a-8072-d84ae2a98323/chat_id=fdcf8e66-81ce-4ef7-8d1f-5e34b9448500/documents/ec50503b-7f2f-491a-921f-80a5e71dc268.txt, Page: 0, Lines: 8655-8669, Start: 533475]
+Tools
+Prototyping and UI
+Draftium
+Invision
+Sketch
+Atomic
+Adobe XD
+Figma
+Maze
+No-code and 
+low-code
+AppSheet
+Webﬂow
+Marketplaces
+UPlabs - design
+Codecanyon - code
+Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=b3ba9ce3-cc55-4e95-b1ec-3af0d6522882/chat_id=6f3c585f-743e-425f-9d99-88826d050e23/documents/pdfs/feb7e83a-cf71-4003-90aa-2d19004abdde.pdf, Page: 17, Lines: 1-16, Start: 0]
 
 Original text:
-xiv Table of Contents
-Visualizing the important characteristics of a dataset • 274
-Looking at relationships using a correlation matrix • 276
-Implementing an ordinary least squares linear regression model ........................................... 278
-Solving regression for regression parameters with gradient descent • 278
-Estimating the coefficient of a regression model via scikit-learn • 283
-Fitting a robust regression model using RANSAC ................................................................... 285
-Evaluating the performance of linear regression models ........................................................ 288
-Using regularized methods for regression ............................................................................. 292
-Turning a linear regression model into a curve – polynomial regression ................................. 294
-Adding polynomial terms using scikit-learn • 294
-Modeling nonlinear relationships in the Ames Housing dataset • 297
-Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=fbf64921-b1ce-402a-8072-d84ae2a98323/chat_id=fdcf8e66-81ce-4ef7-8d1f-5e34b9448500/documents/ec50503b-7f2f-491a-921f-80a5e71dc268.txt, Page: 0, Lines: 310-321, Start: 21603]
+What are different ways 
+to prototype apps?
+https://www.uid.com/en/news/prototyping
+Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=b3ba9ce3-cc55-4e95-b1ec-3af0d6522882/chat_id=6f3c585f-743e-425f-9d99-88826d050e23/documents/pdfs/feb7e83a-cf71-4003-90aa-2d19004abdde.pdf, Page: 5, Lines: 1-3, Start: 0]
 
 
