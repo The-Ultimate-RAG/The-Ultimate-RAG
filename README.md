@@ -157,7 +157,7 @@ Ensure you have the following software installed before you begin:
       ```bash
       docker run --publish 6333:6333 --publish 6334:6334 --volume path_to_project\database:/qdrant/storage qdrant/qdrant
       ```
-    - Wait until installation complete
+    - Wait until installation is complete.
     - Run the main application
       ```bash
       python -m app.core.main
@@ -176,17 +176,16 @@ Ensure you have the following software installed before you begin:
 
 ## <a id="usage"></a>📖 Usage
 
-You can try currently deployed version of the
+You can try a currently deployed version of the
 system [here](https://huggingface.co/spaces/The-Ultimate-RAG-HF/The-Ultimate-RAG). **Note**: you should use the
 following instructions:
 
-- 🌐 Access the cite, you should see the *main* page with the name of the system
-- ➕ Press the button "+ Add new chat", wait until the *login* page is loaded
+- 🌐 Access the site, you should see the *main* page with the name of the system
+- ➕ Press the button "+ Add new chat," wait until the *login* page is loaded
 - 🔍 Find button "Register" (for now it is highly recommended to follow the instructions *strictly*) and press it
 - 📝 You should be redirected to *sign up* page, here you should enter your credentials (you can use Test1@test1.com in
-  all
-  field for testing)
-- 🖱️ Click **ONLY ONCE** on the button "Sign Up", and wait (for now it takes around 10 seconds to load *chat* page)
+  all fields for testing)
+- 🖱️ Click **ONLY ONCE** on the button "Sign Up," and wait (for now it takes around 10 seconds to load *chat* page)
 - 💬 Now you will be able to communicate with the system
 - ❓ You can try to ask anything and attach files. Enter a query and press the *enter* button (near the input area)
 
@@ -203,6 +202,7 @@ following instructions:
     - 🔄 [Continuous integration](./docs/automation/continuous-integration.md)
     - 🚢 [Continuous deployment](./docs/automation/continuous-delivery.md)
 - 🏛️ [Architecture](./docs/architecture/architecture.md)
+- 🌐 You can also find comprehensive documentation on [GitHub Pages](https://the-ultimate-rag.github.io/The-Ultimate-RAG)
 
 <p align="right">(<a href="#readme-top">🔝 back to top</a>)</p>
 
