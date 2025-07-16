@@ -122,10 +122,10 @@ async def send_message(
         print("-" * 100, "User ---->", user, "-" * 100, "\n\n")
         collection_name = construct_collection_name(user, chat_id)
 
-        register_message(content=prompt, sender="user", chat_id=chat_id)
+        message_id = register_message(content=prompt, sender="user", chat_id=chat_id)
 
         await save_documents(
-            collection_name, files=files, RAG=rag, user=user, chat_id=chat_id
+            collection_name, files=files, RAG=rag, user=user, chat_id=chat_id, message_id=message_id
         )
 
         return StreamingResponse(

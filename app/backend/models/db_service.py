@@ -3,7 +3,7 @@ from app.backend.models.base_model import Base
 from app.backend.models.chats import Chat
 from app.backend.models.messages import Message
 from app.backend.models.users import User
-
+from app.backend.models.documents import Document
 
 def table_exists(name: str) -> bool:
     return engine.dialect.has_table(engine, name)
@@ -19,6 +19,7 @@ def drop_tables() -> None:
     Message.__table__.drop(engine)
     Chat.__table__.drop(engine)
     User.__table__.drop(engine)
+    Document.__table__.drop(engine)
 
 
 def automigrate() -> None:
