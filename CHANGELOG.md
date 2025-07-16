@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [MVPv2.5] - current version
 
-### Improveness
+### Improvements & Bug Fixes
 - Accelerated file processing
 
 ### Development & Testing
@@ -20,7 +20,7 @@ All notable changes to this project will be documented in this file.
 - Added JSON, CSV, and MD file types support
 - Added a draft version of user and chat separation
 
-### Improveness and bug fix
+### Improvements & Bug Fixes
 - Significantly reduced response time
 - Enhanced response quality and accuracy
 - Enhanced UI/UX
