@@ -26,9 +26,9 @@ short_description: the ultimate rag
 </p>
 
 <p>
-   <a href="https://huggingface.co/spaces/The-Ultimate-RAG-HF/The-Ultimate-RAG">🌐 Check deployed version</a>
+   <a href="https://the-ultimate-rag-hf-the-ultimate-rag.hf.space">🌐 Check deployed version</a>
    &middot;
-   <a href="">🎬 View demo</a>
+   <a href="https://drive.google.com/drive/folders/1qhe6bS2l7sW1-1g0tBf0Awz1ew-popKV">🎬 View demo</a>
 </p>
 </div>
 
