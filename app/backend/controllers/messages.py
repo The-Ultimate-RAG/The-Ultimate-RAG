@@ -17,7 +17,7 @@ def register_message(content: str, sender: str, chat_id: str) -> str:
     print("-" * 40, "START Registering Message", "-" * 40)
     try:
         id = str(uuid4())
-        message = content if sender == "assistant" else remove_html_tags(content)
+        message = content if sender == "sender" else remove_html_tags(content)
 
         print(f"Message -----> {message[:min(30, len(message))]}")
 
