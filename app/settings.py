@@ -9,6 +9,7 @@ from typing import Callable, List, Optional
 from datetime import timedelta
 from dotenv import load_dotenv
 from aiologger import Logger
+from celery import Celery
 from pathlib import Path
 import asyncio
 import torch
@@ -133,9 +134,9 @@ class Settings(BaseSettings):
     max_cookie_lifetime: timedelta = timedelta(seconds=3000)
     password_reset_token_lifetime: timedelta = timedelta(seconds=3000)
 
-    device: str = Field(
-        default_factory=lambda: "cuda" if torch.cuda.is_available() else "cpu"
-    )
+    # device: str = Field(
+    #     default_factory=lambda: "cuda" if torch.cuda.is_available() else "cpu"
+    # )
     base_dir: Path = BASE_DIR
 
     stream: bool = True
@@ -143,6 +144,16 @@ class Settings(BaseSettings):
     secret_pepper: str = os.environ["SECRET_PEPPER"]
     jwt_algorithm: str = os.environ["JWT_ALGORITHM"]
     api_key: str = os.environ["GEMINI_API_KEY"]
+
+
+    @property
+    def device(self):
+        import torch
+        return "cuda" if torch.cuda.is_available() else "cpu"
+
+    @property
+    def get_gpu_layers(self):
+        return 20 if self.device == "cuda" else 0
 
     @computed_field
     @property
@@ -168,6 +179,31 @@ async def setup_logger(logger: Logger) -> None:
     stream_handler.formatter = formatter
     logger.add_handler(stream_handler)
 
+
+app = Celery(
+    'app',
+    broker="redis://localhost:6379/0",
+    backend="redis://localhost:6379/0",
+)
+
+app.conf.update(
+    task_serializer='json',
+    accept_content=['json'],
+    result_serializer='json',
+    timezone='UTC',
+    enable_utc=True,
+    task_track_started=True,
+    task_time_limit=3600,
+    task_soft_time_limit=3000,
+    task_acks_late=True,
+    result_expires=3600,
+    worker_prefetch_multiplier=1,
+    task_queues={
+        'default': {'exchange': 'default', 'routing_key': 'default'},
+        'high_priority': {'exchange': 'high_priority', 'routing_key': 'high_priority'},
+    },
+    include=['app.core.tasks']
+)
 
 settings = Settings()
 

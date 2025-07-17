@@ -1,8 +1,13 @@
 import asyncio
+import json
+from uuid import uuid4
+from celery.result import AsyncResult
+from app.core.tasks import process_documents, redis_client
+from app.core.tasks import generate_response
 from app.backend.controllers.messages import register_message
 from app.core.document_validator import path_is_valid
 from app.core.response_parser import add_links
-from app.settings import BASE_DIR, settings, logger
+from app.settings import BASE_DIR, settings, logger, app
 from app.backend.controllers.chats import (
     get_chat_with_messages,
     create_new_chat,
@@ -37,6 +42,7 @@ from fastapi import (
     FastAPI,
     Form,
     File,
+    WebSocket
 )
 from fastapi.responses import (
     StreamingResponse,
@@ -119,8 +125,8 @@ async def require_user(request: Request, call_next):
 @api.post("/message_with_docs")
 async def send_message(request: Request, files: list[UploadFile] = File(None), prompt: str = Form(...), chat_id: str = Form(None)) -> StreamingResponse:
     status = 200
-
     try:
+        await logger.info("Start processing the message")
         user = await extract_user_from_context(request)
         if settings.debug:
             await logger.info(f" User ----> {user}")
@@ -131,20 +137,82 @@ async def send_message(request: Request, files: list[UploadFile] = File(None), p
 
         await register_message(content=prompt, sender="user", chat_id=chat_id)
 
-        await save_documents(
-            collection_name, files=files, RAG=rag, user=user, chat_id=chat_id
+        docs = await save_documents(
+           files=files, user=user, chat_id=chat_id
         )
 
-        return StreamingResponse(
-            rag.generate_response_stream(
-                collection_name=collection_name, user_prompt=prompt, stream=True
-            ),
-            status,
-            media_type="text/event-stream",
+        doc_task = None
+        if docs:
+            doc_task = process_documents.delay(
+                collection_name=collection_name,
+                files=docs,
+                chat_id=chat_id,
+            )
+
+        resp_task = generate_response.delay(
+            collection_name=collection_name,
+            prompt=prompt,
+            chat_id=chat_id,
+            task_id=str(uuid4())
         )
+
+        return JSONResponse({
+            "doc_task_id": doc_task.id if doc_task else None,
+            "resp_task_id": resp_task.id,
+            "message": "Tasks enqueued, connect to WebSocket for streaming response"
+        })
+
+        # return StreamingResponse(
+        #     rag.generate_response_stream(
+        #         collection_name=collection_name, user_prompt=prompt, stream=True
+        #     ),
+        #     status,
+        #     media_type="text/event-stream",
+        # )
     except Exception as e:
         status = 500
         await logger.error(f"Error in send_message: {str(e)}")
+
+
+@api.websocket("/ws/response/{task_id}")
+async def websocket_response(websocket: WebSocket, task_id: str):
+    await websocket.accept()
+    try:
+        last_index = 0
+        while True:
+            status = await redis_client.get(f"response:{task_id}:status")
+            if status == "completed":
+                chunks = await redis_client.lrange(f"response:{task_id}:chunks", last_index, -1)
+                for chunk in chunks:
+                    await websocket.send_text(json.loads(chunk)["chunk"])
+                await websocket.send_json({"status": "completed"})
+                break
+            elif status == "failed":
+                error = await redis_client.get(f"response:{task_id}:error") or "Unknown error"
+                await websocket.send_json({"status": "failed", "error": error})
+                break
+            elif status == "streaming":
+                chunks = await redis_client.lrange(f"response:{task_id}:chunks", last_index, -1)
+                for chunk in chunks:
+                    await websocket.send_text(json.loads(chunk)["chunk"])
+                last_index += len(chunks)
+            await asyncio.sleep(0.1)
+    except Exception as e:
+        await logger.error(f"Error at websocket: {e}")
+
+
+@api.get("/task_status/{task_id}")
+async def get_task_status(task_id: str):
+    task = AsyncResult(task_id, app=app)
+    status = await redis_client.get(f"response:{task_id}:status") or task.state
+    if status in ["PENDING", "STARTED"]:
+        return JSONResponse({"task_id": task_id, "status": "pending"})
+    elif status in ["SUCCESS", "completed"]:
+        chunks = await redis_client.lrange(f"response:{task_id}:chunks", 0, -1)
+        return JSONResponse({"task_id": task_id, "status": "success", "chunks": [json.loads(c)["chunk"] for c in chunks]})
+    else:
+        error = await redis_client.get(f"response:{task_id}:error") or str(task.info)
+        return JSONResponse({"task_id": task_id, "status": status, "error": error})
 
 
 @api.post("/replace_message")

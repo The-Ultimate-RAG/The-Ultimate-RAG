@@ -15,14 +15,12 @@ import os
 rag = None
 
 def initialize_rag() -> RagSystem:
-    print("Start RAG initialization")
-    try:
-        global rag
-        if rag is None:
-            rag = RagSystem()
-        return rag
-    finally:
-        print("End RAG initialization")
+    global rag
+    if rag is None:
+        print("Start RAG initialization")
+        rag = RagSystem()
+    return rag
+
 
 
 async def extend_context(context: dict, selected: int = None):
@@ -57,12 +55,10 @@ async def protect_chat(user: User, chat_id: str) -> bool:
 
 
 async def save_documents(
-    collection_name: str,
     files: list[UploadFile],
-    RAG: RagSystem,
     user: User,
     chat_id: str,
-) -> None:
+) -> list[str]:
     storage = os.path.join(
         BASE_DIR,
         "chats_storage",
@@ -95,8 +91,7 @@ async def save_documents(
 
         docs.append(saved_file)
 
-    if len(files) > 0:
-        await RAG.upload_documents(collection_name, docs)
+    return docs
 
 
 async def get_pdf_path(path: str) -> str:

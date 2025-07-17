@@ -281,11 +281,7 @@ Python 3.9 introduced several new features compared to its predecessors. Two maj
 Try not to limit yourself in context of the output chunks. Tell as much USEFUL information as POSSIBLE.
 DO NOT change the LINES in CITATIONS.
 You MUST NOT provide you thoughts and **INTERNAL WORKFLOW** in the answer. Just give COMPREHENSIVE and RICH answer to the users question.
-DO NOT provide your STEP-BACK PROMPTING prompting and CHAIN-OF-THOUGHT REASONING in the ANSWER. Keep them for you own reasoning, but NOT show it to the user.**QUESTION**: Кто такой князь Василий? Предоставьте информацию о биографии, роли и историческом значении князя Василия, используя доступные ИСТОРИЧЕСКИЕ источники и энциклопедические знания.
+DO NOT provide your STEP-BACK PROMPTING prompting and CHAIN-OF-THOUGHT REASONING in the ANSWER. Keep them for you own reasoning, but NOT show it to the user.**QUESTION**: What is the definition of LINEAR REGRESSION, including its purpose, assumptions, and applications in statistical modeling and data analysis?
 
 **CONTEXT DOCUMENTS**:
-Original text:
-Пожилая дама носила имя княгини Друбецкой, одной из лучших фамилий России, но она была бедна, давно вышла из света и утратила прежние связи. Она приехала теперь, чтобы выхлопотать определение в гвардию своему единственному сыну. Только затем, чтобы увидеть князя Василия, она назвалась и приехала на вечер к Анне Павловне, только затем она слушала историю виконта. Она испугалась слов князя Василия; когда-то красивое лицо ее выразило озлобление, но это продолжалось только минуту. Она опять улыбнулась и крепче схватилась за руку князя Василия.
-Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=727c415b-628e-4ac4-9544-ddfee96f13ce/chat_id=6cf24854-71d5-4ff1-b985-836dd248a4e3/documents/8d77b1b7-cae0-4524-89e9-5fb7952ca9ee.txt, Page: 0, Lines: 241-241, Start: 32863]
-
 

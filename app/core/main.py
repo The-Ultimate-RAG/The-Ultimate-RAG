@@ -4,6 +4,10 @@ import aiofiles.os
 import uvicorn
 import asyncio
 import os
+import multiprocessing
+
+
+multiprocessing.set_start_method("spawn", force=True)
 
 
 async def initialize_system() -> bool:
