@@ -9,7 +9,7 @@ class Message(Base):
     __tablename__ = "messages"
     id = Column("id", String, primary_key=True, unique=True)
     content = Column("text", Text)
-    sender = Column("sender", String)
+    sender = Column("role", String)
     chat_id = Column(String, ForeignKey("chats.id"))
     chat = relationship("Chat", back_populates="messages")
     documents = relationship("Document", back_populates="message")
