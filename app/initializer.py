@@ -7,6 +7,7 @@ def initialize_system() -> bool:
     success = True
     path = BASE_DIR
     temp_storage_path = os.path.join(path, "app", "temp_storage")
+    static_path = os.path.join(path, "app", "core", "static")
     pdfs_path = os.path.join(path, "app", "temp_storage", "pdfs")
     database_path = os.path.join(path, "database")
     chats_storage_path = os.path.join(path, "chats_storage")
@@ -14,6 +15,7 @@ def initialize_system() -> bool:
     print(f"Base path: {BASE_DIR}")
     print(f"Parent path: {path}")
     print(f"Temp storage path: {temp_storage_path}")
+    print(f"Static path: {static_path}")
     print(f"PDFs path: {pdfs_path}")
     print(f"Database path: {database_path}")
     print(f"Database path: {chats_storage_path}")
@@ -21,6 +23,8 @@ def initialize_system() -> bool:
     try:
         os.makedirs(temp_storage_path, exist_ok=True)
         print("Created temp_storage_path")
+        os.makedirs(static_path, exist_ok=True)
+        print("Created static_path")
         os.makedirs(pdfs_path, exist_ok=True)
         print("Created pdfs_path")
         os.makedirs(database_path, exist_ok=True)

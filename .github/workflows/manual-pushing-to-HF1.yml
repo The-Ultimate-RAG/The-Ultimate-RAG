@@ -1,0 +1,26 @@
+name: Sync to Hugging Face Hub
+on:
+  push:
+    branches: [for_testing]
+  workflow_dispatch:
+jobs:
+  sync-to-hub:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+      - name: Configure Git identity
+        run: |
+          git config --global user.name "Andrchest"
+          git config --global user.email "andreipolevoi220@gmail.com"
+      - name: Push to Hugging Face
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          git checkout -b hf-single-commit
+          git reset --soft $(git rev-list --max-parents=0 HEAD)
+          git commit -m "Single commit for Hugging Face"
+          git remote add hf https://Andrchest:$HF_TOKEN@huggingface.co/spaces/The-Ultimate-RAG-HF/RAG-Integration-test
+          git push --force hf hf-single-commit:main
