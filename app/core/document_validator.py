@@ -1,5 +1,5 @@
 import os
 
 
-async def path_is_valid(path: str) -> bool:
+def path_is_valid(path: str) -> bool:
     return os.path.exists(path)

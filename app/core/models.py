@@ -9,7 +9,7 @@ from torch import Tensor
 from google import genai
 from google.genai import types
 from app.core.chunks import Chunk
-from app.settings import settings, BASE_DIR, GeminiEmbeddingSettings
+from app.settings import settings, BASE_DIR, GeminiEmbeddingSettings, logger
 import aiofiles.os
 
 load_dotenv()
@@ -48,9 +48,14 @@ class GeminiLLM:
         return response.text
 
     async def get_streaming_response(self, prompt: str, use_default_config: bool = False):
+        loop = asyncio.get_event_loop()
+
+        start = loop.time()
         path_to_prompt = os.path.join(BASE_DIR, "models_io", "prompt.txt")
         async with aiofiles.open(path_to_prompt, "w", encoding="utf-8", errors="replace") as f:
             await f.write(prompt)
+
+        await logger.info(f"Time of saving prompt to  document - {loop.time() - start}")
 
         response = self.client.models.generate_content_stream(
             model=self.model,

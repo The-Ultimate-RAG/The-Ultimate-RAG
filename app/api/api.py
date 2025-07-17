@@ -1,3 +1,4 @@
+import asyncio
 from app.backend.controllers.messages import register_message
 from app.core.document_validator import path_is_valid
 from app.core.response_parser import add_links
@@ -118,6 +119,7 @@ async def require_user(request: Request, call_next):
 @api.post("/message_with_docs")
 async def send_message(request: Request, files: list[UploadFile] = File(None), prompt: str = Form(...), chat_id: str = Form(None)) -> StreamingResponse:
     status = 200
+
     try:
         user = await extract_user_from_context(request)
         if settings.debug:
