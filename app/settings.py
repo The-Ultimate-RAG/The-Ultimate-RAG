@@ -16,9 +16,9 @@ import sys
 import os
 
 
-load_dotenv()
-
+os.environ.pop("DATABASE_URL", None)
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(dotenv_path=BASE_DIR / ".env")
 
 
 class QdrantSettings(BaseModel):
@@ -173,7 +173,7 @@ settings = Settings()
 
 
 async def main():
-    await setup_logger()
+    await setup_logger(logger)
 
     await logger.warning("Successfully loaded settings")
     await logger.info(f"Base Directory: {settings.base_dir}")
