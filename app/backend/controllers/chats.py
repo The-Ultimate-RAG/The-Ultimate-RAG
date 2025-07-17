@@ -1,5 +1,6 @@
 from app.backend.models.messages import get_messages_by_chat_id, Message
 from app.backend.models.users import User, get_user_chats
+from app.backend.models.documents import Document
 from app.backend.controllers.utils import get_group_title
 from app.settings import BASE_DIR
 from app.backend.models.chats import (
@@ -39,12 +40,20 @@ def create_new_chat(title: str | None, user: User) -> dict:
         print("+" * 40, "END Creating Chat", "+" * 40, "\n\n")
 
 
+def dump_documents_dict(documents: list[Document]) -> list[map]:
+    output = []
+    for doc in documents:
+        output.append({"name": doc.name, "path": doc.path, "size": doc.size})
+        print("Add document --->", doc.name)
+    return output
+
+
 def dump_messages_dict(messages: list[Message], dst: dict) -> None:
     history = []
 
     print("!" * 40, "START Dumping History", "!" * 40)
     for message in messages:
-        history.append({"id": message.id, "sender": message.sender, "content": message.content})
+        history.append({"role": message.sender, "content": message.content, "documents": dump_documents_dict(message.documents)})
         print(f"Role ----> {message.sender}, Content ----> {message.content}\n")
     print("!" * 40, "END Dumping History", "!" * 40, "\n\n")
 

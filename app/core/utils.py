@@ -4,6 +4,7 @@ from fastapi import Request, UploadFile
 from app.backend.controllers.chats import list_user_chats, verify_ownership_rights
 from app.backend.controllers.users import get_current_user
 from app.backend.models.users import User
+from app.backend.models.documents import add_new_document
 from app.core.rag_generator import RagSystem
 from app.settings import BASE_DIR
 
@@ -70,6 +71,7 @@ async def save_documents(
     RAG: RagSystem,
     user: User,
     chat_id: str,
+    message_id: str
 ) -> None:
     storage = os.path.join(
         BASE_DIR,
@@ -87,13 +89,19 @@ async def save_documents(
 
     for file in files:
         content = await file.read()
-
+        id = str(uuid4())
         if file.filename.endswith(".pdf"):
-            saved_file = os.path.join(storage, "pdfs", str(uuid4()) + ".pdf")
+            saved_file = os.path.join(storage, "pdfs", id + ".pdf")
         else:
             saved_file = os.path.join(
-                storage, str(uuid4()) + "." + file.filename.split(".")[-1]
+                storage, id + "." + file.filename.split(".")[-1]
             )
+
+        try:
+            add_new_document(id=id, name=file.filename, path=saved_file, message_id=message_id, size=file.size)
+        except Exception as e:
+            print(e)
+            raise RuntimeError("Error while adding document")
 
         with open(saved_file, "wb") as f:
             f.write(content)

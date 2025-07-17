@@ -1,12 +1,14 @@
+from sqlalchemy import inspect
 from app.backend.controllers.base_controller import engine
 from app.backend.models.base_model import Base
 from app.backend.models.chats import Chat
 from app.backend.models.messages import Message
 from app.backend.models.users import User
+from app.backend.models.documents import Document
 
 
 def table_exists(name: str) -> bool:
-    return engine.dialect.has_table(engine, name)
+    return inspect(engine).has_table(name)
 
 
 def create_tables() -> None:
@@ -14,17 +16,22 @@ def create_tables() -> None:
 
 
 def drop_tables() -> None:
-    # for now the order matters, so
-    # TODO: add cascade deletion for models
-    Message.__table__.drop(engine)
-    Chat.__table__.drop(engine)
-    User.__table__.drop(engine)
+    # List tables in the correct order for dropping (considering dependencies)
+    tables = [Message.__table__, Chat.__table__, User.__table__, Document.__table__]
+
+    for table in tables:
+        if table_exists(table.name):
+            try:
+                table.drop(engine)
+                print(f"Dropped table {table.name}")
+            except Exception as e:
+                print(f"Error dropping table {table.name}: {e}")
+        else:
+            print(f"Table {table.name} does not exist, skipping drop")
 
 
 def automigrate() -> None:
-    try:
-        drop_tables()
-    except Exception as e:
-        print(e)
-
+    print("Starting automigration...")
+    drop_tables()
     create_tables()
+    print("Automigration completed.")

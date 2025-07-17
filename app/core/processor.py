@@ -1,5 +1,4 @@
 from langchain_community.document_loaders import (
-    PyPDFLoader,
     UnstructuredWordDocumentLoader,
     TextLoader,
     CSVLoader,
@@ -16,8 +15,23 @@ import numpy as np
 from app.settings import logging, settings
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import os
+import fitz
 
-# TODO: replace PDFloader since it is completely unusable OR try to fix it
+class PDFLoader:
+    def __init__(self, file_path: str):
+        self.file_path = file_path
+
+    def load(self) -> list[Document]:
+        docs = []
+        with fitz.open(self.file_path) as doc:
+            for page in doc:
+                text = page.get_text("text")
+                metadata = {
+                    "source": self.file_path,
+                    "page": page.number,
+                }
+                docs.append(Document(page_content=text, metadata=metadata))
+        return docs
 
 
 class DocumentProcessor:
@@ -93,7 +107,7 @@ class DocumentProcessor:
         loader = None
         parallelization = False
         if filepath.endswith(".pdf"):
-            loader = PyPDFLoader(
+            loader = PDFLoader(
                 file_path=filepath
             )  # splits each presentation into slides and processes it as separate file
             parallelization = False

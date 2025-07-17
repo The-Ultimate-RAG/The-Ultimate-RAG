@@ -5,21 +5,38 @@ from app.backend.models.db_service import automigrate
 
 
 def initialize_system() -> bool:
+    success = True
     path = BASE_DIR
-    chats_storage_path = os.path.join(path, "chats_storage")
+    temp_storage_path = os.path.join(path, "app", "temp_storage")
+    static_path = os.path.join(path, "static")
+    pdfs_path = os.path.join(path, "app", "temp_storage", "pdfs")
     database_path = os.path.join(path, "database")
+    chats_storage_path = os.path.join(path, "chats_storage")
+
+    print(f"Base path: {BASE_DIR}")
+    print(f"Parent path: {path}")
+    print(f"Temp storage path: {temp_storage_path}")
+    print(f"Static path: {static_path}")
+    print(f"PDFs path: {pdfs_path}")
+    print(f"Database path: {database_path}")
+    print(f"Database path: {chats_storage_path}")
 
     try:
+        os.makedirs(temp_storage_path, exist_ok=True)
+        print("Created temp_storage_path")
+        os.makedirs(static_path, exist_ok=True)
+        print("Created static_path")
+        os.makedirs(pdfs_path, exist_ok=True)
+        print("Created pdfs_path")
         os.makedirs(database_path, exist_ok=True)
+        print("Created database_path")
         os.makedirs(chats_storage_path, exist_ok=True)
-    except Exception:
-        raise RuntimeError("Not all required directories were initialized")
+        print("Created chats_storage_path")
+    except Exception as e:
+        success = False
+        print(f"Error creating directories: {str(e)}")
 
-    try:
-        # os.system(f"pip install -r {os.path.join(base_path, 'requirements.txt')}")
-        pass
-    except Exception:
-        raise RuntimeError("Not all package were downloaded")
+    return success
 
 
 def main():

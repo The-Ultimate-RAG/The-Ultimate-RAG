@@ -13,7 +13,7 @@ def remove_html_tags(content: str) -> str:
     return de_taggeed.replace("REPLACE_WITH_RICKROLL", replace_with)
 
 
-def register_message(content: str, sender: str, chat_id: str) -> None:
+def register_message(content: str, sender: str, chat_id: str) -> str:
     print("-" * 40, "START Registering Message", "-" * 40)
     try:
         id = str(uuid4())
