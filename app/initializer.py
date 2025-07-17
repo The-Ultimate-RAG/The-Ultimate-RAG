@@ -7,7 +7,7 @@ def initialize_system() -> bool:
     success = True
     path = BASE_DIR
     temp_storage_path = os.path.join(path, "app", "temp_storage")
-    static_path = os.path.join(path, "app", "core", "static")
+    static_path = os.path.join(path, "static")
     pdfs_path = os.path.join(path, "app", "temp_storage", "pdfs")
     database_path = os.path.join(path, "database")
     chats_storage_path = os.path.join(path, "chats_storage")
