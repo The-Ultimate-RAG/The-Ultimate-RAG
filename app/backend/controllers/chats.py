@@ -53,7 +53,7 @@ def dump_messages_dict(messages: list[Message], dst: dict) -> None:
 
     print("!" * 40, "START Dumping History", "!" * 40)
     for message in messages:
-        history.append({"role": message.sender, "content": message.content, "documents": dump_documents_dict(message.documents)})
+        history.append({"sender": message.sender, "content": message.content, "documents": dump_documents_dict(message.documents)})
         print(f"Role ----> {message.sender}, Content ----> {message.content}\n")
     print("!" * 40, "END Dumping History", "!" * 40, "\n\n")
 

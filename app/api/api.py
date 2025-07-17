@@ -160,7 +160,7 @@ async def replace_message(request: Request):
         f.write(data.get("message", ""))
     updated_message = add_links(data.get("message", ""))
     register_message(
-        content=updated_message, sender="assistant", chat_id=data.get("chatId")
+        content=updated_message, sender="system", chat_id=data.get("chatId")
     )
     return JSONResponse({"updated_message": updated_message})
 
