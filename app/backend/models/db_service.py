@@ -4,6 +4,7 @@ from app.backend.models.base_model import Base
 from app.backend.models.chats import Chat
 from app.backend.models.messages import Message
 from app.backend.models.users import User
+from app.backend.models.documents import Document
 
 
 def table_exists(name: str) -> bool:
@@ -16,7 +17,7 @@ def create_tables() -> None:
 
 def drop_tables() -> None:
     # List tables in the correct order for dropping (considering dependencies)
-    tables = [Message.__table__, Chat.__table__, User.__table__]
+    tables = [Message.__table__, Chat.__table__, User.__table__, Document.__table__]
 
     for table in tables:
         if table_exists(table.name):
