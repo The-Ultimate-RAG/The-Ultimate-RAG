@@ -1,5 +1,4 @@
 
-# worker_start.py (your worker entry point)
 import multiprocessing
 import os
 
@@ -7,11 +6,19 @@ import os
 os.environ["PYTHON_MULTIPROCESSING_START_METHOD"] = "spawn"
 multiprocessing.set_start_method("spawn", force=True)
 
-from app.settings import app  # Your Celery app import
 
-if __name__ == "__main__":
+from app.settings import app
+
+
+def main():
     app.worker_main([
         "worker",
+        "--pool=threads",
+        "--concurrency=1",
         "--loglevel=info",
         "-Q", "default,high_priority"
     ])
+
+
+if __name__ == "__main__":
+    main()

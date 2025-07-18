@@ -12,20 +12,21 @@ class AsyncTask(Task):
     abstract = True
 
     def __call__(self, *args, **kwargs):
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_closed():
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+        except RuntimeError:
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
-        try:
-            return loop.run_until_complete(self.run(*args, **kwargs))
-        finally:
-            loop.close()
+        return loop.run_until_complete(self.run(*args, **kwargs))
 
     async def run(self, *args, **kwargs):
-        # Override this in the task
         pass
 
-redis_client = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
+
+redis_client = redis.Redis(host="127.0.0.1", port=6379, db=0, decode_responses=True)
 
 
 @app.task(base=AsyncTask, queue='high_priority', bind=True, max_retries=3)
@@ -43,13 +44,16 @@ async def process_documents(self, collection_name: str, files: list[str], chat_i
 @app.task(base=AsyncTask, queue='default', bind=True, max_retries=3)
 async def generate_response(self, collection_name: str, prompt: str, chat_id: str, task_id: str):
     RAG = initialize_rag()
+    await logger.info(f"Task id -----> {task_id}")
     try:
         full_response = ""
         async for chunk in RAG.generate_response_stream(collection_name=collection_name, user_prompt=prompt):
+            print(chunk)
             full_response += chunk
             await redis_client.rpush(f"response:{task_id}:chunks", json.dumps({"chunk": chunk}))
             await redis_client.set(f"response:{task_id}:status", "streaming")
             await asyncio.sleep(0.01)
+        await logger.info(f"Full response length: {len(full_response)}, preview: {full_response[:200]}...")
         await register_message(content=full_response, sender="assistant", chat_id=chat_id)
         await redis_client.set(f"response:{task_id}:status", "completed")
         await redis_client.expire(f"response:{task_id}:chunks", 300)

@@ -64,6 +64,7 @@
 
                 const data = await response.json();
                 const taskId = data.resp_task_id;
+                console.log(taskId)
                 if (!taskId) throw new Error('No task ID received');
 
                 // Connect to WebSocket for streaming

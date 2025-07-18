@@ -149,28 +149,21 @@ async def send_message(request: Request, files: list[UploadFile] = File(None), p
                 chat_id=chat_id,
             )
 
+        task_id = str(uuid4())
+
         resp_task = generate_response.delay(
             collection_name=collection_name,
             prompt=prompt,
             chat_id=chat_id,
-            task_id=str(uuid4())
+            task_id=task_id
         )
 
         return JSONResponse({
             "doc_task_id": doc_task.id if doc_task else None,
-            "resp_task_id": resp_task.id,
+            "resp_task_id": task_id,
             "message": "Tasks enqueued, connect to WebSocket for streaming response"
         })
-
-        # return StreamingResponse(
-        #     rag.generate_response_stream(
-        #         collection_name=collection_name, user_prompt=prompt, stream=True
-        #     ),
-        #     status,
-        #     media_type="text/event-stream",
-        # )
     except Exception as e:
-        status = 500
         await logger.error(f"Error in send_message: {str(e)}")
 
 

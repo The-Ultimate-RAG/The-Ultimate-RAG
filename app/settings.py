@@ -134,9 +134,6 @@ class Settings(BaseSettings):
     max_cookie_lifetime: timedelta = timedelta(seconds=3000)
     password_reset_token_lifetime: timedelta = timedelta(seconds=3000)
 
-    # device: str = Field(
-    #     default_factory=lambda: "cuda" if torch.cuda.is_available() else "cpu"
-    # )
     base_dir: Path = BASE_DIR
 
     stream: bool = True

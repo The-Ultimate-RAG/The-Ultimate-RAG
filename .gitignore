@@ -10,3 +10,4 @@ __pycache__
 exp.*
 response.txt
 /models_io
+/dump.*
