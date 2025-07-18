@@ -1,6 +1,7 @@
 from app.settings import app
 import redis.asyncio as redis
 from app.settings import logger
+from app.core.response_parser import add_links
 import json
 import asyncio
 from app.backend.controllers.messages import register_message
@@ -54,7 +55,7 @@ async def generate_response(self, collection_name: str, prompt: str, chat_id: st
             await redis_client.set(f"response:{task_id}:status", "streaming")
             await asyncio.sleep(0.01)
         await logger.info(f"Full response length: {len(full_response)}, preview: {full_response[:200]}...")
-        await register_message(content=full_response, sender="assistant", chat_id=chat_id)
+        await register_message(content=await add_links(full_response), sender="assistant", chat_id=chat_id)
         await redis_client.set(f"response:{task_id}:status", "completed")
         await redis_client.expire(f"response:{task_id}:chunks", 300)
         return {"status": "success", "response": full_response, "chat_id": chat_id}

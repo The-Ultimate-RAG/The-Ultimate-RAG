@@ -281,21 +281,9 @@ Python 3.9 introduced several new features compared to its predecessors. Two maj
 Try not to limit yourself in context of the output chunks. Tell as much USEFUL information as POSSIBLE.
 DO NOT change the LINES in CITATIONS.
 You MUST NOT provide you thoughts and **INTERNAL WORKFLOW** in the answer. Just give COMPREHENSIVE and RICH answer to the users question.
-DO NOT provide your STEP-BACK PROMPTING prompting and CHAIN-OF-THOUGHT REASONING in the ANSWER. Keep them for you own reasoning, but NOT show it to the user.**QUESTION**: How to use TEXT SPLITTERS in the LANGCHAIN framework?
+DO NOT provide your STEP-BACK PROMPTING prompting and CHAIN-OF-THOUGHT REASONING in the ANSWER. Keep them for you own reasoning, but NOT show it to the user.**QUESTION**: How to implement and use RECURSIVE splitters in DOCUMENT processing, including code examples and practical applications?
 
 **CONTEXT DOCUMENTS**:
-Original text:
-from langchain.text_splitter import CharacterTextSplitter
-text_splitter = CharacterTextSplitter(        
-    separator = "\n\n",
-    chunk_size = 1000,
-    chunk_overlap  = 200,
-    length_function = len,
-)
-texts = text_splitter.create_documents([state_of_the_union])
-print(texts[0])
-Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=1344b1d7-b5f1-4acb-81d4-0d058dc013d6/chat_id=d6c8e505-588e-4f1d-9494-e40ba3f4cadf/documents/dba83972-e511-4102-8b2f-136f47d0e582.txt, Page: 0, Lines: 102-110, Start: 5056]
-
 Original text:
 Core Text Splitting Strategies in Langchain
 1. Recursive Character Splitting
@@ -327,106 +315,21 @@ splitter = SemanticChunker(
     breakpoint_threshold=0.85  # Cosine similarity threshold
 )
 Innovation: Uses embedding vectors to split at semantic boundaries
-Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=1344b1d7-b5f1-4acb-81d4-0d058dc013d6/chat_id=d6c8e505-588e-4f1d-9494-e40ba3f4cadf/documents/dba83972-e511-4102-8b2f-136f47d0e582.txt, Page: 0, Lines: 291-320, Start: 13312]
+Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=d11da011-7c6d-4708-9a1e-af1c7c1efdcd/chat_id=bf8acb15-47e4-4bd9-8566-b85a6aa0655b/documents/3333c172-f20b-4186-bd4f-4e3f9f267861.txt, Page: 0, Lines: 291-320, Start: 13312]
 
 Original text:
-How the text is split: by list of markdown specific characters
-
-How the chunk size is measured: by length function passed in (defaults to number of characters)
-
-from langchain.text_splitter import MarkdownTextSplitter
-markdown_text = """
-# 🦜️🔗 LangChain
-
-⚡ Building applications with LLMs through composability ⚡
-
-## Quick Install
-
-```bash
-# Hopefully this code block isn't split
-pip install langchain
-```
-Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=1344b1d7-b5f1-4acb-81d4-0d058dc013d6/chat_id=d6c8e505-588e-4f1d-9494-e40ba3f4cadf/documents/dba83972-e511-4102-8b2f-136f47d0e582.txt, Page: 0, Lines: 44-59, Start: 2636]
-
-Original text:
-But he badly miscalculated.
-
-He thought he could roll into Ukraine and the world would roll over.
-
-Instead he met a wall of strength he never imagined.
-
-He met the Ukrainian people.
-
-From President Zelenskyy to every Ukrainian, their fearlessness, their courage, their determination, inspires the world.
-
-Groups of citizens blocking tanks with their bodies.
-Spacy Text Splitter
-Another alternative to NLTK is to use Spacy.
-
-How the text is split: by Spacy
-
-How the chunk size is measured: by length function passed in (defaults to number of characters)
-
-from langchain.text_splitter import SpacyTextSplitter
-text_splitter = SpacyTextSplitter(chunk_size=1000)
-texts = text_splitter.split_text(state_of_the_union)
-print(texts[0])
-Madam Speaker, Madam Vice President, our First Lady and Second Gentleman.
-
-Members of Congress and the Cabinet.
-
-Justices of the Supreme Court.
-
-My fellow Americans.  
-
-
-
-Last year COVID-19 kept us apart.
-
-This year we are finally together again.
-Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=1344b1d7-b5f1-4acb-81d4-0d058dc013d6/chat_id=d6c8e505-588e-4f1d-9494-e40ba3f4cadf/documents/dba83972-e511-4102-8b2f-136f47d0e582.txt, Page: 0, Lines: 188-222, Start: 10606]
-
-Original text:
-When you want to deal with long pieces of text, it is necessary to split up that text into chunks. As simple as this sounds, there is a lot of potential complexity here. Ideally, you want to keep the semantically related pieces of text together. What “semantically related” means could depend on the type of text. This notebook showcases several ways to do that.
-
-At a high level, text splitters work as following:
-
-Split the text up into small, semantically meaningful chunks (often sentences).
-
-Start combining these small chunks into a larger chunk until you reach a certain size (as measured by some function).
-
-Once you reach that size, make that chunk its own piece of text and then start creating a new chunk of text with some overlap (to keep context between chunks).
-
-That means there two different axes along which you can customize your text splitter:
-
-How the text is split
-
-How the chunk size is measured
-
 For all the examples below, we will highlight both of these attributes
-Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=1344b1d7-b5f1-4acb-81d4-0d058dc013d6/chat_id=d6c8e505-588e-4f1d-9494-e40ba3f4cadf/documents/dba83972-e511-4102-8b2f-136f47d0e582.txt, Page: 0, Lines: 1-17, Start: 0]
 
-Original text:
-How the text is split: by character passed in
+# This is a long document we can split up.
+with open('../../state_of_the_union.txt') as f:
+    state_of_the_union = f.read()
+Generic Recursive Text Splitting
+This text splitter is the recommended one for generic text. It is parameterized by a list of characters. It tries to split on them in order until the chunks are small enough. The default list is ["\n\n", "\n", " ", ""]. This has the effect of trying to keep all paragraphs (and then sentences, and then words) together as long as possible, as those would generically seem to be the strongest semantically related pieces of text.
 
-How the chunk size is measured: by Hugging Face tokenizer
+How the text is split: by list of characters
 
-from transformers import GPT2TokenizerFast
-
-tokenizer = GPT2TokenizerFast.from_pretrained("gpt2")
-text_splitter = CharacterTextSplitter.from_huggingface_tokenizer(tokenizer, chunk_size=100, chunk_overlap=0)
-texts = text_splitter.split_text(state_of_the_union)
-print(texts[0])
-Madam Speaker, Madam Vice President, our First Lady and Second Gentleman. Members of Congress and the Cabinet. Justices of the Supreme Court. My fellow Americans.  
-
-Last year COVID-19 kept us apart. This year we are finally together again. 
-
-Tonight, we meet as Democrats Republicans and Independents. But most importantly as Americans. 
-
-With a duty to one another to the American people to the Constitution.
-tiktoken (OpenAI) Length Function
-You can also use tiktoken, a open source tokenizer package from OpenAI to estimate tokens used. Will probably be more accurate for their models.
-Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=1344b1d7-b5f1-4acb-81d4-0d058dc013d6/chat_id=d6c8e505-588e-4f1d-9494-e40ba3f4cadf/documents/dba83972-e511-4102-8b2f-136f47d0e582.txt, Page: 0, Lines: 121-139, Start: 7919]
+How the chunk size is measured: by length function passed in (defaults to number of characters)
+Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=d11da011-7c6d-4708-9a1e-af1c7c1efdcd/chat_id=bf8acb15-47e4-4bd9-8566-b85a6aa0655b/documents/3333c172-f20b-4186-bd4f-4e3f9f267861.txt, Page: 0, Lines: 17-27, Start: 919]
 
 Original text:
 Perceptual Threshold: 0.8-0.9 cosine similarity optimal for paragraph cohesion
@@ -462,79 +365,44 @@ Code
 
 
 Key Parameters in Production:
-Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=1344b1d7-b5f1-4acb-81d4-0d058dc013d6/chat_id=d6c8e505-588e-4f1d-9494-e40ba3f4cadf/documents/dba83972-e511-4102-8b2f-136f47d0e582.txt, Page: 0, Lines: 322-354, Start: 14239]
+Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=d11da011-7c6d-4708-9a1e-af1c7c1efdcd/chat_id=bf8acb15-47e4-4bd9-8566-b85a6aa0655b/documents/3333c172-f20b-4186-bd4f-4e3f9f267861.txt, Page: 0, Lines: 322-354, Start: 14239]
 
 Original text:
-How the text is split: by single character
-
-How the chunk size is measured: by length function passed in (defaults to number of characters)
-Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=1344b1d7-b5f1-4acb-81d4-0d058dc013d6/chat_id=d6c8e505-588e-4f1d-9494-e40ba3f4cadf/documents/dba83972-e511-4102-8b2f-136f47d0e582.txt, Page: 0, Lines: 98-100, Start: 4915]
+As an open source project in a rapidly developing field, we are extremely open to contributions.
+"""
+markdown_splitter = MarkdownTextSplitter(chunk_size=100, chunk_overlap=0)
+docs = markdown_splitter.create_documents([markdown_text])
+docs
+[Document(page_content='# 🦜️🔗 LangChain\n\n⚡ Building applications with LLMs through composability ⚡', lookup_str='', metadata={}, lookup_index=0),
+ Document(page_content="Quick Install\n\n```bash\n# Hopefully this code block isn't split\npip install langchain", lookup_str='', metadata={}, lookup_index=0),
+ Document(page_content='As an open source project in a rapidly developing field, we are extremely open to contributions.', lookup_str='', metadata={}, lookup_index=0)]
+Python Code Text Splitter
+PythonCodeTextSplitter splits text along python class and method definitions. It’s implemented as a simple subclass of RecursiveCharacterSplitter with Python-specific separators. See the source code to see the Python syntax expected by default.
+Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=d11da011-7c6d-4708-9a1e-af1c7c1efdcd/chat_id=bf8acb15-47e4-4bd9-8566-b85a6aa0655b/documents/3333c172-f20b-4186-bd4f-4e3f9f267861.txt, Page: 0, Lines: 61-70, Start: 3043]
 
 Original text:
-Last year COVID-19 kept us apart.
-
-This year we are finally together again.
-
-
-
-
-
-Tonight, we meet as Democrats Republicans and Independents.
-
-But most importantly as Americans.
-
-
-
-
-
-With a duty to one another to the American people to the Constitution. 
-
-
-
-And with an unwavering resolve that freedom will always triumph over tyranny.
-
-
-
-
-
-Six days ago, Russia’s Vladimir Putin sought to shake the foundations of the free world thinking he could make it bend to his menacing ways.
-
-But he badly miscalculated.
-
-
-
-
-
-He thought he could roll into Ukraine and the world would roll over.
-
-Instead he met a wall of strength he never imagined.
-
-
-
-
-
-He met the Ukrainian people.
-
-
-
-
-
-From President Zelenskyy to every Ukrainian, their fearlessness, their courage, their determination, inspires the world.
-
-
-
-
-
-Groups of citizens blocking tanks with their bodies.
-Token Text Splitter
-How the text is split: by tiktoken tokens
-
 How the chunk size is measured: by tiktoken tokens
-Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=1344b1d7-b5f1-4acb-81d4-0d058dc013d6/chat_id=d6c8e505-588e-4f1d-9494-e40ba3f4cadf/documents/dba83972-e511-4102-8b2f-136f47d0e582.txt, Page: 0, Lines: 220-278, Start: 11505]
+
+from langchain.text_splitter import TokenTextSplitter
+text_splitter = TokenTextSplitter(chunk_size=10, chunk_overlap=0)
+texts = text_splitter.split_text(state_of_the_union)
+print(texts[0])
+Madam Speaker, Madam Vice President, our
+
+
+Langchain Text Splitters: The Architectural Foundation of Modern Document Processing
+The Critical Role of Text Splitters in NLP Pipelines
+Text splitters serve as the fundamental gateway between raw unstructured data and actionable insights in natural language processing. These sophisticated algorithms transform massive documents into digestible chunks that language models can effectively process, balancing crucial trade-offs between context preservation and computational efficiency. Without optimized text splitting, even the most advanced LLMs stumble over context windows and semantic coherence.
+Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=d11da011-7c6d-4708-9a1e-af1c7c1efdcd/chat_id=bf8acb15-47e4-4bd9-8566-b85a6aa0655b/documents/3333c172-f20b-4186-bd4f-4e3f9f267861.txt, Page: 0, Lines: 278-289, Start: 12424]
 
 Original text:
-HuggingFace Length Function
-Most LLMs are constrained by the number of tokens that you can pass in, which is not the same as the number of characters. In order to get a more accurate estimate, we can use HuggingFace tokenizers to count the text length.
-Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=1344b1d7-b5f1-4acb-81d4-0d058dc013d6/chat_id=d6c8e505-588e-4f1d-9494-e40ba3f4cadf/documents/dba83972-e511-4102-8b2f-136f47d0e582.txt, Page: 0, Lines: 118-119, Start: 7665]
+metadatas = [{"document": 1}, {"document": 2}]
+documents = text_splitter.create_documents([state_of_the_union, state_of_the_union], metadatas=metadatas)
+print(documents[0])
+Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=d11da011-7c6d-4708-9a1e-af1c7c1efdcd/chat_id=bf8acb15-47e4-4bd9-8566-b85a6aa0655b/documents/3333c172-f20b-4186-bd4f-4e3f9f267861.txt, Page: 0, Lines: 114-116, Start: 6467]
+
+Original text:
+their fearlessness, their courage, their determination, inspires the world.' lookup_str='' metadata={'document': 1} lookup_index=0
+Citation:[Source: /home/danil/Documents/Учеба/Прога/ML/TheUltimateRAG/The-Ultimate-RAG/chats_storage/user_id=d11da011-7c6d-4708-9a1e-af1c7c1efdcd/chat_id=bf8acb15-47e4-4bd9-8566-b85a6aa0655b/documents/3333c172-f20b-4186-bd4f-4e3f9f267861.txt, Page: 0, Lines: 117-117, Start: 7534]
 
 

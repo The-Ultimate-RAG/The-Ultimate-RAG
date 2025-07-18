@@ -213,11 +213,7 @@ async def replace_message(request: Request):
     data = await request.json()
     async with aiofiles.open(os.path.join(BASE_DIR, "models_io", "response.txt"), "w") as f:
         await f.write(data.get("message", ""))
-    updated_message = await add_links(data.get("message", ""))
-    await register_message(
-        content=updated_message, sender="assistant", chat_id=data.get("chat_id")
-    )
-    return JSONResponse({"updated_message": updated_message})
+    return JSONResponse({"updated_message": await add_links(data.get("message", ""))})
 
 
 @api.get("/viewer")

@@ -1,11 +1,22 @@
 from app.backend.models.users import get_user_last_chat, find_user_by_id, add_new_user, User
 from fastapi import Response, Request, HTTPException
+from app.settings import settings, logger, BASE_DIR
 from datetime import datetime, timedelta, timezone
 from app.backend.models.chats import Chat
-from app.settings import settings, logger
 from uuid import uuid4
 import asyncio
+import shutil
 import jwt
+import os
+
+
+async def remove_user(user_id: str) -> None:
+    loop = asyncio.get_event_loop()
+    path = os.path.join(BASE_DIR, "chats_storage", f"user_id={user_id}")
+    try:
+        loop.run_in_executor(None, shutil.rmtree, path)
+    except Exception as e:
+        await logger.error(f"Error at remove_user: {e}")
 
 
 async def extract_user_from_context(request: Request) -> User | None:
@@ -72,6 +83,8 @@ async def authorize_user(response: Response, user: User) -> dict:
         )
 
         return {"status": "ok"}
+    except jwt.ExpiredSignatureError:
+        await remove_user(user.id)
     finally:
         if settings.debug:
             await logger.info("END Authorizing User")

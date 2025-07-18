@@ -9,6 +9,7 @@ from uuid import uuid4
 import markdown
 import aiofiles
 import asyncio
+import shutil
 import os
 
 

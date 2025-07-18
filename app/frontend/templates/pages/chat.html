@@ -86,17 +86,33 @@
                 console.log(`WebSocket connected for task: ${taskId}`);
             };
 
-            ws.onmessage = (event) => {
+            ws.onmessage = async (event) => {
                 try {
                     const data = JSON.parse(event.data);
                     if (data.status === 'completed') {
-                        removeMessage(loadingId);
-                        addMessageToChat('assistant', marked.parse(fullMessage));
                         ws.close();
+                        try {
+                            const replaceResp = await fetch('/replace_message', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    message: fullMessage,
+                                    chat_id: conversationId
+                                })
+                            });
+                            const json = await replaceResp.json();
+                            const updatedMessage = json.updated_message;
+
+                            removeMessage(loadingId);
+                            addMessageToChat('assistant', updatedMessage);
+                        } catch (error) {
+                            removeMessage(loadingId);
+                            addMessageToChat('assistant', `Error replacing message: ${error.message}`, false, 'error');
+                        }
                     } else if (data.status === 'failed') {
+                        ws.close();
                         removeMessage(loadingId);
                         addMessageToChat('assistant', `Error: ${data.error}`, false, 'error');
-                        ws.close();
                     } else {
                         fullMessage += event.data;
                         updateMessageContent(loadingId, marked.parse(fullMessage));
@@ -122,6 +138,7 @@
                 ws.close();
             };
         }
+
 
         // Update message content
         function updateMessageContent(messageId, newContent) {
