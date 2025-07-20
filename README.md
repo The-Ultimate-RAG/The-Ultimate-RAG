@@ -62,6 +62,8 @@ response, citing the specific sources from your documents.
 
 ### 🎬 Demo (for customer)
 
+https://github.com/user-attachments/assets/cc4a9288-29ec-441c-8805-7c35e4d6984d
+
 This section plays crucial role since good demo quickly shows how the project works in action, helping users understand its purpose, features, and value without having to read long descriptions or set it up themselves.
 
 ![Demo](docs/demo/DEMO.gif)
@@ -87,7 +89,15 @@ This section plays crucial role since good demo quickly shows how the project wo
 | Completed  | Enhance UI/UX                                                           |       |
 | Completed  | Enhance security (secret management)                                    |       |
 | Completed  | Introduce CI/CD pipeline                                                |       |
-| Completed  | Implement unit and integration tests                                    |       |
+| Completed  | Implement unit and inte
+
+https://github.com/user-attachments/assets/18224e02-4a36-44f4-bb6b-54dc0c7f4596
+
+
+
+https://github.com/user-attachments/assets/5fbd174e-0f99-47c5-a7c4-6aa5a43d2739
+
+gration tests                                    |       |
 | Completed  | Implement response streaming                                            | Streaming responses during generation |
 | Completed  | Add JSON, CSV, and MD file support                                      |       |
 | Completed  | Add chat separation functionality                                      |       |
