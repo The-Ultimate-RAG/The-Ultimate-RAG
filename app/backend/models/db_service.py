@@ -17,7 +17,7 @@ def create_tables() -> None:
 
 def drop_tables() -> None:
     # List tables in the correct order for dropping (considering dependencies)
-    tables = [Message.__table__, Chat.__table__, User.__table__, Document.__table__]
+    tables = [Document.__table__, Message.__table__, Chat.__table__, User.__table__]
 
     for table in tables:
         if table_exists(table.name):
