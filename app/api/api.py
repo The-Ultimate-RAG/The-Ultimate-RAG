@@ -158,14 +158,13 @@ async def replace_message(request: Request):
     data = await request.json()
     with open(os.path.join(BASE_DIR, "response.txt"), "w") as f:
         f.write(data.get("message", ""))
-    updated_message = add_links(data.get("message", ""))
     register_message(
-        content=updated_message, sender="system", chat_id=data.get("chatId")
+        content=data.get("message", ""), sender="system", chat_id=data.get("chatId")
     )
-    return JSONResponse({"updated_message": updated_message})
+    return JSONResponse({"updated_message": data.get("message", "")})
 
 
-@api.get("/viewer")
+@api.get("/viewer/{path:path}")
 def show_document(
         request: Request,
         path: str,
@@ -173,13 +172,19 @@ def show_document(
         lines: Optional[str] = "1-1",
         start: Optional[int] = 0,
 ):
+    print(f"DEBUG: Show document with path: {path}, page: {page}, lines: {lines}, start: {start}")
+    path = os.path.realpath(path)
+    print(f"DEBUG: Real path: {path}")
+    
     if not path_is_valid(path):
         return HTTPException(status_code=404, detail="Document not found")
 
     ext = path.split(".")[-1]
     if ext == "pdf":
-        return PDFHandler(request, path=path, page=page, templates=templates)
+        print("Open pdf file by path")
+        return FileResponse(path=path)
     elif ext in ("txt", "csv", "md", "json"):
+        print("Open txt file by path")
         return TextHandler(request, path=path, lines=lines, templates=templates)
     elif ext in ("docx", "doc"):
         return TextHandler(
