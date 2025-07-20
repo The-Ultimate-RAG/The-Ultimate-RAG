@@ -66,8 +66,8 @@ def authorize_user(response: Response, user: User) -> dict:
             expires=expires.strftime("%a, %d %b %Y %H:%M:%S GMT"),
             max_age=settings.max_cookie_lifetime,
             httponly=True,
-            # secure=True,
-            samesite='lax'
+            secure=True,
+            samesite='None'
         )
 
         return {"status": "ok"}

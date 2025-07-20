@@ -56,7 +56,7 @@ api = FastAPI()
 rag = initialize_rag()
 
 origins = [
-    "http://localhost:5173",
+    "*",
 ]
 
 api.add_middleware(
