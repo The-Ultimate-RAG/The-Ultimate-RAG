@@ -36,6 +36,7 @@ short_description: the ultimate rag
   <summary><strong>📑 Table of Contents</strong></summary>
   <ul>
     <li><a href="#overview">Overview</a></li>
+    <li><a href="#team">Team&Contacts</a></li>
     <li><a href="#getting-started">Getting Started</a></li>
     <li><a href="#usage">Usage</a></li>
     <li><a href="#hyperlinks-to-the-documentation">Hyperlinks to the Documentation</a></li>
@@ -57,6 +58,12 @@ response, citing the specific sources from your documents.
 - **🔒 Secure User Authentication:** Features robust user registration and login with JWT and password hashing.
 - **💾 Local Knowledge Base:** All your data is processed and stored locally using PostgreSQL.
 - **🐳 Dockerized:** Easy to set up and run in an isolated environment using Docker.
+
+### 🎬 Demo
+
+<div style="text-align: center;">
+  <video src="docs/demo/DEMO.mkv" alt="Project Context Diagram"/>
+</div>
 
 ### 📊 Project context diagram
 
@@ -90,6 +97,35 @@ response, citing the specific sources from your documents.
 
 </div>
 
+<p align="right">(<a href="#readme-top">🔝 back to top</a>)</p>
+
+## <a id="team"></a>🧑‍💼 Team & Contacts
+
+<div style="margin-left: auto; margin-right: auto; width: fit-content;">
+  <table style="margin-left: auto; margin-right: auto; text-align: center; border-collapse: collapse;">
+    <thead> <tr> <th style="padding: 10px;">👤 Full Name</th> <th style="padding: 10px;">💼 Role</th> <th style="padding: 10px;">📨 Contacts</th> </tr> </thead> <tbody>
+      <tr>
+        <td style="padding: 10px;">Imam Muwaffaq</td> <td style="padding: 10px;">Product Owner</td> <td style="padding: 10px;"><a href="https://web.telegram.org/k/#@muwaffaqImam">Telegram</a>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 10px;">Danil Popov</td> <td style="padding: 10px;">Lead & Backend</td> <td style="padding: 10px;"><a href="https://web.telegram.org/k/#@Danil_P0pov">Telegram</a></td>
+      </tr>
+      <tr>
+        <td style="padding: 10px;">Zagir Latypov</td> <td style="padding: 10px;">Frontend</td> <td style="padding: 10px;"><a href="https://web.telegram.org/k/#@ZagirLatypov">Telegram</a></td>
+      </tr>
+      <tr>
+        <td style="padding: 10px;">Alina Shadrina</td> <td style="padding: 10px;">Designer</td> <td style="padding: 10px;"><a href="https://web.telegram.org/k/#@alinaksta">Telegram</a>
+      </td>
+      </tr>
+        <tr> <td style="padding: 10px;">Ilya Ponomarev</td> <td style="padding: 10px;">Frontend</td> <td style="padding: 10px;"><a href="https://web.telegram.org/k/#@ilya2006p">Telegram</a></td>
+      </tr>
+      <tr>
+        <td style="padding: 10px;">Andrei Polevoi</td> <td style="padding: 10px;">DevOps</td> <td style="padding: 10px;"><a href="https://web.telegram.org/k/#@Andrchest">Telegram</a></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 <p align="right">(<a href="#readme-top">🔝 back to top</a>)</p>
 
 ## <a id="getting-started"></a>🚀 Getting Started
@@ -193,7 +229,7 @@ following instructions:
 
 ## <a id="hyperlinks-to-the-documentation"></a>📚 Hyperlinks to the documentation
 
-- 👨‍💻 [Development](CONTRIBUTING.md)
+- 👨‍💻 [Contributing](CONTRIBUTING.md)
 - 📊 [Quality characteristics and quality attribute scenarios](./docs/quality-assurance/quality-attribute-scenarios.md)
 - 🛡️ Quality assurance
     - 🤖 [Automated tests](./docs/quality-assurance/automated-tests.md)
