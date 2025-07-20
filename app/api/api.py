@@ -158,6 +158,10 @@ async def replace_message(request: Request):
     data = await request.json()
     with open(os.path.join(BASE_DIR, "response.txt"), "w") as f:
         f.write(data.get("message", ""))
+<<<<<<< HEAD
+=======
+    updated_message = data.get("message", "")
+>>>>>>> 746985f6834deb51411662d66b10bf71f24b81b4
     register_message(
         content=data.get("message", ""), sender="system", chat_id=data.get("chatId")
     )
@@ -172,16 +176,24 @@ def show_document(
         lines: Optional[str] = "1-1",
         start: Optional[int] = 0,
 ):
+<<<<<<< HEAD
     print(f"DEBUG: Show document with path: {path}, page: {page}, lines: {lines}, start: {start}")
     path = os.path.realpath(path)
     print(f"DEBUG: Real path: {path}")
     
+=======
+    path = os.path.realpath(path)
+
+>>>>>>> 746985f6834deb51411662d66b10bf71f24b81b4
     if not path_is_valid(path):
         return HTTPException(status_code=404, detail="Document not found")
 
     ext = path.split(".")[-1]
     if ext == "pdf":
+<<<<<<< HEAD
         print("Open pdf file by path")
+=======
+>>>>>>> 746985f6834deb51411662d66b10bf71f24b81b4
         return FileResponse(path=path)
     elif ext in ("txt", "csv", "md", "json"):
         print("Open txt file by path")
