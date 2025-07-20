@@ -45,7 +45,7 @@ short_description: the ultimate rag
   </ul>
 </details>
 
-## <a id="overview"></a>🎯 Overview
+## <a id="overview"></a> 🎯 Overview
 
 **The Ultimate RAG** is a powerful Retrieval-Augmented Generation (RAG) system designed to provide accurate,
 source-cited answers to your questions. Simply upload your documents (`.pdf`, `.docx`, `.txt`), and the application will
@@ -60,7 +60,7 @@ response, citing the specific sources from your documents.
 - **💾 Local Knowledge Base:** All your data is processed and stored locally using PostgreSQL.
 - **🐳 Dockerized:** Easy to set up and run in an isolated environment using Docker.
 
-### 🎬 Demo (for customer)
+### <a id="demo"></a> 🎬 Demo (for customer)
 
 This section plays crucial role since good demo quickly shows how the project works in action, helping users understand its purpose, features, and value without having to read long descriptions or set it up themselves.
 
@@ -87,15 +87,7 @@ https://github.com/user-attachments/assets/cc4a9288-29ec-441c-8805-7c35e4d6984d
 | Completed  | Enhance UI/UX                                                           |       |
 | Completed  | Enhance security (secret management)                                    |       |
 | Completed  | Introduce CI/CD pipeline                                                |       |
-| Completed  | Implement unit and inte
-
-https://github.com/user-attachments/assets/18224e02-4a36-44f4-bb6b-54dc0c7f4596
-
-
-
-https://github.com/user-attachments/assets/5fbd174e-0f99-47c5-a7c4-6aa5a43d2739
-
-gration tests                                    |       |
+| Completed  | Implement unit and integration tests                                    |       |
 | Completed  | Implement response streaming                                            | Streaming responses during generation |
 | Completed  | Add JSON, CSV, and MD file support                                      |       |
 | Completed  | Add chat separation functionality                                      |       |
@@ -221,7 +213,7 @@ Ensure you have the following software installed before you begin:
 
 <p align="right">(<a href="#readme-top">🔝 back to top</a>)</p>
 
-## <a id="usage"></a>📖 Usage
+## <a id="usage"></a> 📖 Usage
 
 You can try a currently deployed version of the
 system [here](https://huggingface.co/spaces/The-Ultimate-RAG-HF/The-Ultimate-RAG). **Note**: you should use the
@@ -259,7 +251,7 @@ Please refer to our [CONTRIBUTING.md](CONTRIBUTING.md) for detailed contribution
 
 <p align="right">(<a href="#readme-top">🔝 back to top</a>)</p>
 
-## <a id="license"></a>📜 License
+## <a id="license"></a> 📜 License
 
 This project is licensed under the [MIT License](LICENSE).
 
