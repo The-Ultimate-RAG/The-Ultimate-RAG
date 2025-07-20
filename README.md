@@ -39,6 +39,7 @@ short_description: the ultimate rag
     <li><a href="#team">Team&Contacts</a></li>
     <li><a href="#getting-started">Getting Started</a></li>
     <li><a href="#usage">Usage</a></li>
+    <li><a href="#contributing">Contributing</a></li>
     <li><a href="#hyperlinks-to-the-documentation">Hyperlinks to the Documentation</a></li>
     <li><a href="#license">License</a></li>
   </ul>
@@ -59,11 +60,11 @@ response, citing the specific sources from your documents.
 - **💾 Local Knowledge Base:** All your data is processed and stored locally using PostgreSQL.
 - **🐳 Dockerized:** Easy to set up and run in an isolated environment using Docker.
 
-### 🎬 Demo
+### 🎬 Demo (for customer)
 
-<div style="text-align: center;">
-  <video src="docs/demo/DEMO.mkv" alt="Project Context Diagram"/>
-</div>
+This section plays crucial role since good demo quickly shows how the project works in action, helping users understand its purpose, features, and value without having to read long descriptions or set it up themselves.
+
+![Demo](docs/demo/DEMO.gif)
 
 ### 📊 Project context diagram
 
@@ -99,7 +100,9 @@ response, citing the specific sources from your documents.
 
 <p align="right">(<a href="#readme-top">🔝 back to top</a>)</p>
 
-## <a id="team"></a>🧑‍💼 Team & Contacts
+## <a id="team"></a>🧑‍💼 Team & Contacts (for customer)
+
+A team overview with roles helps others quickly understand who is responsible for different parts of the project, improves communication, and may help newcomers to quicker adapt to the workflow.
 
 <div style="margin-left: auto; margin-right: auto; width: fit-content;">
   <table style="margin-left: auto; margin-right: auto; text-align: center; border-collapse: collapse;">
@@ -216,14 +219,20 @@ You can try a currently deployed version of the
 system [here](https://huggingface.co/spaces/The-Ultimate-RAG-HF/The-Ultimate-RAG). **Note**: you should use the
 following instructions:
 
-- 🌐 Access the site, you should see the *main* page with the name of the system
-- ➕ Press the button "+ Add new chat," wait until the *login* page is loaded
-- 🔍 Find button "Register" (for now it is highly recommended to follow the instructions *strictly*) and press it
-- 📝 You should be redirected to *sign up* page, here you should enter your credentials (you can use Test1@test1.com in
-  all fields for testing)
-- 🖱️ Click **ONLY ONCE** on the button "Sign Up," and wait (for now it takes around 10 seconds to load *chat* page)
+- 🌐 Access the site, you should see the *main* page. New chat will be created automatically.
+- ➕ Press the button "+ Add new chat," wait until the page is loaded (if you want to try it).
 - 💬 Now you will be able to communicate with the system
 - ❓ You can try to ask anything and attach files. Enter a query and press the *enter* button (near the input area)
+
+<p align="right">(<a href="#readme-top">🔝 back to top</a>)</p>
+
+
+## <a id="contributing"></a> 👨‍💻 Contributing (for customer)
+
+This is the most important part to those, who want to contribute to the project. It sets the expectations and provides essential instructions to the newcomers.
+
+We welcome all newcomers and value your suggestions for enhancing the project.
+Please refer to our [CONTRIBUTING.md](CONTRIBUTING.md) for detailed contribution guidelines.
 
 <p align="right">(<a href="#readme-top">🔝 back to top</a>)</p>
 
