@@ -64,7 +64,7 @@ response, citing the specific sources from your documents.
 
 This section plays crucial role since good demo quickly shows how the project works in action, helping users understand its purpose, features, and value without having to read long descriptions or set it up themselves.
 
-https://github.com/user-attachments/assets/cc4a9288-29ec-441c-8805-7c35e4d6984d
+https://github.com/user-attachments/assets/b46ae27a-ac15-4586-8177-d050b44e26f9
 
 ### 📊 Project context diagram
 
