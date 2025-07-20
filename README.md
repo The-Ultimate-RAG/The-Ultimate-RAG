@@ -62,11 +62,9 @@ response, citing the specific sources from your documents.
 
 ### 🎬 Demo (for customer)
 
-https://github.com/user-attachments/assets/cc4a9288-29ec-441c-8805-7c35e4d6984d
-
 This section plays crucial role since good demo quickly shows how the project works in action, helping users understand its purpose, features, and value without having to read long descriptions or set it up themselves.
 
-![Demo](docs/demo/DEMO.gif)
+https://github.com/user-attachments/assets/cc4a9288-29ec-441c-8805-7c35e4d6984d
 
 ### 📊 Project context diagram
 
